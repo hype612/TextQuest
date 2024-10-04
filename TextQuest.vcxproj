@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>(/X:\Coding\TextQuest\TextQuest\TextQuest\Headers);</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +121,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>(/X:\Coding\TextQuest\TextQuest\TextQuest\Headers);</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,11 +151,13 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="TextQuest.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
+    <ClCompile Include="TextureMapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\AsciiVerse.h" />
     <ClInclude Include="Headers\player.h" />
     <ClInclude Include="Headers\TextureLoader.h" />
+    <ClInclude Include="Headers\TextureMapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
