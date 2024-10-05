@@ -112,10 +112,10 @@ void GameEngine::run_game() {
 				float distance_to_wall = 0.0f;
 				hitwall = false;
 				isedge = false;
-				
+
 				float eye_x = sinf(ray_angle);
 				float eye_y = cosf(ray_angle);
-				
+
 				int test_x;
 				int test_y;
 				while (!hitwall && distance_to_wall < max_raylength) {
@@ -125,7 +125,7 @@ void GameEngine::run_game() {
 					if (test_x < 0 || test_x >= map_width || test_y < 0 || test_y >= map_height) {
 						hitwall = true;
 						distance_to_wall = max_raylength; // imo could cause weird rendering
-														  // long distance. check later
+						// long distance. check later
 					}
 					else {
 						// ray is inbounds > test if is a wall block
@@ -133,14 +133,14 @@ void GameEngine::run_game() {
 							hitwall = true;
 							if (map[test_y * map_width + test_x] != current_tile.position) {
 								//std::vector<std::pair<float, float>> edges;
-								for( int tx = 0; tx < 2; tx++) {
-									for( int ty = 0; ty < 2; ty++) { 
+								for (int tx = 0; tx < 2; tx++) {
+									for (int ty = 0; ty < 2; ty++) {
 										float vy = (float)test_y + ty - player.get_y();
 										float vx = (float)test_x + tx - player.get_x();
 										float distance = sqrt(vx * vx + vy * vy);
 										float dot = (eye_x * vx / distance) + (eye_y * vy / distance);
-										current_tile.edges.push_back(std::make_pair(distance, dot));
-										sort(current_tile.edges.begin(), current_tile.edges.end(), [](const std::pair<float, float>& left, const std::pair<float, float>& right) { return left.first < right.first; });
+										//current_tile.edges.push_back(std::make_pair(distance, dot));
+										//sort(current_tile.edges.begin(), current_tile.edges.end(), [](const std::pair<float, float>& left, const std::pair<float, float>& right) { return left.first < right.first; });
 									}
 								}
 								//float edge_bound = 0.002f;
@@ -152,7 +152,7 @@ void GameEngine::run_game() {
 				}
 				int ceiling = int((float)(screen_height / 2.0f) - screen_height / ((float)distance_to_wall));
 				int floor = screen_height - ceiling;
-				
+
 				// wall shade
 				short shade;
 				std::wstring to_render = TextureMapper::GetCharColumnAtPosition(screen_height - ceiling, map[test_y * map_width + test_x], textures['#']);
@@ -165,11 +165,11 @@ void GameEngine::run_game() {
 					}
 					else if (y > ceiling && y <= floor)
 					{
-						/*
-						if (distance_to_wall <= max_raylength / 4.0f)		shade = 0x2588;
-						else if (distance_to_wall < max_raylength / 3.0f)	shade = 0x0040;
-						else if (distance_to_wall < max_raylength / 2.0f)	shade = 0x007C;
-						else	*/											shade = ' ';
+						
+						//if (distance_to_wall <= max_raylength / 4.0f)		shade = 0x2588;
+						//else if (distance_to_wall < max_raylength / 3.0f)	shade = 0x0040;
+						//else if (distance_to_wall < max_raylength / 2.0f)	shade = 0x007C;
+						//else												shade = ' ';
 						//if (isedge && distance_to_wall < max_raylength / 2.0f) shade = 'e';
 						//screen[y * screen_width + x] = shade;
 						screen[y * screen_width + x] = to_render[y - ceiling];
