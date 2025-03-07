@@ -5,10 +5,12 @@
 #include <Windows.h>
 #include <chrono>
 #include <vector>
+#include <thread>
 #include <algorithm>
 #include "Headers\player.h"
 #include "Headers\TextureLoader.h"
 #include "Headers\TextureMapper.h"
+#include "TextureTile.h"
 
 class GameEngine {
 private:
@@ -25,6 +27,7 @@ private:
 	int map_width = 16;
 	float max_raylength = 16.0f;
 	std::wstring map;
+	std::vector<textureTile> texMap;
 
 	Player player;
 
@@ -32,7 +35,8 @@ private:
 	wchar_t* screen;
 	HANDLE hConsole;
 	DWORD dwBytesWritten;
-	std::unordered_map<wchar_t, std::wstring> textures;
+	std::unordered_map<std::pair<wchar_t,int>, std::wstring> textures;
+	int _max_thread_num = -1;
 
 	// dont want anyone to call this
 	GameEngine(GameEngine& g);
@@ -43,4 +47,4 @@ public:
 	void run_game();
 };
 
-#endif // !ASCIIVERSE_H
+#endif // ASCIIVERSE_H

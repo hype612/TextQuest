@@ -158,6 +158,7 @@
     <ClInclude Include="Headers\player.h" />
     <ClInclude Include="Headers\TextureLoader.h" />
     <ClInclude Include="Headers\TextureMapper.h" />
+    <ClInclude Include="Headers\TextureTile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

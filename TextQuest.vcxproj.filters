@@ -44,5 +44,8 @@
     <ClInclude Include="Headers\TextureMapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\TextureTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

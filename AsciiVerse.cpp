@@ -9,10 +9,13 @@ GameEngine::GameEngine(int sc_width = 240, int sc_height = 80, std::string textu
 	screen_width(sc_width)
 {
 	textures = Texture_loader::load_textures(textures_path);
+	//std::wstring wtex = textures['#'];
 	screen = new wchar_t[screen_width * screen_height];
 	hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(hConsole);
 	dwBytesWritten = 0;
+
+	_max_thread_num = std::thread::hardware_concurrency();
 }
 
 // should
@@ -20,19 +23,35 @@ bool GameEngine::initMap() {
 	map += L"################";
 	map += L"#..............#";
 	map += L"#..............#";
-	map += L"##########.....#";
 	map += L"#..............#";
-	map += L"#....###########";
+	map += L"#......#####...#";
 	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
+	map += L"#########......#";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
-	map += L"######....######";
+	map += L"#..............#";
+	map += L"#..............#";
+	map += L"#..............#";
 	map += L"#..............#";
 	map += L"#..............#";
 	map += L"################";
+	
+	for (int i = 0; i < 16; i++)
+	{
+		for (int j = 0; j < 16; j++)
+		{
+			if (map[i * 16 + j] == L'.')
+				continue;
+			textureTile current;
+			current.x = i;
+			current.y = j;
+			current.texture = map[i * 16 + j];
+			texMap.push_back(current);
+		}
+	}
+	
+	
 	return true;
 }
 
@@ -44,6 +63,13 @@ void GameEngine::run_game() {
 	
 	float player_fov = player.get_fov();
 	tile current_tile;
+
+	std::thread textureSetterT;
+
+	int currentObjX = -1;
+	int currentObjY = -1;
+	bool isCurrentObj = false;
+	textureTile textureFromMap;
 
 	bool changed_pos = true;
 	while (true) {
@@ -106,16 +132,17 @@ void GameEngine::run_game() {
 		
 		if(changed_pos)
 		{ 
-		// actual raytracing
+		// actual raycasting
 			for (int x = 0; x < screen_width; x++) {
 				float ray_angle = (player.get_angle() - player_fov / 2.0f) + ((float)x / (float)screen_width) * player_fov;
 				float distance_to_wall = 0.0f;
 				hitwall = false;
 				isedge = false;
-
+				
+				
 				float eye_x = sinf(ray_angle);
 				float eye_y = cosf(ray_angle);
-
+			
 				int test_x;
 				int test_y;
 				while (!hitwall && distance_to_wall < max_raylength) {
@@ -147,6 +174,21 @@ void GameEngine::run_game() {
 								//if (acos(edges.at(0).second) < edge_bound) isedge = true;
 								//if (acos(edges.at(1).second) < edge_bound) isedge = true;
 							}
+							isCurrentObj = currentObjX == test_x && currentObjY == test_y;
+							if (!isCurrentObj)
+							{
+								for (textureTile t : texMap)
+								{
+									if (t.x == test_x && t.y == test_y)
+									{
+										textureFromMap = t;
+										break;
+									}
+								}
+								textureSetterT = std::thread(TextureMapper::setCurrentTexture, distance_to_wall, "repeat", &textures[std::pair(textureFromMap.texture, std::round(distance_to_wall))]);
+								currentObjX = test_x;
+								currentObjY = test_y;
+							}
 						}
 					}
 				}
@@ -155,7 +197,12 @@ void GameEngine::run_game() {
 
 				// wall shade
 				short shade;
-				std::wstring to_render = TextureMapper::GetCharColumnAtPosition(screen_height - ceiling, map[test_y * map_width + test_x], textures['#']);
+				if (textureSetterT.joinable())
+				{
+					textureSetterT.join();
+				}
+
+				std::wstring to_render = TextureMapper::GetCharColumnAtPosition(screen_height - ceiling);
 				// until there is something 
 				// other than the player that moves 
 				for (int y = 0; y < screen_height; y++) {
@@ -166,13 +213,16 @@ void GameEngine::run_game() {
 					else if (y > ceiling && y <= floor)
 					{
 						
-						//if (distance_to_wall <= max_raylength / 4.0f)		shade = 0x2588;
-						//else if (distance_to_wall < max_raylength / 3.0f)	shade = 0x0040;
-						//else if (distance_to_wall < max_raylength / 2.0f)	shade = 0x007C;
+						/*if (distance_to_wall <= max_raylength / 4.0f)		shade = 0x2588;
+						else if (distance_to_wall < max_raylength / 3.0f)	shade = 0x0040;
+						else if (distance_to_wall < max_raylength / 2.0f)	shade = 0x007C;*/
+						//if (distance_to_wall < max_raylength / 2.f)			shade = to_render[y];
 						//else												shade = ' ';
+						
 						//if (isedge && distance_to_wall < max_raylength / 2.0f) shade = 'e';
 						//screen[y * screen_width + x] = shade;
-						screen[y * screen_width + x] = to_render[y - ceiling];
+						if (distance_to_wall > 8.f) screen[y * screen_width + x] = L' ';
+						else					     screen[y * screen_width + x] = to_render[y - ceiling];
 					}
 					else {
 						float b = 1.0f - (((float)y - screen_height / 2.0f) / ((float)screen_height / 2.0f));

@@ -1,0 +1,64 @@
+W@?o:o#######???@#?Oo?##?PooPo   .P#:.  .@PP@?##@?o:?@?@@#:..c?@
+@@Pc.o#######@@@?@@PPO##OPPoPo    P#:.  .@Po?P##@?oc@@?@?#c...:?
+#@o:.o######@?@@O@@PoO@#OPooPP    ?#:.  .@Po?o##??o:@@?OO#:.: .?
+@?o:co######@?@@P@?oPO?#PPooP?    ?#..  .@PPOo@#?Oo:???oP#. : cO
+@PoccP#@####@?@?P@OooP?#PPooPO   .@#:.  .@PP?P##?Po.?@OoP#. :.P?
+@Oc:co#@@###@@@OP@PccPO#PoooP?   .@#:.  .@oP?P##OOc.?@OoO#. ..O?
+@@c::c#@@###@@@Po?PccoO@PPooO?.  .@#:.  .@ooOP##OOc:O?Oo?#. ..OO
+@@c..:#@@###@@?Po?PccoO@PPooP?.   ##..  .@ooOo##OOc:?OPPO#.   co
+@@c:.:#@@###@@?PcOocoP?#PPPPPc   .@#..  .@Pooo##OPcc?????#    .o
+@?:c::#@####@??PcOOoPP?#PPoPO.   .@#     ?PooP#@PPc:?@@??# .  .P
+@?::..#?####@?PPc?OOP?O#PPoPO:  .:@?    .?Pooo#@PPc:@#@P?@    .P
+@@o:..#@@###@?Poc??PP??#PPcoOc   c@?    .?oooo@#?P::?#@PO@    .P
+@?:...#??###?Oooc@OoP?P#PPooPc   :@?    :?oooo@#Ooc:@#@PP@    .o
+?Oc. .#O?###?PoPo@PoP?o@oPooPo  ..??   .:?oooc?@Poo:?#?PP@    .o
+?Oc.  #?P###@Oooo@?oP?P@oocoPo  ..OO    .@Poc:?@Poc.@#?PP@    .o
+??:.. #?O#@#@?Poo@OoPOP@occ:oo    OO    .@occ:?@oo:.@@OoP@    .o
+??:.. @@O@@#OOOoo@PcoOO@:c::oc    P?    .@occo?@Po:.???oo@    .P
+?Oc.. @?O@?#?PPoc@OooO?#.:c:oo    oO    .@Pccc?@o:..??Ooo@    :O
+??c...@?P@?#?Pooc??ocOO@::c:Po .  :P    .@oocc?@oc..@?OOP@    .P
+??c...@OP@?#@Pcoc??Po??#.:ccoo.:  :?.   .@ooo:O@cc..???PP@    .P
+??:...@Po@?#@Pooo??OoO?@.:coPo.:  .?.   .@ooo:P@o.. ?@?PP#    .P
+??:...@?O@?#@oooc??OPPP#:o:cPo..  .O    .?coo:P?o.. ?@?O?#    :o
+??o...#O?@@#@cPo:?OOoPo#:oo:Po.:  .?    .?::c:o@o.. ?#@O?#   .:o
+@?c...#@?@@#@coo:?Poooo#cPo:oo:?:..?   .:?::::o@o:. ?#@P?#   ..o
+?P:...#@@###@ooPc?PPocP#cco:oO?@:..?.  ..@c:c:P?c:..@#@P?#   .:P
+PP....#@@###?ooPc?OPooO#coo.c@O?.. O    .@c:c:P?c:..@##O@#.  ..P
+Po....#@@@##?coPc@?oO@?#cco.o@oP.. O    .@ooc.o?c.  @@@?@#   ..o
+Oc....#@?@##?oPo:@?o?@?#:cc:o@PP.. P     @ooc.o?:.. @@??##    :o
+?o....#@?@##?PPPc@O:P?P@..c:o?cc.  c     @coc.o?c.. ?@@?@#    :o
+?c....#@?@##?POPc@?coPP#::::P?c:.  :     @coo.o?c.. ?@@O@@    .O
+O:....#@@@##?ooPo@?oooo#:c::oOc:.  c    .@ooo:oPc...O@@O?@..  .o
+?:....#@@@@#OoPPc@P::co#oPo.oOc:.  c    .@ooo:oOc...@@@OP@.   .o
+?:....#@@#@#OoPoc@P::oo#PPc.oO:..  :    .@ooPcOOc...@@??O#    .o
+?:....#@@###?POoc@P::cP#oo:.oO:..  :    :@ooPc?P::..@@??O#   ..c
+?c  ..##@#@#?oocc@?ooPP#oo..POc:   :    ?@Poo:?P::..@#??P@    .o
+?o.  .##@#@#?P::c@??ooo#oc..o@o.   o    :@ooPc?P::..##@PO#    :P
+?c.. .##@@##@?o::@??ooP#oc. c@P.   o    .@oPPc?Pc::.@@@OP#.  ..o
+Oc:...##@###@OPcc@OPooP#Pc. :@P.  .o    .@o?Pc??::. @@?OP# .  :o
+?o:...##?###?ocoo@POocP#?c. :@?.  .o    .@o?P:??c:..@@@OP#   .cc
+?o:...#@?@##Oc::o@oPPPO#Oc. c@O:  .o    .@P@P:??::..?@@OO#   .:P
+Oo....#@?@##Oc::c@Poo?P#Pc..:?P:   o    :@P@P:??::..?@@PP#   .oO
+Oc....#@?###P:::c@Pco?P#@c. :Oo.   o    c@P?O.?O:...???Po@ . :PP
+Oc.  .#@@@##P:::o@PcoOP#@c. :Po:  .o    o@o?P.??:...?P?oo@   .oP
+?c.  .#@??##o::cP#@OPoP#P:..:PP:  .c    ?#oOO:??::..@P?cc?   .PP
+?c.  .#??@@#P::co#@?P:P#oc:.:Po:  .c    @#POO:@?.:..?P?cc?   :OP
+?c.   #??@@#o:c:c#@?ocO#Po:.:oo:  .o   .@#PPP:@?::.:@P?oo?  .:oO
+?o.   #?O@@#?c:.:#@?ooP#Po:.:co:  .O   .@#PPo:@?::::@P?oP?  ..oP
+?o    #??@@#?o:.o#@?PoP#oc: :c::  .?   .O#PPOc#@c::c@?@PP@  ..oP
+?:    #?O@@#O:.:c#@Ooco#o:. .c::  .O.. .P@O?@o#@c:cc@?@oP@  ..oP
+Oc.   #??@##P:..c#?c::P#o:. .c::..:o   .c@??@o@?c:::@@@oo@   .oO
+Ooo  .#@?@##P::::#o:..O#P.. co::..:P. :?o@@?@o#?o::c@@@Po@  ..oO
+OoO ..#@?###P:c:c#?cc:P#P...Po:o..:P. o?c@@@?o#?o:::@@#Oo@   .PO
+OPo ..#@?###P::.c#O:ccP#P:..oO:O:.:P..:cc@O@?o#?ococ@@#?O#. .:O?
+?o....#@?@##Oc::c#?c:cP#P::.oOc@ccoP..:oo@O@?o#@o:oo@@#@P@....P?
+?:....#@@#@#Pc:.o#@occ@#o.::oPc#??oo  .PP@P??o#@o:co@@@@?@....o?
+Pc....#@@@@#Ooc.o#@oco@#c.::cPo#?cPo  .cO@?OPo#?P:co@@@?O#:...P?
+?P....#@???#Oc::o#@ocP@#:.::o?c@o.OP  .oO#OOoo#@o:cP#@#?O#:...O@
+?@o:..#@O?@#?:::P#@ooPO#:.::c@:PP:Po  .o?#??Po#@Pc:P#@#??#:...P?
+@@::..#@O?@#?:.:O#@??PP@:...c@.oP?oc  .o@#O??P#@?c:o###@?#c:..cO
+@?cc.:#@O@@#O:..o#@??oP@:...o#O?oocP  .P@@P@@?#?Poco###@?#o:.:c?
+@P.o.:#@O@@#Pcoco#@??PO@:.::P##@::cO  o?@@P?@O@@Poco####@#c..:P@
+@o.o.c#@@@##OPocP#???OP@::::P#??..O? :@?#@P??P@@Poco######c..:O@
+@o.:.o#@@@##?PooP@?PO?O@c:::o#o?.:??.:?O#@P??P@@Pocc######:..cP@
+#@P:.o###@@#Poc:P@@ooOP@c:.:c#P?:oOP .:c#@POOo#@Pocc######c.:oO@
