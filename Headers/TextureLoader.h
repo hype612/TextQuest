@@ -13,9 +13,9 @@
 
 
 namespace Texture_loader {
-	//std::unordered_map<wchar_t, std::wstring> load_textures(std::string& path);
-	std::unordered_map<std::pair<wchar_t,int>, std::wstring> load_textures(std::string& path);
-	std::unordered_map<std::pair<wchar_t,int>, std::wstring> generate_MipMapLevels(std::wstring&, wchar_t tex_key);
+	std::unordered_map<wchar_t, std::wstring> load_textures(std::string& path);
+	//std::unordered_map<std::pair<wchar_t,int>, std::wstring> load_textures(std::string& path);
+	//std::unordered_map<std::pair<wchar_t,int>, std::wstring> generate_MipMapLevels(std::wstring&, wchar_t tex_key);
 }
 
 #endif

@@ -35,7 +35,7 @@ private:
 	wchar_t* screen;
 	HANDLE hConsole;
 	DWORD dwBytesWritten;
-	std::unordered_map<std::pair<wchar_t,int>, std::wstring> textures;
+	std::unordered_map<wchar_t, std::wstring> textures;
 	int _max_thread_num = -1;
 
 	// dont want anyone to call this

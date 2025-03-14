@@ -185,7 +185,7 @@ void GameEngine::run_game() {
 										break;
 									}
 								}
-								textureSetterT = std::thread(TextureMapper::setCurrentTexture, distance_to_wall, "repeat", &textures[std::pair(textureFromMap.texture, std::round(distance_to_wall))]);
+								textureSetterT = std::thread(TextureMapper::setCurrentTexture, distance_to_wall, "repeat", &textures[textureFromMap.texture]);
 								currentObjX = test_x;
 								currentObjY = test_y;
 							}

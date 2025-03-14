@@ -5,7 +5,7 @@
 // character which is assigned to the texture on the map.
 // currently the first character is copied from the second, for later visual clarity
 
-/*
+
 
 std::unordered_map<wchar_t, std::wstring> Texture_loader::load_textures(std::string& path) {
 	std::wstringstream temp;
@@ -47,9 +47,9 @@ std::unordered_map<wchar_t, std::wstring> Texture_loader::load_textures(std::str
 	}
 	return returned_textures;
 }
-*/
 
 
+/*
 std::unordered_map<std::pair<wchar_t, int>, std::wstring> Texture_loader::load_textures(std::string& path) {
 	std::wstringstream temp;
 	std::wstring value;
@@ -107,4 +107,4 @@ std::unordered_map<std::pair<wchar_t, int>, std::wstring> Texture_loader::genera
 		mipmaps[std::pair(tex_key, i)] = TextureMapper::CreateMipMapAtLevel(i, "repeat", &tex);
 	}
 	return mipmaps;
-}
+}*/

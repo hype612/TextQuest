@@ -11,13 +11,13 @@ int TextureMapper::tex_width = -1;
 
 float TextureMapper::estimateHeight(float distance)
 {
-	if (distance > 8.5f)
+	if (distance > 9.f)
 		return 0;
 	return (-(distance / 0.105f) + 98.2f);
 }
 float TextureMapper::estimateWidth(float distance)
 {
-	if (distance > 8.5f)
+	if (distance > 9.f)
 		return 0;
 	return (-(distance / 0.0375f) + 294.f);
 }
