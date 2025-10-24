@@ -1,27 +1,31 @@
-#include "Headers\Core.h"
-
+#include "../Headers/Core.h"
 
 
 
 GameEngine::GameEngine(int sc_width = 240, int sc_height = 80, std::string textures_path = "\\Resources\\Textures") :
-	player(8.0f, 8.0f, 6.28f, 3.14159f/4.0f),
-	screen_height(sc_height),
-	screen_width(sc_width)
+	_player(2.0f, 2.0f, 6.28f, 3.14159f/4.0f, map, map_width, map_height),
+	_screenHeight(sc_height), _screenWidth(sc_width)
 {
 	textures = Texture_loader::load_textures(textures_path);
 	if (textures.size() > 1)
 	{
 		for (int i = 0; i < textures.size(); i++)
 		{
-			_entityContainer.push_back(Entity(3, 3, L'E', &textures[L'E'], 100, EntityState::IDLE));
+			//_entityContainer.push_back(Entity(3, 3, L'E', &textures[L'E'], 100, EntityState::IDLE));
 		}
 	}
 	//std::wstring wtex = textures['#'];
-	screen = new wchar_t[screen_width * screen_height];
-	hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	SetConsoleActiveScreenBuffer(hConsole);
-	dwBytesWritten = 0;
+	if( EngineState::GetInstance()->opSystem == RunningOS::WINDOWS ) {
+		//_renderer     = new WindowsRenderer();
+		//_inputHandler = new WindowsInputHanlder(_player);
+	}
+	else if( EngineState::GetInstance()->opSystem == RunningOS::LINUX ) {
+		_renderer     = new NCursesRenderer();
+		_inputHandler = new NCursesInputHandler(_player);
+	}
 
+	_renderer->Init();
+	_renderer->SetScreenSize(sc_width, sc_height);
 	_max_thread_num = std::thread::hardware_concurrency();
 }
 
@@ -96,7 +100,7 @@ bool GameEngine::initMap() {
 		{
 			if (map[i * map_width + j] == L'.')
 				continue;
-			textureTile current;
+			TextureTile current;
 			current.x = i;
 			current.y = j;
 			current.texture = map[i * map_width + j];
@@ -107,13 +111,6 @@ bool GameEngine::initMap() {
 	
 	return true;
 }
-
-void GameEngine::SetScaledTexture(std::wstring& source, std::wstring& into, float distance)
-{
-	into = TextureMapper::CreateMipMapAtLevel(distance, "nninterpolate", source);
-	return;
-}
-
 
 
 void GameEngine::run_game() {
@@ -129,80 +126,19 @@ void GameEngine::run_game() {
 		tp1 = tp2;
 		float f_elapsed_time = elapsed_time.count();
 		
-		// later maybe multithread
-		/*
-		std::thread movementThread = std::thread(&GameEngine::RegisterMovement, this, f_elapsed_time);	
-		std::thread RayCastingThread = std::thread(&GameEngine::RayCastingProcess, this);
 		
-		if (movementThread.joinable())
-			movementThread.join();
-		if (RayCastingThread.joinable())
-			RayCastingThread.join();
-		*/
-		RegisterMovement(f_elapsed_time);
+		//InputHandler::ReceiveMovementInput(f_elapsed_time, player);
+		_inputHandler->ReceiveMovementInput(f_elapsed_time);
 		RayCastingProcess();
-		swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f, FPS=%3.2f", player.get_x(), player.get_y(), player.get_angle(), 1.0f / f_elapsed_time);
+		//swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f, FPS=%3.2f", player.get_x(), player.get_y(), player.get_angle(), 1.0f / f_elapsed_time);
 
 		changed_pos = false;
-		screen[screen_height * screen_width - 1] = '\0';
-		WriteConsoleOutputCharacter(hConsole, screen, screen_width * screen_height, { 0,0 }, &dwBytesWritten);
+		screen[_screenHeight * _screenWidth - 1] = '\0';
+		_renderer->OverwriteBuffer(screen);
+		_renderer->PrintBuffer();
 	}
 
 
-}
-
-bool GameEngine::RegisterMovement(float delta)
-{
-	bool changed_pos = false;
-	if (GetAsyncKeyState((unsigned short)'A') & 0x8000) {
-		player.subtractf_angle(1.2f * delta);
-		changed_pos = true;
-	}
-	if (GetAsyncKeyState((unsigned short)'D') & 0x8000) {
-		player.addto_angle(1.2f * delta);
-		changed_pos = true;
-	}
-	if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
-		player.addto_x(sinf(player.get_angle()) * 5.0f * delta);
-		player.addto_y(cosf(player.get_angle()) * 5.0f * delta);
-		changed_pos = true;
-		
-		if (map[(int)player.get_y() * map_width + (int)player.get_x()] == '#') {
-			player.subtractf_x(sinf(player.get_angle()) * 5.0f * delta);
-			player.subtractf_y(cosf(player.get_angle()) * 5.0f * delta);
-		}
-	}
-	if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
-		player.subtractf_x(sinf(player.get_angle()) * 5.0f * delta);
-		player.subtractf_y(cosf(player.get_angle()) * 5.0f * delta);
-		changed_pos = true;
-		
-		if (map[(int)player.get_y() * map_width + (int)player.get_x()] == '#') {
-			player.addto_x(sinf(player.get_angle()) * 5.0f * delta);
-			player.addto_y(cosf(player.get_angle()) * 5.0f * delta);
-		}
-	}
-	if (GetAsyncKeyState((unsigned short)'Q') & 0x8000) {
-		player.addto_x(sinf(player.get_angle() - (3.14159f / 2.0f)) * 5.0f * delta);
-		player.addto_y(cosf(player.get_angle() - (3.14159f / 2.0f)) * 5.0f * delta);
-		changed_pos = true;
-
-		if (map[(int)player.get_y() * map_width + (int)player.get_x()] == '#') {
-			player.subtractf_x(sinf(player.get_angle() - (3.14159f / 2.0f)) * 5.0f * delta);
-			player.subtractf_y(cosf(player.get_angle() - (3.14159f / 2.0f)) * 5.0f * delta);
-		}
-	}
-	if (GetAsyncKeyState((unsigned short)'E') & 0x8000) {
-		player.addto_x(sinf(player.get_angle() + (3.14159f / 2.0f)) * 5.0f * delta);
-		player.addto_y(cosf(player.get_angle() + (3.14159f / 2.0f)) * 5.0f * delta);
-		changed_pos = true;
-
-		if (map[(int)player.get_y() * map_width + (int)player.get_x()] == '#') {
-			player.subtractf_x(sinf(player.get_angle() + (3.14159f / 2.0f)) * 5.0f * delta);
-			player.subtractf_y(cosf(player.get_angle() + (3.14159f / 2.0f)) * 5.0f * delta);
-		}
-	}
-	return changed_pos;
 }
 
 void GameEngine::RayCastingProcess()
@@ -216,17 +152,13 @@ void GameEngine::RayCastingProcess()
 
 	std::vector<std::tuple<std::wstring, int>> entitiesInWay;
 	std::tuple<std::wstring, float> topEntity;
-	for (int x = 0; x < screen_width; x++) 
+	for (int x = 0; x < _screenWidth; x++)
 	{
-		float ray_angle = (player.get_angle() - player.get_fov() / 2.0f) + ((float)x / (float)screen_width) * player.get_fov();
+		float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) + ((float)x / (float)_screenWidth) * _player.get_fov();
 		float distance_to_wall = 0.0f;
 		hitwall = false;
 		isedge = false;
-		//topEntity = std::tuple<std::wstring, float>(L"", -1.f);
-		Entity& topEntity = Entity();
-		textureTile textureFromMap;
-		//std::vector<wchar_t> depthStack;
-		//std::vector<std::tuple<std::wstring, int>> entitiesInWay;
+		TextureTile textureFromMap;
 
 		tile current_tile;
 
@@ -238,8 +170,8 @@ void GameEngine::RayCastingProcess()
 		while (!hitwall && distance_to_wall < max_raylength)
 		{
 			distance_to_wall += 0.1f;
-			test_x = (int)(player.get_x() + eye_x * distance_to_wall);
-			test_y = (int)(player.get_y() + eye_y * distance_to_wall);
+			test_x = (int)(_player.get_x() + eye_x * distance_to_wall);
+			test_y = (int)(_player.get_y() + eye_y * distance_to_wall);
 			if (test_x < 0 || test_x >= map_width || test_y < 0 || test_y >= map_height) {
 				hitwall = true;
 				distance_to_wall = max_raylength;
@@ -252,8 +184,8 @@ void GameEngine::RayCastingProcess()
 						//std::vector<std::pair<float, float>> edges;
 						for (int tx = 0; tx < 2; tx++) {
 							for (int ty = 0; ty < 2; ty++) {
-								float vy = (float)test_y + ty - player.get_y();
-								float vx = (float)test_x + tx - player.get_x();
+								float vy = (float)test_y + ty - _player.get_y();
+								float vx = (float)test_x + tx - _player.get_x();
 								float distance = sqrt(vx * vx + vy * vy);
 								float dot = (eye_x * vx / distance) + (eye_y * vy / distance);
 								//current_tile.edges.push_back(std::make_pair(distance, dot));
@@ -267,7 +199,7 @@ void GameEngine::RayCastingProcess()
 					isCurrentObj = currentObjX == test_x && currentObjY == test_y;
 					if (!isCurrentObj)
 					{
-						for (textureTile t : texMap)
+						for (TextureTile t : texMap)
 						{
 							if (t.x == test_x && t.y == test_y)
 							{
@@ -280,54 +212,10 @@ void GameEngine::RayCastingProcess()
 						currentObjY = test_y;
 					}
 				}
-				
-				if (map[test_y * map_width + test_x] == L'E') {
-					if (map[test_y * map_width + test_x] != current_tile.position) {
-						//std::vector<std::pair<float, float>> edges;
-						for (int tx = 0; tx < 2; tx++) {
-							for (int ty = 0; ty < 2; ty++) {
-								float vy = (float)test_y + ty - player.get_y();
-								float vx = (float)test_x + tx - player.get_x();
-								float distance = sqrt(vx * vx + vy * vy);
-								float dot = (eye_x * vx / distance) + (eye_y * vy / distance);
-								//current_tile.edges.push_back(std::make_pair(distance, dot));
-								//sort(current_tile.edges.begin(), current_tile.edges.end(), [](const std::pair<float, float>& left, const std::pair<float, float>& right) { return left.first < right.first; });
-							}
-						}
-						//float edge_bound = 0.002f;
-						//if (acos(edges.at(0).second) < edge_bound) isedge = true;
-						//if (acos(edges.at(1).second) < edge_bound) isedge = true;
-					}
-					isCurrentObj = currentObjX == test_x && currentObjY == test_y;
-					if (!isCurrentObj)
-					{
-						for (Entity e : _entityContainer)
-						{
-							if (e.X() == test_x && e.Y() == test_y)
-							{
-								TextureTile temp;
-								temp.x = e.X();
-								temp.y = e.Y();
-								temp.te
-								textureFromMap = temp; 
-								break;
-							}
-						}
-						//entitiesInWay.push_back(std::tuple(std::wstring(), 0));
-						//topEntity = std::tuple<std::wstring, float>()	
-							
-						//textureSetterT = std::thread(&GameEngine::SetScaledTexture, this, textures[textureFromMap.texture], std::get<0>(entitiesInWay.back()));
-
-						//textureSetterT = std::thread(&GameEngine::SetScaledTexture, textures[textureFromMap.texture], std::get<0>(entitiesInWay.back()));
-						
-						currentObjX = test_x;
-						currentObjY = test_y;
-					}
-				}
 			}
 		}
-		int ceiling = int((float)(screen_height / 2.0f) - screen_height / ((float)distance_to_wall));
-		int floor = screen_height - ceiling;
+		int ceiling = int((float)(_screenHeight / 2.0f) - _screenHeight / ((float)distance_to_wall));
+		int floor = _screenHeight - ceiling;
 
 		
 		RenderScreen(ceiling, floor, x, distance_to_wall, entitiesInWay);
@@ -344,42 +232,34 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col, float distance_to
 	{
 		textureSetterT.join();
 	}
-	std::wstring render_bg = TextureMapper::GetCharColumnAtPosition(screen_height - ceiling);
+	std::wstring render_bg = TextureMapper::GetCharColumnAtPosition(_screenHeight - ceiling);
 	if (entities.size() > 0)	
-		render_fg = TextureMapper::GetCharColumnAtPosition(screen_height - ceiling, std::get<0>(entities.back()), std::get<1>(entities.back()));
-	for (int y = 0; y < screen_height; y++) {
+		render_fg = TextureMapper::GetCharColumnAtPosition(_screenHeight - ceiling, std::get<0>(entities.back()), std::get<1>(entities.back()));
+	for (int y = 0; y < _screenHeight; y++) {
 		if (y < ceiling)
 		{ 
-			screen[y * screen_width + x] = ' ';
+			screen[y * _screenWidth + x] = ' ';
 		}
 		else if (y > ceiling && y <= floor)
 		{
 			
-			/*if (distance_to_wall <= max_raylength / 4.0f)		shade = 0x2588;
-			else if (distance_to_wall < max_raylength / 3.0f)	shade = 0x0040;
-			else if (distance_to_wall < max_raylength / 2.0f)	shade = 0x007C;*/
-			//if (distance_to_wall < max_raylength / 2.f)			shade = to_render[y];
-			//else												shade = ' ';
-			
-			//if (isedge && distance_to_wall < max_raylength / 2.0f) shade = 'e';
-			//screen[y * screen_width + x] = shade;
-			if (distance_to_wall > 8.f)  screen[y * screen_width + x] = L' ';
-			else					     screen[y * screen_width + x] = render_bg[y - ceiling];
+			if (distance_to_wall > 8.f)  screen[y * _screenWidth + x] = L' ';
+			else					     screen[y * _screenWidth + x] = render_bg[y - ceiling];
 			
 			if (entities.size() > 0 )
 			{
-				if (distance_to_wall > 8.f) screen[y * screen_width + x] = L' ';
-				else					     screen[y * screen_width + x] = render_fg[y - ceiling];
+				if (distance_to_wall > 8.f) screen[y * _screenWidth + x] = L' ';
+				else					     screen[y * _screenWidth + x] = render_fg[y - ceiling];
 			}
 		}
 		else {
-			float b = 1.0f - (((float)y - screen_height / 2.0f) / ((float)screen_height / 2.0f));
+			float b = 1.0f - (((float)y - _screenHeight / 2.0f) / ((float)_screenHeight / 2.0f));
 			if (b < 0.25)		shade = '#';
 			else if (b < 0.5)	shade = 'X';
 			else if (b < 0.75)	shade = '.';
 			else if (b < 0.9)	shade = '-';
 			else				shade = ' ';
-			screen[y * screen_width + x] = shade;
+			screen[y * _screenWidth + x] = shade;
 		}
 	}
 }

@@ -1,0 +1,128 @@
+E                                                               
+                                                                
+                                o#?o                            
+                              ###@@?PP                          
+                             ##@#O?oO?c                         
+                            ##@P@@#@@O@                         
+                         ?O?#@#????OPO?o                        
+                       @OoOP@?occc@@?OcPP                       
+                     @Po#P@@@@oP oO@PoccO?                      
+                    ???@P?oO?@?#co@?Pooo??co                    
+                   PPoPPc   ??@OO@P#cooO@c@@O                   
+                   O#?     c??OO?PoO ?oo?P?o?P                  
+                  @#P      #?OP?cP .oPo   oP?Oc                 
+                  ?? c@@   @?@@OOoooooP     P@#                 
+                  oOO@?    ?@@?OOooocoP P   .OOo                
+                      #.   PO???occccccP?     ?O.               
+                     .o   ?POOOOP@oOooP#@P    #o                
+                     #o#  o?ooP?@ooPoP?ooo@@??.                 
+                  o@#Po?@?o#@o@?@PcoOPo@#O###o?Po               
+               OoO@?@o#Oo@@?ooooOo@o?OO?o#@?@#oP?PO?O           
+           o@PoO??@#oPOO??P?ooooooocP#ocoo##PPoc?ooP??          
+         Po?#O?OoPOO##O@O@@@Oooooco@??Occ?O#@O#@ooOoPP          
+         oPoPooP##@##?o#@@?OooooccP#O#Oco#?@?O?OPO@O@           
+         #oo?@P@?#O@O#@o@?OOoPocooco?#POo#???P@@?Ooo#O          
+          @oPoO??OO??@PO??ooPP occ @OOP@?#oo@ooo? @@c@          
+         ?P?Poo?oOPOOo?@OooocccoP c ??o?P???P?Poo#P@?c          
+         @??@PoPooPPOPcPOooooooo@cc @#o#ooOPoO@?@@oOP           
+          PO?@??O?#O@POooo?cooccccocoo?OoOoP#@@#O@oo            
+          oO#@?PPooocPcoO#oooooocc co cPooPo???#@oPc            
+           o?O##OccccccoO#Oo?ooPo?oocP@ooOo oOO?oOO.            
+            OOPo oocoococ#o?#?OPoOOoc?#OcooPooooo?c             
+             c oooccoo???O?#???o?@O##c?oPocPooo .               
+              ooOPcc@?@oP@c#@O?@@#PP@POoOoooo co                
+              oooOcOOoo##??#o?P@O?ocoooP@coooocc                
+              ooooco@@?@#Oo???PoOOO#OP#ccP oooo                 
+             .ooooc#???o#@#OO#@PP@?#coPO?o ooo? o               
+             oOcocc??##@#PooOOOoO#oP??OPO#  occ c               
+             ooc c.##??oP#O@@??P@@ Pcoo@ ?  occ                 
+             oocc  Oo@???OO#o@?O??#@O?cc?o  oocc                
+             occ   O@O??coO?oooOooPPoo@#o    oocc               
+             occ   #?Po@#O@o@##@P#O?o o?@    ococ?              
+           #ooc o  PO?Oo@#@P?###@#oPOOOoo   @oOoco              
+           #ooc.    #??#???oPOoc@oocPoOOc  .oOoooc.             
+         ##oPPocoo   PPo?##@OOoOP@@P##oc.   o?o?coPO#           
+        c?#Ooccoo   .o?Oo@##O?O?O#oo##Oo    #@oocOOPoc          
+        ##oOOocP#    oO#P?coo?@#@cco P@?     oo?Po??c@          
+        O@??@@oc     P@Po#o@oo???oocOoO      .o@oO??o@          
+       O#@??@@##     ?OO?@oOooPcoooo oc       @o@P?Pc?o         
+       @###@@?#o       c?oo?oooOOooc c        ??O##PPc#         
+       @@?OP#O?#     cO@?ocPooc?occPooc       ##O@o??o#         
+       @@OP???c.    co?ooo?OoocOcccocoOoc      ?#P@#oo?         
+      c#?@P?O@?     @?@O?oPooocoo ccoocoo      ?@P@oOOo.        
+      #@?OO#?c      P?##@?@#?Ocooco?#@?O?       #@O@OooP        
+      ??Po@ooP      O#?@@##??@?o??PP#O#?oP       oo@#Oc#        
+      oPOP##c     .Oo@?@@?###?O#?@O?##?OPo       ?@#oPc@        
+      oOP?oOc     # #@@@#@####@@OP####?P?@        OO?#PP        
+      ?PP@Po      ? ?O@?@@#@#@@#Oo#@@#@oP#.       #O#o o@       
+     ?#O@#OO      ??#@@@O####@#O?@O?@@@@@O         ???@?#       
+     O@@@o?       ???#@@#?###??@?oO@o@@@#Pc        ?O@o#P       
+     o?O@@c       o??O##?##@?@##@?O?#@?@@?c        @?O#OcP      
+    c#P@@@O       @?#@####@@@@?@???O#@#?o@#         Pc@@P#      
+    ????coP       ??@#@?@@#@@#@???@?OP#P?P?o        @#oooO.     
+    ?o#o#o@       ???@@?@#?####@#@?#@@@@@OO?        ##@oPc@     
+   @O??o@?        P@@?@#cOOcP?oOOO?? oco##??        O@?Pc?c#    
+  O#@ #O##?      @O????oOcccoPP?@?P?oc@o?@?#@       O@#?o ##o   
+ PP   @#?P?      @O#?@@?co cooo??OO?coooOo@@?o      Po?@o   .   
+      c@##Oc     o@@@O@oo.c#oPo?OoOOccooPo@@@?      oo?oO       
+      P@??oc    c@#?O@oo o##oc #PoO?OccooPO@@?      ?o##oO      
+     PO ##co    ?#??@@ccoO@ cc  #oooo?oOooo@?O?    oO?#ooc      
+     coPc oo   #@#@#@ococ?@     ##o#ooOcoo@@@?@    Poo oo?      
+     oPoc Po   ?@@@?#o c@@#     #.O@?OoPcooo@?#   oPocOcP       
+      ooooo   o?@#@@oo@c@##     ##O??oooooooo @#                
+              #@#@#@o c#@@o      ##?O@ooPcPoo##@                
+              @##coc cc##@       ####?oooooocc##                
+             .##occ  oo@@o        ##?O@ooocoPcO##               
+              O?occc c @@#        #@@@@ooOocPcc@@               
+             #ooOoo co#@#          #@@?Oooococc?#               
+             #O#ooocco@##          #?##@ooOooc.@@               
+             ?@?oOcoPc@@            ???#PoOoPP?#o               
+             ?O?PPoOc###            @??@#Oc#??oPo               
+              @@? #o?#.#            #?#@#?##O#@o@@              
+             ?@@OoOoo@ c              ####?#@@#oP@              
+            @@#@@#??co                  #?O???@OP@O             
+            PPo?c?P@o                    #OO#Oo#cc#             
+            P@##oPP@@                    #??@?O?##?             
+            @#@@@@o#o                    .?##?@@@?#             
+           ?@??@@@@o                      oPo@?@@@P             
+           O#Ooocc#o                      O?@#o@P@?#            
+           c?O?#?@?o                      O#o@@@o#Oo            
+            o??O?@@?                      ?O?@@#o?@             
+            ???##OPo                     O@?oO?#oPo             
+            ?@#P#@@oc                    #@@?###OPo             
+           .O@#P#?#Oo                    o@O####P?P             
+           c?@#o#?coc                    @#P@??@P#O             
+           #?O@P#@PPP                    OPo#O@#P?c             
+           c#@#P#?#?o                    P#@@O?#o@o             
+           c?##o#OP#P                   .POO?o@#o#o             
+           @P#@O??@c                     ?oo??##P?o             
+           #P#@?#P@P                      ?@##?@o##             
+           O@#@##O??                      ?@@@##?OO             
+           #?#?#OP@O                      @???##@O@.            
+          .#@#@#@Ooc                      OooPo#@?P             
+           #@#O#?P#o                      @P# o###?o            
+          ?O#?P#@coP                      #o?OO##P@O            
+          @?#?O@Oco@                      @Oc@PO#@P?            
+          ?O@??#@#?O                      ?@?O@##@@#            
+          @@@?@@POoO                       ?o?PO##o@O           
+          #?#O@@ooc                         @P##O#oO@           
+          O#?##?o?                          @@####Oc?@          
+         ####o##@@c                         ?@@#P##@O@.         
+         ##@@o#o@o                          ###@###?@Oo         
+        @P?@@P#O#?                          P??@o@#O@@#         
+        @o??#o#oOP                          ??P?Oo@#oOc         
+        @@?##@oo#c                          @P@?##P?cocc        
+        ooocooO#PP                           OP#@@oOPooo        
+        oPoPOPooPo                          ?@??@#POo@o         
+        ??co?@cOOo                          @@@@?##@@?O#        
+        @o#@@#P##o                          @??@@??@@?@@o       
+       PO##@ o#@@o                          #?@@#@#@?@?@#@@     
+       @O@?##o#P?o                          @O?O##@P#####?O@oO  
+       ?###@O@O@#O                           #####?##@@@@?##@@@ 
+      #@?@@@#@o?#?                            #O#@@#@###@?##@@# 
+     #??@?@P?@?@?#                                   @#@@@?@@#O 
+     #@#Oo@ooO###                                      ######o  
+     ##???@?##                                                  
+     #####@@@                                                   
+      #OP?##                                                    
+                                                                

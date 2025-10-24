@@ -2,7 +2,8 @@ from PIL import Image
 from pathlib import Path
 
 ascii_texture = " .:coPO?@#"
-
+#ascii_texture = " :P?#"
+#ascii_texture = " :P#"
 
 def get_closest_pow2(n: int):
     if n <= 0:
@@ -28,7 +29,7 @@ parent_path = Path("./TextureSource")
 tex_files = list(parent_path.iterdir())
 
 # height and with of a char
-char_size = 8 
+char_size = 4 
 
 
 for texSource in tex_files:
@@ -39,7 +40,7 @@ for texSource in tex_files:
     new_size = tuple(get_closest_pow2(i) for i in new_size)
     tex = img_in.resize(new_size)
     tex = tex.convert("L")
-    tex = tex.quantize(10)
+    tex = tex.quantize(len(ascii_texture))
     texData = tex.load()
 
     tex_name = "./Textures/" + str(texSource.stem) + ".txt"

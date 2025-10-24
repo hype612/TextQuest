@@ -1,11 +1,9 @@
 #include <iostream>
 #include <Windows.h>
 #include <chrono>
-#include "Headers/player.h"
 #include <vector>
 #include <algorithm>
-#include "Headers\AsciiVerse.h"
-#include "Headers\TextureLoader.h"
+#include "src\Headers\Core.h"
 
 
 

@@ -88,8 +88,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>(/X:\Coding\TextQuest\TextQuest\TextQuest\Headers);</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\src\Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>(/X:\Coding\TextQuest\TextQuest\TextQuest\Headers);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>($(SolutionDir)\Headers);</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -120,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>(/X:\Coding\TextQuest\TextQuest\TextQuest\Headers);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>($(SolutionDir)\Headers);</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -147,18 +147,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AsciiVerse.cpp" />
-    <ClCompile Include="player.cpp" />
+    <ClCompile Include="src\Core\Core.cpp" />
+    <ClCompile Include="src\Scene\player.cpp" />
     <ClCompile Include="TextQuest.cpp" />
-    <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="TextureMapper.cpp" />
+    <ClCompile Include="src\Resource\TextureLoader.cpp" />
+    <ClCompile Include="src\Rendering\TextureMapper.cpp" />
+	  <ClCompile Include="src\Input\InputHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\AsciiVerse.h" />
+    <ClInclude Include="Headers\Entity.h" />
+    <ClInclude Include="Headers\Core.h" />
     <ClInclude Include="Headers\player.h" />
     <ClInclude Include="Headers\TextureLoader.h" />
     <ClInclude Include="Headers\TextureMapper.h" />
     <ClInclude Include="Headers\TextureTile.h" />
+    <ClInclude Include="Headers\InputHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
