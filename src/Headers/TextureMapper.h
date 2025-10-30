@@ -12,8 +12,7 @@ public:
 	float estimateHeight(float distance);
 	float estimateWidth(float distance);
 	void setCurrentTexture(float distance, const std::string& mode, std::wstring* tex);
-	void GenerateTextureMask();	
-	
+  void rescaleCurrentTexture(float distance);	
 	// =============================	
 	// repeating scaling
 	// =============================	
@@ -36,16 +35,20 @@ public:
 	// =========================	
 	//   return of textures 
 	// =========================	
-	std::wstring GetCharColumnAtPosition(int height);
+  std::wstring getNextTexColumn(int height); 
+  std::wstring getMaskColumn(int height); 
+  std::wstring getTexture();
+  std::wstring getMask(); 
 
 	TextureMapper(std::wstring initTexture);
 private:
 	std::wstring _textureMipMap = L"";
 	std::wstring _textureMask =  L""; 
 	int _stepper = -1;
-    int _tex_height = -1;
-    int _tex_width = -1;
+  int _tex_height = -1;
+  int _tex_width = -1;
 
+	void GenerateTextureMask();	
 	std::wstring ScaleToHeight(int height, std::wstring column);
 	TextureMapper(); // default construction should not be allowed
 };

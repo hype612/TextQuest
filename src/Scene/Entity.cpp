@@ -11,10 +11,9 @@ Entity::Entity() : _id(-1), _x(-1), _y(-1), _mapSign(L'E'), _texture(nullptr), _
 }
 
 
-Entity::Entity(int id, int x, int y, wchar_t mapSign, std::wstring* tex, int initHP, EntityState initState) : _id(id), _x(x), _y(y), _mapSign(mapSign), _texture(tex), _health(initHP), _state(initState)
-{
-    texture_mask = TextureMapper::GenerateTextureMask(*_texture);
-}
+Entity::Entity(int id, int x, int y, std::wstring* tex, std:: wstring* texMask, int initHP, EntityState initState) 
+  : _id(id), _x(x), _y(y), _texMapper(tex), _health(initHP), _state(initState)
+{}
 
 // =============
 // Getters	
@@ -33,14 +32,24 @@ std::tuple<int, int> Entity::getCoordinates()
 	return std::tuple<int, int>(_x, _y);
 }
 
-std::wstring* Entity::getTexturePointer()
-{
-    return _texture;
-}
-
 std::wstring Entity::getTexture()
 {
-    return *_texture;
+    return _texMapper.getTexture();
+}
+
+std::wstring Entity::getNextTexColumn(int height)
+{
+  return _texMapper.getNextColumn();
+}
+
+std::wstring Entity::getTexMask()
+{
+  return _maskMapper.getMask();
+}
+
+std::wstring Entity::getMaskColumn(int height)
+{
+  return _maskMapper.getMaskColumn();
 }
 
 int Entity::getHP()
@@ -72,3 +81,10 @@ void Entity::modifyHealth(int amount)
 		// destroy object
 	}
 }
+
+void Entity::rescaleTexture(float distance)
+{
+  _texMapper.rescaleTexture(float distance);
+}
+
+
