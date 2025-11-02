@@ -1,6 +1,11 @@
 #ifndef ENGINESTATE_H_
 #define ENGINESTATE_H_
 
+
+#include "MapManager.h"
+#include "SceneManager.h"
+#include "EntityManager.h"
+
 enum class RunningOS { WINDOWS,
                        LINUX };
 
@@ -23,11 +28,18 @@ public:
 #endif
     int screenHeight = -1;
     int screenWidth  = -1;
+    
+    static SceneManager*  _globalSceneManager;
+    static EntityManager* _globalEntityManager;
+    static MapManager*    _globalMapManager;
 private:
     EngineState() {}
+    
+    
+
 
     static EngineState* instancePtr;
-
+    
 };
 
 #endif // ENGINESTATEVARS_H_

@@ -18,12 +18,19 @@ class Entity
 public:
 	// constructors
 	Entity();
-	Entity(int id, int x, int y, std::wstring* tex, int initHP, EntityState initState);
-	
+	Entity(int x, int y, std::wstring* tex, int initHP, EntityState initState);
+
+
+  virtual void process() = 0;
+
+
 	// getters
 	int ID();
-	int X();
-	int Y();
+	float X();
+	float Y();
+  int discreteX();
+  int discreteY();
+
 
 	std::tuple<int, int> getCoordinates();
 	std::wstring getTexture();
@@ -37,13 +44,14 @@ public:
 	// setters
 	void setX(int x);
 	void setY(int y);
-	void modifyHealth(int amount);
+  void setID(int id);	
+  void modifyHealth(int amount);
 
   void rescaleTexture(float distance);
 private:
   int _id;
-	int _x;
-	int _y;
+	float _x;
+	float _y;
 	//std::wstring* _texture;
 	//std::vector<int> texture_mask;
   TextureMapper _texMapper;

@@ -11,7 +11,7 @@ public:
   MapManager();
   MapManager(const std::wstring& map, int map_width, int map_height);
 
-  void uploadNewMap();
+  void uploadNewMap(const std::wstring& map, int newMapWidth, int newMapHeight);
   std::wstring GetMap(const std::wstring& map);
   bool isWall();
 

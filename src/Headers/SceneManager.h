@@ -3,6 +3,8 @@
 
 #include "Object.h"
 #include "Entity.h"
+#include "EntityManager"
+#include "MapManager"
 #include <unordered_map>
 #include <tuple>
 #include <vector>
@@ -19,24 +21,33 @@ struct coord_hash
 };
 
 
-class SceneHandler
+class SceneManager
 {
 public:
-    SceneHandler();
-    SceneHandler(std::wstring& map); // pass a map and construct a scene from that
+    SceneManager();
+    SceneManager(std::wstring& map); // pass a map and construct a scene from that
 
+
+    void process();
     // i do not want to give access to entities and objects
     // for now i wont implement these
     //Entity EntityAt(int x, int y) const;
     //Object ObjectAt(int x, int y);
-    bool IsOccupied(int x, int y) const;
+    bool isOccupied(int x, int y) const;
 
-private:
-    std::vector<Entity> _entityContainer; // indexed with entity._id
-    //std::unordered_map<coord_t, int, coord_hash> _entityPositionMap; // stores entity._id, indexes with coordinates
-    std::unordered_map<coord_t, Object, coord_hash> _objectContainer; // indexed with coordinates
-    std::wstring _map;
+    // Map Related functions
+    void initializeNewMap(std::wstring& map, int mapWidth, int mapHeight);
+
+    // Entity Related functions
+    void AddEntity(Entity& entity);
+    void removeEntity(Entity& entity);
+    void removeEntity(int entityId);
+    void removeAllEntities();
     
+private:
+    //std::unordered_map<coord_t, int, coord_hash> _entityPositionMap; // stores entity._id, indexes with coordinates
+    MapManager    _mapManager; 
+    EntityManager _entityManager;
 };
 
 

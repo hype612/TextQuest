@@ -18,21 +18,91 @@ int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) {
   }
 }
 
-
-void EntityManager::ScaleEntityTexture(int EntityId) {
-  
+void EntityManager::process()
+{
+  for(Entity e : _entityContainer) {
+    e.process();
+  }
 }
-void EntityManager::GetEntityTexture(int EntityId) {}
+
 
 // ways to access the container
-void EntityManager::addEntity(Entity& entity);
-void EntityManager::removeEntity(int id);
-void EntityManager::removeEntity(int coord_x, int coord_y);
+void EntityManager::addEntity(Entity& entity)
+{
+  if (entity.ID() != -1)
+  {
+    std::cerr << "id has been altered. Please do not touch id" << std::endl;
+    return;
+  } 
+  entity.setID(_entityContainer.size());
+  _entityContainer.push_back(entity);
+}
+void EntityManager::removeEntity(int id) 
+{
+  _entityContainer[id].setX(-1);
+  _entityContainer[id].setY(-1);
+}
+
+
+void EntityManager::removeEntity(int coord_x, int coord_y)
+{
+  int id = getEntityAtPos(coord_x, coord_y);
+  removeEntity(id);
+}
+
+
+void EntityManager::removeAllEntities()
+{
+  _entityContainer.clear();
+  _entityContainer.shrink_to_fit();
+}
+
+
 
 // for renderer
-void EntityManager::ChangeEntityTextureScale(int EntityId, float distance);
-void EntityManager::ChangeEntityTextureScale(Entity& entity, float distance);
-std::wstring EntityManager::GetCurrentEntityTexture(int EntityId);
-std::wstring EntityManager::GetCurrentEntityTexture(const Entity& entity);
+void EntityManager::changeEntityTextureScale(int EntityId, float distance)
+{
+  _entityContainer[EntityId].rescaleTexture(distance);
+}
 
 
+void EntityManager::changeEntityTextureScale(Entity& entity, float distance)
+{
+  entity.rescaleTexture(distance);
+}
+
+
+std::wstring EntityManager::getCurrentEntityTexture(int EntityId)
+{
+  _entityContainer[EntityId].getTexture();
+}
+
+
+std::wstring EntityManager::getCurrentEntityTexture(const Entity& entity)
+{
+  entity.getTexture(); 
+}
+
+
+std::wstring getCurrentEntityTexMask(int EntityId)
+{
+  _entityContainer[EntityId].getTexMask();
+}
+
+
+std::wstring getCurrentEntityTexMask(const Entity& entity)
+{
+  entity.getTexMask();
+}
+
+
+std::wstring getNextEntityCharColumn(int EntityId)
+{
+  _entityContainer[EntityId].getNextTexColumn();
+}
+
+
+std::wstring getEntityMaskColumn(int EntityId)
+{
+  _entityContainer[EntityId].getMaskColumn();
+}

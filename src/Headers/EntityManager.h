@@ -14,21 +14,26 @@ public:
 
   Entity& getEntityAtPos(int coord_x, int coord_y);
   int getEntityIdAtPos(int coord_x, int coord_y);
+  void process();
 
-
-  void ScaleEntityTexture(int EntityId);
-  void GetEntityTexture(int EntityId);
 
   // ways to access the container
   void addEntity(Entity& entity);
   void removeEntity(int id);
   void removeEntity(int coord_x, int coord_y);
+  void removeAllEntities();
+
 
   // for renderer
-  void ChangeEntityTextureScale(int EntityId, float distance);
-  void ChangeEntityTextureScale(Entity& entity, float distance);
-  std::wstring GetCurrentEntityTexture(int EntityId);
-  std::wstring GetCurrentEntityTexture(const Entity& entity);
+  void changeEntityTextureScale(int EntityId, float distance);
+  void changeEntityTextureScale(Entity& entity, float distance);
+  std::wstring getCurrentEntityTexture(int EntityId);
+  std::wstring getCurrentEntityTexture(const Entity& entity);
+  std::wstring getCurrentEntityTexMask(int EntityId);
+  std::wstring getCurrentEntityTexMask(const Entity& entity);
+
+  std::wstring getNextEntityCharColumn(int EntityId);
+  std::wstring getEntityMaskColumn(int EntityId);
 
 private:
   std::vector<Entity> _entityContainer;
