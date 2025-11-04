@@ -21,26 +21,28 @@
 #include "SceneManager.h"
 #include "MapManager.h"
 #include "EntityManager.h"
-
+#include "TextureRequestQueue.h"
 
 class GameEngine {
 private:
   // scene
-  SceneManager _sceneManager; 
-
+  SceneManager _sceneManager;
+  Player _player;
 	// rendering vars and consts
 	IRenderer* _renderer;
 	IInputHandler* _inputHandler;
 	wchar_t* screen;
 	int& _screenHeight = EngineState::GetInstance()->screenHeight;
 	int& _screenWidth  = EngineState::GetInstance()->screenWidth;
-
-	// dont want anyone to call this
-	GameEngine(GameEngine& g);
+  TextureRequestQueue _texRequestQueue;
 
   // for multithreading
 	int _max_thread_num = -1;
 	std::thread textureSetterT;
+
+	// dont want anyone to call this
+	GameEngine(GameEngine& g);
+
 public:
 	GameEngine(int sc_width, int sc_height, std::string textures_path);
 	bool initMap(); // for now initializes a static test map

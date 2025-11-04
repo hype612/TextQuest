@@ -30,7 +30,7 @@ GameEngine::GameEngine(int sc_width = 240, int sc_height = 80, std::string textu
 }
 
 bool GameEngine::initMap() {
-
+  std::wstring map = "";
 	map += L"###############################################################";
 	map += L"#.............................................................#";
 	map += L"#..............########################################....####";
@@ -72,23 +72,11 @@ bool GameEngine::initMap() {
 	map += L"#..............#..............................................#";
 	map += L"###############################################################";
 
+  int map_w = map.find(L"\n");
+  int map_h = map.size() / map_w;
 
+  SceneManager.initializeNewMap(map, map_w, map_h);
 
-	for (int i = 0; i < map_height; i++)
-	{
-		for (int j = 0; j < map_width; j++)
-		{
-			if (map[i * map_width + j] == L'.')
-				continue;
-			TextureTile current;
-			current.x = i;
-			current.y = j;
-			current.texture = map[i * map_width + j];
-			texMap.push_back(current);
-		}
-	}
-	
-	
 	return true;
 }
 
@@ -96,7 +84,8 @@ bool GameEngine::initMap() {
 void GameEngine::run_game() {
 	// game loop
 	initMap();
-	auto tp1 = std::chrono::system_clock::now();
+	
+  auto tp1 = std::chrono::system_clock::now();
 	auto tp2 = std::chrono::system_clock::now();
 
 	tp2 = std::chrono::system_clock::now();
@@ -106,7 +95,9 @@ void GameEngine::run_game() {
 	
 	
 	_inputHandler->ReceiveMovementInput(f_elapsed_time);
-	RayCastingProcess();
+  _sceneManager.process();
+
+  RayCastingProcess();
 
 	changed_pos = false;
 	screen[_screenHeight * _screenWidth - 1] = '\0';
@@ -125,17 +116,12 @@ void GameEngine::RayCastingProcess()
 	int currentObjY = -1;
 	bool isCurrentObj = false;
 
-	std::vector<std::tuple<std::wstring, int>> entitiesInWay;
-	std::tuple<std::wstring, float> topEntity;
 	for (int x = 0; x < _screenWidth; x++)
 	{
 		float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) + ((float)x / (float)_screenWidth) * _player.get_fov();
 		float distance_to_wall = 0.0f;
 		hitwall = false;
 		isedge = false;
-		TextureTile textureFromMap;
-
-		tile current_tile;
 
 		float eye_x = sinf(ray_angle);
 		float eye_y = cosf(ray_angle);
@@ -155,8 +141,10 @@ void GameEngine::RayCastingProcess()
 				// ray is inbounds > test if is a wall block
 				if (map[test_y * map_width + test_x] == '#') {
 					hitwall = true;
-					if (map[test_y * map_width + test_x] != current_tile.position) {
-						//std::vector<std::pair<float, float>> edges;
+				  /* edge detection
+          if (map[test_y * map_width + test_x] != current_tile.position) {
+					  
+            //std::vector<std::pair<float, float>> edges;
 						for (int tx = 0; tx < 2; tx++) {
 							for (int ty = 0; ty < 2; ty++) {
 								float vy = (float)test_y + ty - _player.get_y();
@@ -170,7 +158,7 @@ void GameEngine::RayCastingProcess()
 						//float edge_bound = 0.002f;
 						//if (acos(edges.at(0).second) < edge_bound) isedge = true;
 						//if (acos(edges.at(1).second) < edge_bound) isedge = true;
-					}
+					} edge detection END */
 					isCurrentObj = currentObjX == test_x && currentObjY == test_y;
 					if (!isCurrentObj)
 					{
@@ -182,8 +170,10 @@ void GameEngine::RayCastingProcess()
 								break;
 							}
 						}
-						textureSetterT = std::thread(TextureMapper::setCurrentTexture, distance_to_wall, "repeat", &textures[textureFromMap.texture]);
-						currentObjX = test_x;
+						//textureSetterT = std::thread(TextureMapper::setCurrentTexture, distance_to_wall, "repeat", &textures[textureFromMap.texture]);
+					  int entityId = 
+            _texRequestQueue.push()	
+            currentObjX = test_x;
 						currentObjY = test_y;
 					}
 				}
