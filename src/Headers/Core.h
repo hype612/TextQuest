@@ -18,37 +18,29 @@
 #include "NCursesInputHandler.h"
 #include "WindowsInputHandler.h"
 #include "EngineState.h"
+#include "SceneManager.h"
+#include "MapManager.h"
+#include "EntityManager.h"
+
 
 class GameEngine {
 private:
-	struct tile {
-		int position = -1; // since the screen is a 2d array
-		std::vector<std::pair<float, float>> edges;
-	};
+  // scene
+  SceneManager _sceneManager; 
 
-	// map consts
-	int map_height = 39;
-	int map_width = 63;
-	float max_raylength = 16.0f;
-	std::wstring map;
-	std::vector<TextureTile> texMap;
-
-	Player _player;
-
-	std::vector<Entity> _entityContainer;
+	// rendering vars and consts
 	IRenderer* _renderer;
 	IInputHandler* _inputHandler;
 	wchar_t* screen;
 	int& _screenHeight = EngineState::GetInstance()->screenHeight;
 	int& _screenWidth  = EngineState::GetInstance()->screenWidth;
-	// rendering vars and consts
-	std::unordered_map<wchar_t, std::wstring> textures;
-	int _max_thread_num = -1;
-	std::thread textureSetterT;
 
 	// dont want anyone to call this
 	GameEngine(GameEngine& g);
 
+  // for multithreading
+	int _max_thread_num = -1;
+	std::thread textureSetterT;
 public:
 	GameEngine(int sc_width, int sc_height, std::string textures_path);
 	bool initMap(); // for now initializes a static test map

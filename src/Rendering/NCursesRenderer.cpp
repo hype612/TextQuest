@@ -36,6 +36,9 @@ void NCursesRenderer::SetScreenSize(int x, int y) {
     _screenHeight = y;
     delete _screenBuffer;
     _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
+
+    EngineState::GetInstance()->screenHeight = _screenHeight;
+    EngineState::GetInstance()->screenWidth = _screenWidth;
 }
 
 

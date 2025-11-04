@@ -10,12 +10,16 @@ Entity& EntityManager::getEntityAtPos(int coord_x, int coord_y) {
     if ( e.coord_x == coord_x && e.coord_y == coord_y)
       return e;
   }
+  
+  return Entity();
 }
 int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) {
   for(Entity e : _entityContainer) {
     if ( e.X() == coord_x && e.Y() == coord_y)
       return e.ID();
   }
+  
+  return -1;
 }
 
 void EntityManager::process()

@@ -47,9 +47,12 @@ void SceneManager::removeAllEntities()
 
 
 
-
-
-
 bool SceneManager::isOccupied(int x, int y) const {
-  
+  if(_entityManager.getEntityIdAtPos(x, y) != -1 )
+    return true;
+
+  if (_mapManager.isWall() == true )
+    return true;
+
+  return false;
 }

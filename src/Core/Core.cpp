@@ -29,27 +29,7 @@ GameEngine::GameEngine(int sc_width = 240, int sc_height = 80, std::string textu
 	_max_thread_num = std::thread::hardware_concurrency();
 }
 
-// should
 bool GameEngine::initMap() {
-	/*
-	map += L"################";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#......#####...#";
-	map += L"#..............#";
-	map += L"#########......#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"#..............#";
-	map += L"################";
-	*/
-
 
 	map += L"###############################################################";
 	map += L"#.............................................................#";
@@ -119,24 +99,19 @@ void GameEngine::run_game() {
 	auto tp1 = std::chrono::system_clock::now();
 	auto tp2 = std::chrono::system_clock::now();
 
-	bool changed_pos = true;
-	while (true) {
-		tp2 = std::chrono::system_clock::now();
-		std::chrono::duration<float> elapsed_time = tp2 - tp1;
-		tp1 = tp2;
-		float f_elapsed_time = elapsed_time.count();
-		
-		
-		//InputHandler::ReceiveMovementInput(f_elapsed_time, player);
-		_inputHandler->ReceiveMovementInput(f_elapsed_time);
-		RayCastingProcess();
-		//swprintf_s(screen, 40, L"X=%3.2f, Y=%3.2f, A=%3.2f, FPS=%3.2f", player.get_x(), player.get_y(), player.get_angle(), 1.0f / f_elapsed_time);
+	tp2 = std::chrono::system_clock::now();
+	std::chrono::duration<float> elapsed_time = tp2 - tp1;
+	tp1 = tp2;
+	float f_elapsed_time = elapsed_time.count();
+	
+	
+	_inputHandler->ReceiveMovementInput(f_elapsed_time);
+	RayCastingProcess();
 
-		changed_pos = false;
-		screen[_screenHeight * _screenWidth - 1] = '\0';
-		_renderer->OverwriteBuffer(screen);
-		_renderer->PrintBuffer();
-	}
+	changed_pos = false;
+	screen[_screenHeight * _screenWidth - 1] = '\0';
+	_renderer->OverwriteBuffer(screen);
+	_renderer->PrintBuffer();
 
 
 }
