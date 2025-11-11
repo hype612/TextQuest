@@ -25,7 +25,7 @@ public:
 
 
   // for renderer
-  void changeEntityTextureScale(int EntityId, float distance);
+  void rescaleEntityTexture(int EntityId, float distance);
   void changeEntityTextureScale(Entity& entity, float distance);
   std::wstring getCurrentEntityTexture(int EntityId);
   std::wstring getCurrentEntityTexture(const Entity& entity);

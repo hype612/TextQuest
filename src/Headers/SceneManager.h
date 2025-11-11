@@ -37,6 +37,9 @@ public:
 
     // Map Related functions
     void initializeNewMap(std::wstring& map, int mapWidth, int mapHeight);
+    void rescaleTextureOf(int pos_x, int pos_y, float distance);
+    std::wstring getTextureAt(int pos_x, int pos_y);
+    std::wstring getNextCharColumnAt(int pos_x, int pos_y);
 
     // Entity Related functions
     void AddEntity(Entity& entity);
@@ -46,7 +49,7 @@ public:
     
 private:
     //std::unordered_map<coord_t, int, coord_hash> _entityPositionMap; // stores entity._id, indexes with coordinates
-    MapManager    _mapManager; 
+    MapManager    _mapManager;
     EntityManager _entityManager;
 };
 

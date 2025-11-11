@@ -25,6 +25,43 @@ void SceneManager::process()
 // Map Related functions
 void SceneManager::initializeNewMap(std::wstring& map, int mapWidth, int mapHeight);
 
+
+void rescaleTextureOf(int pos_x, int pos_y, float distance) 
+{
+  if ( _mapManager.isWall() == true)
+    _mapManager.rescaleWallTextureAt(pos_x, pos_y);
+  int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
+  if ( e_id != -1)
+    _entityManager.rescaleEntityTexture(e_id, distance);
+  else
+    std::cerr << "invalid position" << std::endl;
+}
+
+
+std::wstring getTextureAt(int pos_x, int pos_y)
+{
+  if ( _mapManager.isWall() == true)
+    _mapManager.getWallTextureAt(pos_x, pos_y);
+  int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
+  if ( e_id != -1)
+    _entityManager.getCurrentEntityTexture(e_id);
+  else
+    std::cerr << "invalid position" << std::endl;
+}
+
+
+std::wstring getNextCharColumnAt(int pos_x, int pos_y)
+{
+  if ( _mapManager.isWall() == true)
+    _mapManager.getWallTexColumnAt(pos_x, pos_y);
+  int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
+  if ( e_id != -1)
+    _entityManager.getNextEntityCharColumn(e_id);
+  else
+    std::cerr << "invalid position" << std::endl;
+}
+
+
 // Entity Related functions
 void SceneManager::AddEntity(Entity& entity)
 {

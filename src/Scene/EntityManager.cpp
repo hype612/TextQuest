@@ -64,7 +64,7 @@ void EntityManager::removeAllEntities()
 
 
 // for renderer
-void EntityManager::changeEntityTextureScale(int EntityId, float distance)
+void EntityManager::rescaleEntityTexture(int EntityId, float distance)
 {
   _entityContainer[EntityId].rescaleTexture(distance);
 }

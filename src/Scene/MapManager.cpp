@@ -27,3 +27,28 @@ bool MapManager::isWall(int test_x, int test_y) {
     return false;
 }
 
+void MapManager::uploadWallTextureFor(wchar_t mapChar, std::wstring texture)
+{
+  _wallTexMappers[mapChar] = TextureMapper(texture);
+}
+
+
+void MapManager::rescaleWallTextureAt(int x, int y, float distance)
+{
+  wchar_t mapChar = map[y * map_width + x];
+  _wallTexMappers[mapChar].rescaleCurrentTexture(distance);
+}
+
+
+std::wstring MapManager::getWallTextureAt(int x, int y) 
+{
+  wchar_t mapChar = map[y * map_width + x];
+  return _wallTexMappers[mapChar].getTexture();
+}
+
+
+std::wstring MapManager::getWallTexColumnAt(int x, int y)
+{
+  wchar_t mapChar = map[y * map_width + x];
+  return _wallTexMappers[mapChar].getNextTexColumn();
+}
