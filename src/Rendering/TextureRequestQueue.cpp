@@ -1,29 +1,32 @@
 #include "../Headers/TextureRequestQueue.h"
+#include <shared_mutex>
 
 TextureRequestQueue::TextureRequestQueue() {}
-TextureRequestQueue::~TextureRequestQueue() { _mtx.unlock(); } // just to make sure;
-
-void TextureRequestQueue::push(std::tuple<int, int> position)
-{
-  _mtx.lock();
-  _texQueue.push_ back(position);
+TextureRequestQueue::~TextureRequestQueue() {
   _mtx.unlock();
+} // just to make sure;
+
+void TextureRequestQueue::push(std::tuple<int, int> position) {
+  std::unique_lock<std::shared_mutex> lock(_mtx);
+  _texQueue.push_back(position);
 }
 
+bool TextureRequestQueue::contains(const std::tuple<int, int> &position) const {
 
-void contains(std::tuple<int, int> position)
-{
-  if( std::find(_texQueue.begin(), _texQueue.end(), position) != _texQueue.end())
+  std::shared_lock<std::shared_mutex> lock(_mtx);
+  if (std::find(_texQueue.begin(), _texQueue.end(), position) !=
+      _texQueue.end())
     return true;
   else
     return false;
 }
 
-
-void TextureRequestQueue::pop()
-{
-  _mtx.lock();
+void TextureRequestQueue::pop() {
+  std::unique_lock<std::shared_mutex> lock(_mtx);
   _texQueue.pop_front();
-  _mtx.unlock();
 }
 
+const std::tuple<int, int> &TextureRequestQueue::top() const {
+  std::shared_lock<std::shared_mutex> lock(_mtx);
+  return _texQueue.front();
+}
