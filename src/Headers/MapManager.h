@@ -14,7 +14,8 @@ public:
   std::wstring GetMap();
   int mapHeight() const;
   int mapWidth() const;
-  bool isWall(int test_x, int test_y);
+  bool isWall(int test_x, int test_y) const;
+  bool isMapAvailable() const;
 
   void uploadWallTextureFor(wchar_t mapChar, std::wstring texture);
   void rescaleWallTextureAt(int x, int y, float distance);

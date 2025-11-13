@@ -5,7 +5,6 @@
 #include "./EntityManager.h"
 #include "./MapManager.h"
 #include "Entity.h"
-#include "Object.h"
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -24,6 +23,7 @@ public:
   void initializeNewMap(std::wstring &map, int mapWidth, int mapHeight);
   int getMapHeight() const;
   int getMapWidth() const;
+  bool isMapAvailable() const;
   /* shifted to TexAssetManager
   void rescaleTextureOf(int pos_x, int pos_y, float distance);
   std::wstring getTextureAt(int pos_x, int pos_y);

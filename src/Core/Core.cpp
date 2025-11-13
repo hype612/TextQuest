@@ -1,17 +1,8 @@
 #include "../Headers/Core.h"
 
-GameEngine::GameEngine(int sc_width = 240, int sc_height = 80,
-                       std::string textures_path = "\\Resources\\Textures")
-    : _player(2.0f, 2.0f, 6.28f, 3.14159f / 4.0f, map, map_width, map_height),
-      _screenHeight(sc_height), _screenWidth(sc_width) {
-  textures = Texture_loader::load_textures(textures_path);
-  if (textures.size() > 1) {
-    for (int i = 0; i < textures.size(); i++) {
-      //_entityContainer.push_back(Entity(3, 3, L'E', &textures[L'E'], 100,
-      // EntityState::IDLE));
-    }
-  }
-  // std::wstring wtex = textures['#'];
+GameEngine::GameEngine(int sc_width = 240, int sc_height = 80) {
+  // TODO: just decide in compile time
+  // Obviously, it does not make sense to do this at runtime
   if (EngineState::GetInstance()->opSystem == RunningOS::WINDOWS) {
     //_renderer     = new WindowsRenderer();
     //_inputHandler = new WindowsInputHanlder(_player);
@@ -25,7 +16,7 @@ GameEngine::GameEngine(int sc_width = 240, int sc_height = 80,
   _max_thread_num = std::thread::hardware_concurrency();
 }
 
-bool GameEngine::initMap() {
+bool GameEngine::initTestMap() {
   std::wstring map;
   map += L"###############################################################";
   map += L"#.............................................................#";
@@ -78,7 +69,8 @@ bool GameEngine::initMap() {
 
 void GameEngine::run_game() {
   // game loop
-  initMap();
+  if (!_sceneManager.isMapAvailable())
+    initTestMap();
 
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
@@ -123,48 +115,21 @@ void GameEngine::RayCastingProcess() {
       distance_to_wall += 0.1f;
       test_x = (int)(_player.get_x() + eye_x * distance_to_wall);
       test_y = (int)(_player.get_y() + eye_y * distance_to_wall);
-      if (test_x < 0 || test_x >= map_width || test_y < 0 ||
-          test_y >= map_height) {
+      if (test_x < 0 || test_x >= _sceneManager.getMapWidth() || test_y < 0 ||
+          test_y >= _sceneManager.getMapHeight()) {
         hitwall = true;
         distance_to_wall = max_raylength;
       } else {
         // ray is inbounds > test if is a wall block
-        if (map[test_y * map_width + test_x] == '#') {
+        if (_sceneManager.isOccupied(test_x, test_y)) {
           hitwall = true;
-          /* edge detection
-if (map[test_y * map_width + test_x] != current_tile.position) {
-
-//std::vector<std::pair<float, float>> edges;
-                        for (int tx = 0; tx < 2; tx++) {
-                                for (int ty = 0; ty < 2; ty++) {
-                                        float vy = (float)test_y + ty -
-_player.get_y(); float vx = (float)test_x + tx - _player.get_x(); float distance
-= sqrt(vx * vx + vy * vy); float dot = (eye_x * vx / distance) + (eye_y * vy /
-distance);
-                                        //current_tile.edges.push_back(std::make_pair(distance,
-dot));
-                                        //sort(current_tile.edges.begin(),
-current_tile.edges.end(), [](const std::pair<float, float>& left, const
-std::pair<float, float>& right) { return left.first < right.first; });
-                                }
-                        }
-                        //float edge_bound = 0.002f;
-                        //if (acos(edges.at(0).second) < edge_bound) isedge =
-true;
-                        //if (acos(edges.at(1).second) < edge_bound) isedge =
-true; } edge detection END */
           isCurrentObj = currentObjX == test_x && currentObjY == test_y;
           if (!isCurrentObj) {
-            for (TextureTile t : texMap) {
-              if (t.x == test_x && t.y == test_y) {
-                textureFromMap = t;
-                break;
-              }
-            }
             // textureSetterT = std::thread(TextureMapper::setCurrentTexture,
             // distance_to_wall, "repeat", &textures[textureFromMap.texture]);
-            int entityId = _texRequestQueue.push() currentObjX = test_x;
+            _texRequestQueue.push(std::tuple<int, int>(test_x, test_y));
             currentObjY = test_y;
+            currentObjX = test_x;
           }
         }
       }

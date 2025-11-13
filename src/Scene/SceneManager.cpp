@@ -23,8 +23,12 @@ void SceneManager::initializeNewMap(std::wstring &map, int mapWidth,
 int SceneManager::getMapHeight() const { return _mapManager.mapHeight(); }
 int SceneManager::getMapWidth() const { return _mapManager.mapWidth(); }
 
+bool SceneManager::isMapAvailable() const {
+  return _mapManager.isMapAvailable();
+}
+
 void SceneManager::rescaleTextureOf(int pos_x, int pos_y, float distance) {
-  if (_mapManager.isWall() == true)
+  if (_mapManager.isWall(pos_x, pos_y) == true)
     _mapManager.rescaleWallTextureAt(pos_x, pos_y);
   int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
   if (e_id != -1)
@@ -70,7 +74,7 @@ bool SceneManager::isOccupied(int x, int y) const {
   if (_entityManager.getEntityIdAtPos(x, y) != -1)
     return true;
 
-  if (_mapManager.isWall() == true)
+  if (_mapManager.isWall(x, y) == true)
     return true;
 
   return false;

@@ -17,11 +17,19 @@ std::wstring MapManager::GetMap() { return _map; }
 int MapManager::mapHeight() const { return _mapHeight; }
 int MapManager::mapWidth() const { return _mapWidth; }
 
-bool MapManager::isWall(int test_x, int test_y) {
+bool MapManager::isWall(int test_x, int test_y) const {
   if (_map[test_y * _mapWidth + test_x] == '#')
     return true;
   else
     return false;
+}
+
+bool MapManager::isMapAvailable() const {
+  if (_map == L"") {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 void MapManager::uploadWallTextureFor(wchar_t mapChar, std::wstring texture) {
