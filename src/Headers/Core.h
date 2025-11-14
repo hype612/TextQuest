@@ -9,6 +9,7 @@
 #include "MapManager.h"
 #include "NCursesInputHandler.h"
 #include "NCursesRenderer.h"
+#include "RenderAssetManager.h"
 #include "SceneManager.h"
 #include "TextureLoader.h"
 #include "TextureMapper.h"
@@ -26,7 +27,11 @@ class GameEngine {
 private:
   // scene
   SceneManager _sceneManager;
+  MapManager _mapManager;
+  EntityManager _entityManager;
+
   Player _player;
+
   // rendering vars and consts
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
@@ -34,6 +39,7 @@ private:
   int &_screenHeight = EngineState::GetInstance()->screenHeight;
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
+  RenderAssetManager _renderAssetManager;
 
   // for multithreading
   int _max_thread_num = -1;
