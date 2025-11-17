@@ -4,6 +4,7 @@
 #include "./EngineState.h"
 #include "./EntityManager.h"
 #include "./MapManager.h"
+#include "./Tile.h"
 #include "Entity.h"
 #include <string>
 #include <tuple>
@@ -17,7 +18,8 @@ public:
       MapManager &mapMan); // pass a map and construct a scene from that
 
   void process();
-  bool isOccupied(int x, int y) const;
+  // bool isOccupied(int x, int y) const;
+  Tile isOccupied(int x, int y) const;
 
   // Map Related functions
   void initializeNewMap(std::wstring &map, int mapWidth, int mapHeight);

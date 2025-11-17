@@ -24,11 +24,19 @@
 #include <vector>
 
 class GameEngine {
+public:
+  GameEngine(int sc_width = 240, int sc_height = 80);
+  void run_game();
+  void SetScaledTexture(std::wstring &source, std::wstring &into,
+                        float distance);
+  void RayCastingProcess();
+  void RenderScreen(int ceiling, int floor, int col, float distance_to_wall);
+
 private:
   // scene
-  SceneManager _sceneManager;
   MapManager _mapManager;
   EntityManager _entityManager;
+  SceneManager _sceneManager;
 
   Player _player;
 
@@ -40,6 +48,7 @@ private:
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
+  std::thread _textureSetterT;
 
   // for multithreading
   int _max_thread_num = -1;
@@ -49,14 +58,6 @@ private:
   GameEngine(GameEngine &g);
   // fallback map for testing
   bool initTestMap(); // for now initializes a static test map
-public:
-  GameEngine(int sc_width, int sc_height);
-  void run_game();
-  void SetScaledTexture(std::wstring &source, std::wstring &into,
-                        float distance);
-  void RayCastingProcess();
-  void RenderScreen(int ceiling, int floor, int col, float distance_to_wall,
-                    std::vector<std::tuple<std::wstring, int>> entities);
 };
 
 #endif // ASCIIVERSE_H

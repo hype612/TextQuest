@@ -37,12 +37,12 @@ void SceneManager::removeEntity(int entityId) {
 }
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
 
-bool SceneManager::isOccupied(int x, int y) const {
+Tile SceneManager::isOccupied(int x, int y) const {
   if (_entityManager.getEntityIdAtPos(x, y) != -1)
-    return true;
+    return Tile::ENTITY;
 
   if (_mapManager.isWall(x, y) == true)
-    return true;
+    return Tile::WALL;
 
-  return false;
+  return Tile::NONE;
 }

@@ -2,6 +2,7 @@
 #define ENGINESTATE_H_
 
 class SceneManager;
+class RenderAssetManager;
 
 enum class RunningOS { WINDOWS, LINUX };
 
@@ -26,6 +27,8 @@ public:
   int screenWidth = -1;
 
   static SceneManager *_globalSceneManager;
+  static RenderAssetManager *_globalRenderAssetManager;
+  static bool GameRunningf;
 
 private:
   EngineState() {}
