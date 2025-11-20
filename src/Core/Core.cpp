@@ -109,6 +109,8 @@ void GameEngine::RayCastingProcess() {
   const int max_raylength = 8;
 
   for (int x = 0; x < _screenWidth; x++) {
+    _texRequestQueue.setRayCompleted(false);
+    _texRequestQueue.setTexturesReady(false);
     float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) +
                       ((float)x / (float)_screenWidth) * _player.get_fov();
     float distance_to_wall = 0.0f;
@@ -135,8 +137,8 @@ void GameEngine::RayCastingProcess() {
           hitwall = true;
           isCurrentObj = currentObjX == test_x && currentObjY == test_y;
           if (!isCurrentObj) {
-            _texRequestQueue.push(
-                std::tuple<int, int, Tile>(test_x, test_y, Tile::WALL));
+            _texRequestQueue.push(std::tuple<int, int, Tile, float>(
+                test_x, test_y, Tile::WALL, distance_to_wall));
             currentObjY = test_y;
             currentObjX = test_x;
           }
@@ -145,8 +147,8 @@ void GameEngine::RayCastingProcess() {
             currentObjX != test_x && currentObjY != test_y) {
           isCurrentObj = currentObjX == test_x && currentObjY == test_y;
           if (!isCurrentObj) {
-            _texRequestQueue.push(
-                std::tuple<int, int, Tile>(test_x, test_y, Tile::ENTITY));
+            _texRequestQueue.push(std::tuple<int, int, Tile, float>(
+                test_x, test_y, Tile::ENTITY, distance_to_wall));
             currentObjY = test_y;
             currentObjX = test_x;
           }
@@ -156,45 +158,39 @@ void GameEngine::RayCastingProcess() {
     int ceiling = int((float)(_screenHeight / 2.0f) -
                       _screenHeight / ((float)distance_to_wall));
     int floor = _screenHeight - ceiling;
-
+    _texRequestQueue.setRayCompleted(true);
+    _texRequestQueue.waitForTextures();
     RenderScreen(ceiling, floor, x, distance_to_wall);
   }
 }
 
 void GameEngine::RenderScreen(int ceiling, int floor, int col,
                               float distance_to_wall) {
-  short shade;
+  wchar_t floorShade;
   int x = col;
+  std::wstring toRender =
+      _renderAssetManager.getNextCharColumn(ceiling - floor);
+  int toRenderIt = 0;
   for (int y = 0; y < _screenHeight; y++) {
     if (y < ceiling && y > floor) {
       screen[y * _screenWidth + x] = ' ';
     } else if (y > ceiling && y <= floor) {
-
-      if (distance_to_wall > 8.f)
-        screen[y * _screenWidth + x] = L' ';
-      else
-        screen[y * _screenWidth + x] = render_bg[y - ceiling];
-
-      if (entities.size() > 0) {
-        if (distance_to_wall > 8.f)
-          screen[y * _screenWidth + x] = L' ';
-        else
-          screen[y * _screenWidth + x] = render_fg[y - ceiling];
-      }
+      screen[y * _screenWidth + x] = toRender[toRenderIt];
+      toRenderIt++;
     } else if (y <= floor) {
       float b = 1.0f - (((float)y - _screenHeight / 2.0f) /
                         ((float)_screenHeight / 2.0f));
       if (b < 0.25)
-        shade = '#';
+        floorShade = '#';
       else if (b < 0.5)
-        shade = 'X';
+        floorShade = 'X';
       else if (b < 0.75)
-        shade = '.';
+        floorShade = '.';
       else if (b < 0.9)
-        shade = '-';
+        floorShade = '-';
       else
-        shade = ' ';
-      screen[y * _screenWidth + x] = shade;
+        floorShade = ' ';
+      screen[y * _screenWidth + x] = floorShade;
     }
   }
 }

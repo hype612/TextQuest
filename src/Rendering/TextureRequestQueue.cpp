@@ -1,47 +1,67 @@
 #include "../Headers/TextureRequestQueue.h"
-#include <shared_mutex>
+#include <mutex>
 
 TextureRequestQueue::TextureRequestQueue() {}
-TextureRequestQueue::~TextureRequestQueue() {
-  _mtx.unlock();
-} // just to make sure;
 
-void TextureRequestQueue::push(std::tuple<int, int, Tile> input) {
-  std::unique_lock<std::shared_mutex> lock(_mtx);
-  _texQueue.push_back(input);
+void TextureRequestQueue::push(std::tuple<int, int, Tile, float> input) {
+  {
+    std::unique_lock<std::shared_mutex> lock(_mtx);
+    _texQueue.push_back(input);
+  }
+  _cv.notify_one();
 }
 
-bool TextureRequestQueue::contains(const std::tuple<int, int> &position) const {
-
-  std::shared_lock<std::shared_mutex> lock(_mtx);
-  std::tuple<int, int, Tile> withEntity(std::get<0>(position),
-                                        std::get<1>(position), Tile::ENTITY);
-  std::tuple<int, int, Tile> withWall(std::get<0>(position),
-                                      std::get<1>(position), Tile::WALL);
-  if (std::find(_texQueue.begin(), _texQueue.end(), withEntity) !=
-      _texQueue.end())
-    return true;
-  if (std::find(_texQueue.begin(), _texQueue.end(), withWall) !=
-      _texQueue.end())
-    return true;
-  else
-    return false;
-}
-
-void TextureRequestQueue::pop() {
+std::tuple<int, int, Tile, float> TextureRequestQueue::pop() {
+  std::unique_lock<std::mutex> cvLock(_cvMtx);
+  _cv.wait(cvLock, [this] {
+    std::shared_lock<std::shared_mutex> lock(_mtx);
+    return !_texQueue.empty() || _rayCompleted;
+  });
   std::unique_lock<std::shared_mutex> lock(_mtx);
+  if (_texQueue.empty()) {
+    return std::tuple<int, int, Tile, float>(-1, -1, Tile::NONE, -1.f);
+  }
+  std::tuple<int, int, Tile, float> topEl = _texQueue.front();
   _texQueue.pop_front();
-}
-
-const std::tuple<int, int, Tile> &TextureRequestQueue::top() const {
-  std::shared_lock<std::shared_mutex> lock(_mtx);
-  return _texQueue.front();
+  return topEl;
 }
 
 bool TextureRequestQueue::isEmpty() const {
+  std::shared_lock<std::shared_mutex> lock(_mtx);
   if (_texQueue.empty()) {
     return true;
   } else {
     return false;
   }
+}
+
+void TextureRequestQueue::setRayCompleted(bool done) {
+  {
+    std::unique_lock<std::mutex> cvLock(_cvMtx);
+    _rayCompleted = done;
+  }
+  _cv.notify_all();
+}
+
+bool TextureRequestQueue::isRayCompleted() {
+  std::unique_lock<std::mutex> lock(_cvMtx);
+  return _rayCompleted;
+}
+
+void TextureRequestQueue::setTexturesReady(bool done) {
+  {
+    std::unique_lock<std::mutex> cvLock(_cvMtx);
+    _texturesReady = done;
+  }
+  _cv.notify_all();
+}
+
+bool TextureRequestQueue::areTexturesReady() {
+  std::unique_lock<std::mutex> lock(_cvMtx);
+  return _texturesReady;
+}
+
+void TextureRequestQueue::waitForTextures() {
+  std::unique_lock<std::mutex> lock(_cvMtx);
+  _cv.wait(lock, [this] { return _texturesReady; });
 }

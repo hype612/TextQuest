@@ -2,27 +2,48 @@
 
 void RenderAssetManager::TexturePreparator() {
   while (EngineState::GetInstance()->GameRunningf == true) {
-    if (_texRequestQ.isEmpty()) {
+    std::tuple<int, int, Tile, float> current = _texRequestQ.pop();
+
+    if (std::get<0>(current) == -1 && std::get<1>(current) == -1 &&
+        _texRequestQ.isRayCompleted()) {
+      _texRequestQ.setTexturesReady(true);
       continue;
     }
+
+    switch (std::get<2>(current)) {
+    case Tile::ENTITY:
+      prepareEntityTexture(current);
+      break;
+    case Tile::WALL:
+      prepareWallTexture(current);
+      break;
+    default:
+      continue;
+    }
+    _depthStack.push_back(std::tuple<int, int, Tile>(
+        std::get<0>(current), std::get<1>(current), std::get<2>(current)));
   }
+}
+
+void RenderAssetManager::prepareEntityTexture(
+    const std::tuple<int, int, Tile, float> &toPrepare) {
+  // TODO: make it available to have multiple entities on a
+  // single tile. For that, entity texture preparation needs to work with arrays
+  int id = _entityManager.getEntityIdAtPos(std::get<0>(toPrepare),
+                                           std::get<1>(toPrepare));
+  _entityManager.rescaleEntityTexture(id, std::get<3>(toPrepare));
+}
+
+void RenderAssetManager::prepareWallTexture(
+    const std::tuple<int, int, Tile, float> &toPrepare) {
+  _mapManager.rescaleWallTextureAt(
+      std::get<0>(toPrepare), std::get<1>(toPrepare), std::get<3>(toPrepare));
 }
 
 RenderAssetManager::RenderAssetManager(EntityManager &entityMan,
                                        MapManager &mapMan,
                                        TextureRequestQueue &texReqQ)
     : _entityManager(entityMan), _mapManager(mapMan), _texRequestQ(texReqQ) {}
-
-void RenderAssetManager::rescaleTextureOf(int pos_x, int pos_y,
-                                          float distance) {
-  if (_mapManager.isWall(pos_x, pos_y) == true)
-    _mapManager.rescaleWallTextureAt(pos_x, pos_y, distance);
-  int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
-  if (e_id != -1)
-    _entityManager.rescaleEntityTexture(e_id, distance);
-  else
-    std::cerr << "invalid position" << std::endl;
-}
 
 std::wstring RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
   if (_mapManager.isWall(pos_x, pos_y) == true) {
@@ -37,4 +58,34 @@ std::wstring RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
   }
 }
 
-std::wstring RenderAssetManager::getNextCharColumn() {}
+std::wstring RenderAssetManager::getNextCharColumn(int height) {
+  std::wstring col;
+  int x = std::get<0>(_depthStack.back());
+  int y = std::get<1>(_depthStack.back());
+  while (!_depthStack.empty()) {
+    std::wstring thisCol;
+    if (std::get<2>(_depthStack.back()) == Tile::WALL) {
+      col = _mapManager.getWallTexColumnAt(
+          x, y,
+          height); // wall is always on the back, so just write it on retCol
+      continue;
+    }
+    // in case it is not a wall, proceed with
+    // handling the next one as Entity
+    int id = _entityManager.getEntityIdAtPos(x, y);
+    thisCol = _entityManager.getNextEntityCharColumn(id, height);
+    bool edge_detected = false;
+    int i = 0;
+    for (char c : thisCol) {
+      if (c == L' ' && edge_detected == false) {
+        i++;
+        continue;
+      }
+      edge_detected = !edge_detected;
+      if (c != L' ')
+        col[i] = c;
+      i++;
+    }
+  }
+  return col;
+}

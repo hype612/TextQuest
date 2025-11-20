@@ -5,7 +5,10 @@
 #include "MapManager.h"
 #include "SceneManager.h"
 #include "TextureRequestQueue.h"
+#include "Tile.h"
+#include <deque>
 #include <string>
+#include <tuple>
 
 class RenderAssetManager {
 public:
@@ -13,11 +16,14 @@ public:
                      TextureRequestQueue &texReqQ);
 
   void TexturePreparator();
-  void rescaleTextureOf(int pos_x, int pos_y, float distance);
   std::wstring getTextureAt(int pos_x, int pos_y);
-  std::wstring getNextCharColumn();
+  std::wstring getNextCharColumn(int height);
 
 private:
+  void prepareEntityTexture(const std::tuple<int, int, Tile, float> &toPrepare);
+  void prepareWallTexture(const std::tuple<int, int, Tile, float> &toPrepare);
+
+  std::deque<std::tuple<int, int, Tile>> _depthStack;
   EntityManager &_entityManager;
   MapManager &_mapManager;
   TextureRequestQueue &_texRequestQ;

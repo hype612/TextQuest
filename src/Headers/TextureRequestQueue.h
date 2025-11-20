@@ -3,6 +3,7 @@
 
 #include "./Tile.h"
 #include <algorithm>
+#include <condition_variable>
 #include <deque>
 #include <mutex>
 #include <shared_mutex>
@@ -13,15 +14,24 @@ public:
   TextureRequestQueue();
   ~TextureRequestQueue();
 
-  void push(std::tuple<int, int, Tile> input);
-  bool contains(const std::tuple<int, int> &position) const;
-  void pop();
-  const std::tuple<int, int, Tile> &top() const;
+  void push(std::tuple<int, int, Tile, float> input);
+  std::tuple<int, int, Tile, float> pop();
   bool isEmpty() const;
 
+  void setRayCompleted(bool done);
+  bool isRayCompleted();
+
+  void setTexturesReady(bool done);
+  bool areTexturesReady();
+  void waitForTextures();
+
 private:
-  std::deque<std::tuple<int, int, Tile>> _texQueue;
+  std::deque<std::tuple<int, int, Tile, float>> _texQueue;
   mutable std::shared_mutex _mtx;
+  mutable std::mutex _cvMtx;
+  std::condition_variable_any _cv;
+  bool _rayCompleted = false;
+  bool _texturesReady = false;
 };
 
 #endif // TEXTUREREQUESTQUEUE_H
