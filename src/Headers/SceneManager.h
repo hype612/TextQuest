@@ -5,6 +5,7 @@
 #include "./EntityManager.h"
 #include "./MapManager.h"
 #include "./Tile.h"
+#include "./player.h"
 #include "Entity.h"
 #include <string>
 #include <tuple>
@@ -18,7 +19,6 @@ public:
       MapManager &mapMan); // pass a map and construct a scene from that
 
   void process();
-  // bool isOccupied(int x, int y) const;
   Tile isOccupied(int x, int y) const;
 
   // Map Related functions
@@ -33,11 +33,15 @@ public:
   void removeEntity(int entityId);
   void removeAllEntities();
 
+  // Player
+  void setPlayerX(int new_x);
+  void setPlayerY(int new_y);
+  Player &getPlayerRef();
+
 private:
-  // std::unordered_map<coord_t, int, coord_hash> _entityPositionMap; // stores
-  // entity._id, indexes with coordinates
   MapManager &_mapManager;
   EntityManager &_entityManager;
+  Player _player;
 };
 
 #endif // SCENEMANAGER_H

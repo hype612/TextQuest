@@ -1,8 +1,6 @@
 #include "../Headers/TextureRequestQueue.h"
 #include <mutex>
 
-TextureRequestQueue::TextureRequestQueue() {}
-
 void TextureRequestQueue::push(std::tuple<int, int, Tile, float> input) {
   {
     std::unique_lock<std::shared_mutex> lock(_mtx);

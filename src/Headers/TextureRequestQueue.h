@@ -11,8 +11,8 @@
 
 class TextureRequestQueue {
 public:
-  TextureRequestQueue();
-  ~TextureRequestQueue();
+  TextureRequestQueue() = default;
+  ~TextureRequestQueue() = default;
 
   void push(std::tuple<int, int, Tile, float> input);
   std::tuple<int, int, Tile, float> pop();

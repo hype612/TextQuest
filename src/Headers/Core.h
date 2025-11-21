@@ -38,7 +38,7 @@ private:
   EntityManager _entityManager;
   SceneManager _sceneManager;
 
-  Player _player;
+  Player &_player;
 
   // rendering vars and consts
   IRenderer *_renderer;

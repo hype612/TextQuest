@@ -1,7 +1,7 @@
 #include "../Headers/RenderAssetManager.h"
 
 void RenderAssetManager::TexturePreparator() {
-  while (EngineState::GetInstance()->GameRunningf == true) {
+  while (EngineState::GetInstance()->gameRunningf == true) {
     std::tuple<int, int, Tile, float> current = _texRequestQ.pop();
 
     if (std::get<0>(current) == -1 && std::get<1>(current) == -1 &&

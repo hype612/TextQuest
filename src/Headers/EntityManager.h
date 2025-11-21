@@ -3,6 +3,8 @@
 
 #include "../Headers/CoordHash.h"
 #include "../Headers/Entity.h"
+#include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -10,7 +12,8 @@ class EntityManager {
 public:
   EntityManager();
 
-  Entity &getEntityAtPos(int coord_x, int coord_y);
+  std::optional<std::reference_wrapper<Entity>> getEntityAtPos(int coord_x,
+                                                               int coord_y);
   int getEntityIdAtPos(int coord_x, int coord_y) const;
   void process();
 

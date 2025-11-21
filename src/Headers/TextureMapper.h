@@ -40,6 +40,7 @@ public:
   std::wstring getMask() const;
 
   TextureMapper(std::wstring initTexture);
+  TextureMapper() = default;
 
 private:
   std::wstring _textureMipMap = L"";
@@ -50,7 +51,6 @@ private:
 
   void GenerateTextureMask();
   std::wstring ScaleToHeight(int height, std::wstring column);
-  TextureMapper(); // default construction should not be allowed
 };
 
 #endif

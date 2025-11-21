@@ -23,12 +23,12 @@ public:
 #if (defined(_WIN32) || defined(_WIN64))
   RunningOS opSystem = RunningOS::WINDOWS;
 #endif
-  int screenHeight = -1;
-  int screenWidth = -1;
+  static int screenHeight;
+  static int screenWidth;
 
-  static SceneManager *_globalSceneManager;
-  static RenderAssetManager *_globalRenderAssetManager;
-  static bool GameRunningf;
+  static RenderAssetManager *globalRenderAssetManager;
+  static SceneManager *globalSceneManager;
+  static bool gameRunningf;
 
 private:
   EngineState() {}

@@ -1,50 +1,43 @@
 #include "../Headers/NCursesRenderer.h"
 
+#if (defined(LINUX) || defined(__linux__))
 
-
-#if (defined (LINUX) || defined (__linux__))
-
-NCursesRenderer::NCursesRenderer() {
-    Init();
-}
+NCursesRenderer::NCursesRenderer() { Init(); }
 
 void NCursesRenderer::Init() {
-    initscr();
-    cbreak();
-    keypad(stdscr, TRUE);
-    noecho();
-    _screenHeight = EngineState::GetInstance()->screenHeight;
-    _screenWidth = EngineState::GetInstance()->screenWidth;
+  initscr();
+  cbreak();
+  keypad(stdscr, TRUE);
+  noecho();
+  _screenHeight = EngineState::GetInstance()->screenHeight;
+  _screenWidth = EngineState::GetInstance()->screenWidth;
 }
 
-void NCursesRenderer::OverwriteBuffer(wchar_t* newBuffer) {
-    _screenBuffer = newBuffer;
-    //printw(*_screenBuffer);
-    addwstr(_screenBuffer);
+void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
+  _screenBuffer = newBuffer;
+  // printw(*_screenBuffer);
+  addwstr(_screenBuffer);
 }
 
-void NCursesRenderer::PrintBuffer() {
-    refresh();
-}
+void NCursesRenderer::PrintBuffer() { refresh(); }
 
 std::tuple<int, int> NCursesRenderer::GetScreenSize() {
-    return std::make_tuple(_screenWidth, _screenHeight);
+  return std::make_tuple(_screenWidth, _screenHeight);
 }
 
 void NCursesRenderer::SetScreenSize(int x, int y) {
-    _screenWidth  = x;
-    _screenHeight = y;
-    delete _screenBuffer;
-    _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
+  _screenWidth = x;
+  _screenHeight = y;
+  delete _screenBuffer;
+  _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
 
-    EngineState::GetInstance()->screenHeight = _screenHeight;
-    EngineState::GetInstance()->screenWidth = _screenWidth;
+  EngineState::GetInstance()->screenHeight = _screenHeight;
+  EngineState::GetInstance()->screenWidth = _screenWidth;
 }
 
-
 NCursesRenderer::~NCursesRenderer() {
-    endwin();
-    delete _screenBuffer;
+  endwin();
+  delete _screenBuffer;
 }
 
 #endif // OS check end

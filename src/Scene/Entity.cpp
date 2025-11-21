@@ -10,8 +10,14 @@ Entity::Entity(int x, int y, std::wstring *tex, int initHP,
       _state(initState) {}
 
 // =============
+// Process
+// =============
+void Entity::process() {}
+
+// =============
 // Getters
 // =============
+int Entity::ID() const { return _id; }
 float Entity::X() const { return _x; }
 float Entity::Y() const { return _y; }
 

@@ -1,10 +1,9 @@
 #include "../Headers/SceneManager.h"
 
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
-    : _entityManager(entityMan),
-      _mapManager(mapMan) // pass a map and construct a scene from that
-{
-  EngineState::_globalSceneManager = this;
+    : _entityManager(entityMan), _mapManager(mapMan),
+      _player(-1, -1, 0.f, 60, mapMan) {
+  EngineState::globalSceneManager = this;
 }
 
 void SceneManager::process() {
@@ -46,3 +45,8 @@ Tile SceneManager::isOccupied(int x, int y) const {
 
   return Tile::NONE;
 }
+
+// Player related functions
+void SceneManager::setPlayerX(int new_x) { _player.set_x(new_x); }
+void SceneManager::setPlayerY(int new_y) { _player.set_y(new_y); }
+Player &SceneManager::getPlayerRef() { return _player; }

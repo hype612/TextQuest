@@ -2,7 +2,13 @@
 
 GameEngine::GameEngine(int sc_width, int sc_height)
     : _sceneManager(_entityManager, _mapManager),
-      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
+      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue),
+      _player(_sceneManager.getPlayerRef()) {
+  EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
+  EngineState::GetInstance()->globalSceneManager = &_sceneManager;
+  _renderer->Init();
+  _renderer->SetScreenSize(sc_width, sc_height);
+  _max_thread_num = std::thread::hardware_concurrency();
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
   _inputHandler = new NCursesInputHandler(_player);
@@ -11,11 +17,6 @@ GameEngine::GameEngine(int sc_width, int sc_height)
   _renderer = new WindowsRenderer();
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
-  EngineState::GetInstance()->_globalRenderAssetManager = &_renderAssetManager;
-  EngineState::GetInstance()->_globalSceneManager = &_sceneManager;
-  _renderer->Init();
-  _renderer->SetScreenSize(sc_width, sc_height);
-  _max_thread_num = std::thread::hardware_concurrency();
 }
 
 bool GameEngine::initTestMap() {
@@ -70,14 +71,14 @@ bool GameEngine::initTestMap() {
 }
 
 void GameEngine::run_game() {
-  EngineState::GetInstance()->GameRunningf = true;
+  EngineState::GetInstance()->gameRunningf = true;
   _textureSetterT =
       std::thread(&RenderAssetManager::TexturePreparator, &_renderAssetManager);
   if (!_sceneManager.isMapAvailable())
     initTestMap();
-  while (EngineState::GetInstance()->GameRunningf == true) {
+  while (EngineState::GetInstance()->gameRunningf == true) {
     if (textureSetterT.joinable() &&
-        !EngineState::GetInstance()->GameRunningf) {
+        !EngineState::GetInstance()->gameRunningf) {
       textureSetterT.join();
     }
     auto tp1 = std::chrono::system_clock::now();

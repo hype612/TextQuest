@@ -14,7 +14,7 @@ public:
   // constructors
   Entity(int x, int y, std::wstring *tex, int initHP, EntityState initState);
 
-  virtual void process() = 0;
+  virtual void process();
 
   // getters
   int ID() const;

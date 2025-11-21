@@ -3,13 +3,13 @@
 EntityManager::EntityManager() {}
 
 // naive searches, later add something to speed it up if neccessary
-Entity &EntityManager::getEntityAtPos(int coord_x, int coord_y) {
-  for (Entity e : _entityContainer) {
-    if (e.coord_x == coord_x && e.coord_y == coord_y)
+std::optional<std::reference_wrapper<Entity>>
+EntityManager::getEntityAtPos(int coord_x, int coord_y) {
+  for (Entity &e : _entityContainer) {
+    if (e.X() == coord_x && e.Y() == coord_y)
       return e;
   }
-
-  return Entity();
+  return std::nullopt;
 }
 int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
   for (const Entity &e : _entityContainer) {
@@ -60,25 +60,25 @@ void EntityManager::changeEntityTextureScale(Entity &entity, float distance) {
 }
 
 std::wstring EntityManager::getCurrentEntityTexture(int EntityId) {
-  _entityContainer[EntityId].getTexture();
+  return _entityContainer[EntityId].getTexture();
 }
 
 std::wstring EntityManager::getCurrentEntityTexture(const Entity &entity) {
-  entity.getTexture();
+  return entity.getTexture();
 }
 
 std::wstring EntityManager::getCurrentEntityTexMask(int EntityId) {
-  _entityContainer[EntityId].getTexMask();
+  return _entityContainer[EntityId].getTexMask();
 }
 
 std::wstring EntityManager::getCurrentEntityTexMask(const Entity &entity) {
-  entity.getTexMask();
+  return entity.getTexMask();
 }
 
 std::wstring EntityManager::getNextEntityCharColumn(int EntityId, int height) {
-  _entityContainer[EntityId].getNextTexColumn(height);
+  return _entityContainer[EntityId].getNextTexColumn(height);
 }
 
 std::wstring EntityManager::getEntityMaskColumn(int EntityId, int height) {
-  _entityContainer[EntityId].getMaskColumn(height);
+  return _entityContainer[EntityId].getMaskColumn(height);
 }

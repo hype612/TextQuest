@@ -39,7 +39,7 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
                     delta);
   }
   if (keyPressed == 'x' || keyPressed == 'X') {
-    EngineState::GetInstance()->GameRunningf = false;
+    EngineState::GetInstance()->gameRunningf = false;
   }
 }
 
