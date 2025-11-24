@@ -67,11 +67,12 @@ std::wstring EntityManager::getCurrentEntityTexture(const Entity &entity) {
   return entity.getTexture();
 }
 
-std::wstring EntityManager::getCurrentEntityTexMask(int EntityId) {
+const std::vector<int> &EntityManager::getCurrentEntityTexMask(int EntityId) {
   return _entityContainer[EntityId].getTexMask();
 }
 
-std::wstring EntityManager::getCurrentEntityTexMask(const Entity &entity) {
+const std::vector<int> &
+EntityManager::getCurrentEntityTexMask(const Entity &entity) {
   return entity.getTexMask();
 }
 
@@ -79,6 +80,6 @@ std::wstring EntityManager::getNextEntityCharColumn(int EntityId, int height) {
   return _entityContainer[EntityId].getNextTexColumn(height);
 }
 
-std::wstring EntityManager::getEntityMaskColumn(int EntityId, int height) {
+std::vector<int> EntityManager::getEntityMaskColumn(int EntityId, int height) {
   return _entityContainer[EntityId].getMaskColumn(height);
 }

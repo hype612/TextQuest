@@ -39,8 +39,8 @@ public:
   Player &getPlayerRef();
 
 private:
-  MapManager &_mapManager;
   EntityManager &_entityManager;
+  MapManager &_mapManager;
   Player _player;
 };
 

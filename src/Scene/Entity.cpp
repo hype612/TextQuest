@@ -34,9 +34,11 @@ std::wstring Entity::getNextTexColumn(int height) {
   return _texMapper.getNextTexColumn(height);
 }
 
-std::wstring Entity::getTexMask() const { return _texMapper.getMask(); }
+const std::vector<int> &Entity::getTexMask() const {
+  return _texMapper.getMask();
+}
 
-std::wstring Entity::getMaskColumn(int height) const {
+std::vector<int> Entity::getMaskColumn(int height) const {
   return _texMapper.getMaskColumn(height);
 }
 

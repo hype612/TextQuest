@@ -3,7 +3,7 @@
 MapManager::MapManager() {} // so far nothing needs to be inited
 
 MapManager::MapManager(const std::wstring &map, int mapWidth, int mapHeight)
-    : _map(map), _mapHeight(mapHeight), _mapWidth(mapWidth) {}
+    : _map(map), _mapWidth(mapWidth), _mapHeight(mapHeight) {}
 
 void MapManager::uploadNewMap(const std::wstring &map, int newMapWidth,
                               int newMapHeight) {

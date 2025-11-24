@@ -9,6 +9,7 @@ class IInputHandler {
 public:
   virtual void Init() = 0;
   virtual void ReceiveMovementInput(float delta) = 0;
+  virtual ~IInputHandler() = default;
 
 protected:
   IInputHandler(Player &player) : _player(player) {}

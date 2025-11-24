@@ -21,15 +21,17 @@ float TextureMapper::estimateWidth(float distance) {
 // shading time, the most bright pixels wont be shaded
 // if the shading is dependant of the mask
 void TextureMapper::GenerateTextureMask() {
+  _textureMask.clear();
   int tx_width = _textureMipMap.find(L'\n');
   int tx_height = tx_width;
-  std::vector<int> ret(tx_height, tx_width);
   for (int i = 0; i < tx_height; i++) {
     for (int j = 0; j < tx_width; j++) {
       if (_textureMipMap[i * tx_width + i + j] == ' ')
-        ret[i, j] = 0;
+        _textureMask.push_back(0);
+      else if (_textureMipMap[i * tx_width + i + j] == '\n')
+        _textureMask.push_back(-1);
       else
-        ret[i, j] = 1;
+        _textureMask.push_back(1);
     }
   }
 }
@@ -46,18 +48,34 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
   _texHeight = _texWidth;
   _textureMipMap = *tex;
   // HORIZONTAL SCALE
-  if (_texWidth < width) {
-    nxInterpolationUpscale(width);
-  }
-  if (_texWidth > width) {
-    nxInterpolationDownscale(width);
-  }
-  // VERTICAL SCALE
-  if (_texHeight < height) {
-    nyInterpolationUpscale(height);
-  }
-  if (_texHeight > height) {
-    nyInterpolationDownscale(height);
+  if (mode == "repeat") {
+    if (_texWidth < width) {
+      repeatingHorizontalUpscale(height, width);
+    }
+    if (_texWidth > width) {
+      repeatingHorizontalDownscale(width);
+    }
+    // VERTICAL SCALE
+    if (_texHeight < height) {
+      repeatingVerticalUpscale(height, width);
+    }
+    if (_texHeight > height) {
+      repeatingVerticalDownscale(height, width);
+    }
+  } else if (mode == "interpolating") {
+    if (_texWidth < width) {
+      nxInterpolationUpscale(width);
+    }
+    if (_texWidth > width) {
+      nxInterpolationDownscale(width);
+    }
+    // VERTICAL SCALE
+    if (_texHeight < height) {
+      nyInterpolationUpscale(height);
+    }
+    if (_texHeight > height) {
+      nyInterpolationDownscale(height);
+    }
   }
   GenerateTextureMask();
 }
@@ -66,7 +84,7 @@ void TextureMapper::rescaleCurrentTexture(float distance) {
   setCurrentTexture(distance, "interpolating", &_textureMipMap);
 }
 
-void TextureMapper::repeatingHorizontalDownscale(int height, int width) {
+void TextureMapper::repeatingHorizontalDownscale(int width) {
   std::wstring tex = L"";
   tex.reserve(_texHeight * (width + 1));
   if (_texWidth > width) {
@@ -134,26 +152,26 @@ std::wstring TextureMapper::getNextTexColumn(int height) {
   return ret;
 }
 
-std::wstring TextureMapper::getMaskColumn(int height) const {
+std::vector<int> TextureMapper::getMaskColumn(int height) const {
   if (_texHeight < 1 || _texWidth < 1) {
-    return std::wstring(L"");
+    return std::vector<int>(0);
   }
-  std::wstring ret = L"";
+  std::vector<int> ret;
   ret.reserve(height);
 
   for (int i = 0; i < _texHeight; i++) {
     ret.push_back(_textureMask[(i % _texHeight) * _texWidth + _stepper]);
   }
   int j = 0;
-  while (ret.length() < height) {
+  while (ret.size() < height) {
     ret.push_back(_textureMask[(j % _texHeight) * _texWidth + _stepper]);
     j++;
   }
   return ret;
 }
 
-std::wstring TextureMapper::getTexture() const { return _textureMipMap; }
-std::wstring TextureMapper::getMask() const { return _textureMask; }
+const std::wstring &TextureMapper::getTexture() const { return _textureMipMap; }
+const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 
 // =======================
 //  interpolation scaling

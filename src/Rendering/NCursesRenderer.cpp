@@ -11,9 +11,15 @@ void NCursesRenderer::Init() {
   noecho();
   _screenHeight = EngineState::GetInstance()->screenHeight;
   _screenWidth = EngineState::GetInstance()->screenWidth;
+  _screenBuffer = nullptr;
 }
 
 void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
+  if (_screenBuffer == nullptr) {
+    std::cerr << "ERROR: no screenbuffer has been initialized yet. Please call "
+                 "SetScreenSize before calling OverWriteBuffer"
+              << std::endl;
+  }
   _screenBuffer = newBuffer;
   // printw(*_screenBuffer);
   addwstr(_screenBuffer);
@@ -37,7 +43,7 @@ void NCursesRenderer::SetScreenSize(int x, int y) {
 
 NCursesRenderer::~NCursesRenderer() {
   endwin();
-  delete _screenBuffer;
+  delete[] _screenBuffer;
 }
 
 #endif // OS check end

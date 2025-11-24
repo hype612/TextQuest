@@ -4,6 +4,7 @@
 #if (defined(LINUX) || defined(__linux__))
 
 #include "./IRenderer.h"
+#include <iostream>
 #include <ncurses.h>
 
 class NCursesRenderer : public IRenderer {

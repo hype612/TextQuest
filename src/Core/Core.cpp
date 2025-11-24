@@ -2,12 +2,10 @@
 
 GameEngine::GameEngine(int sc_width, int sc_height)
     : _sceneManager(_entityManager, _mapManager),
-      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue),
-      _player(_sceneManager.getPlayerRef()) {
+      _player(_sceneManager.getPlayerRef()),
+      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
-  _renderer->Init();
-  _renderer->SetScreenSize(sc_width, sc_height);
   _max_thread_num = std::thread::hardware_concurrency();
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
@@ -17,6 +15,8 @@ GameEngine::GameEngine(int sc_width, int sc_height)
   _renderer = new WindowsRenderer();
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
+  _renderer->Init();
+  _renderer->SetScreenSize(sc_width, sc_height);
 }
 
 bool GameEngine::initTestMap() {
@@ -102,7 +102,6 @@ void GameEngine::run_game() {
 
 void GameEngine::RayCastingProcess() {
   bool hitwall;
-  bool isedge;
 
   int currentObjX = -1;
   int currentObjY = -1;
@@ -116,7 +115,6 @@ void GameEngine::RayCastingProcess() {
                       ((float)x / (float)_screenWidth) * _player.get_fov();
     float distance_to_wall = 0.0f;
     hitwall = false;
-    isedge = false;
 
     float eye_x = sinf(ray_angle);
     float eye_y = cosf(ray_angle);
@@ -161,12 +159,11 @@ void GameEngine::RayCastingProcess() {
     int floor = _screenHeight - ceiling;
     _texRequestQueue.setRayCompleted(true);
     _texRequestQueue.waitForTextures();
-    RenderScreen(ceiling, floor, x, distance_to_wall);
+    RenderScreen(ceiling, floor, x);
   }
 }
 
-void GameEngine::RenderScreen(int ceiling, int floor, int col,
-                              float distance_to_wall) {
+void GameEngine::RenderScreen(int ceiling, int floor, int col) {
   wchar_t floorShade;
   int x = col;
   std::wstring toRender =
@@ -194,4 +191,9 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col,
       screen[y * _screenWidth + x] = floorShade;
     }
   }
+}
+
+GameEngine::~GameEngine() {
+  delete _renderer;
+  delete _inputHandler;
 }

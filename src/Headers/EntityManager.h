@@ -28,11 +28,11 @@ public:
   void changeEntityTextureScale(Entity &entity, float distance);
   std::wstring getCurrentEntityTexture(int EntityId);
   std::wstring getCurrentEntityTexture(const Entity &entity);
-  std::wstring getCurrentEntityTexMask(int EntityId);
-  std::wstring getCurrentEntityTexMask(const Entity &entity);
+  const std::vector<int> &getCurrentEntityTexMask(int EntityId);
+  const std::vector<int> &getCurrentEntityTexMask(const Entity &entity);
 
   std::wstring getNextEntityCharColumn(int EntityId, int height);
-  std::wstring getEntityMaskColumn(int EntityId, int height);
+  std::vector<int> getEntityMaskColumn(int EntityId, int height);
 
 private:
   std::vector<Entity> _entityContainer;

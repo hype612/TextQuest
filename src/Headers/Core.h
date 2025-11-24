@@ -30,7 +30,8 @@ public:
   void SetScaledTexture(std::wstring &source, std::wstring &into,
                         float distance);
   void RayCastingProcess();
-  void RenderScreen(int ceiling, int floor, int col, float distance_to_wall);
+  void RenderScreen(int ceiling, int floor, int col);
+  ~GameEngine();
 
 private:
   // scene
