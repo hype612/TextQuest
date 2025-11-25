@@ -1,4 +1,5 @@
 #include "../Headers/Core.h"
+#include <ncurses.h>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
     : _sceneManager(_entityManager, _mapManager),
@@ -17,6 +18,27 @@ GameEngine::GameEngine(int sc_width, int sc_height)
 #endif
   _renderer->Init();
   _renderer->SetScreenSize(sc_width, sc_height);
+}
+
+GameEngine::GameEngine()
+    : _sceneManager(_entityManager, _mapManager),
+      _player(_sceneManager.getPlayerRef()),
+      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
+  EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
+  EngineState::GetInstance()->globalSceneManager = &_sceneManager;
+  _max_thread_num = std::thread::hardware_concurrency();
+#if (defined(LINUX) || defined(__linux__))
+  _renderer = new NCursesRenderer();
+  _inputHandler = new NCursesInputHandler(_player);
+#endif
+#if (defined(_WIN32) || defined(_WIN64))
+  _renderer = new WindowsRenderer();
+  _inputHandler = new WindowsInputHanlder(_player);
+#endif
+  _renderer->Init();
+  int row, col;
+  getmaxyx(stdscr, row, col);
+  _renderer->SetScreenSize(col, row);
 }
 
 bool GameEngine::initTestMap() {

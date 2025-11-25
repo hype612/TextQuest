@@ -11,7 +11,6 @@
 #include "NCursesRenderer.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
-#include "TextureLoader.h"
 #include "TextureMapper.h"
 #include "TextureRequestQueue.h"
 #include "WindowsInputHandler.h"
@@ -26,6 +25,7 @@
 class GameEngine {
 public:
   GameEngine(int sc_width = 240, int sc_height = 80);
+  GameEngine();
   void run_game();
   void SetScaledTexture(std::wstring &source, std::wstring &into,
                         float distance);

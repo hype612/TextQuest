@@ -21,7 +21,6 @@ void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
               << std::endl;
   }
   _screenBuffer = newBuffer;
-  // printw(*_screenBuffer);
   addwstr(_screenBuffer);
 }
 
@@ -34,7 +33,7 @@ std::tuple<int, int> NCursesRenderer::GetScreenSize() {
 void NCursesRenderer::SetScreenSize(int x, int y) {
   _screenWidth = x;
   _screenHeight = y;
-  delete _screenBuffer;
+  delete[] _screenBuffer;
   _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
 
   EngineState::GetInstance()->screenHeight = _screenHeight;
