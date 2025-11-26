@@ -24,7 +24,7 @@
 
 class GameEngine {
 public:
-  GameEngine(int sc_width = 240, int sc_height = 80);
+  GameEngine(int sc_width, int sc_height);
   GameEngine();
   void run_game();
   void SetScaledTexture(std::wstring &source, std::wstring &into,
@@ -32,6 +32,11 @@ public:
   void RayCastingProcess();
   void RenderScreen(int ceiling, int floor, int col);
   ~GameEngine();
+
+  GameEngine(const GameEngine &g) = delete;
+  GameEngine &operator=(const GameEngine &) = delete;
+  GameEngine(GameEngine &) = delete;
+  GameEngine &operator=(GameEngine &&) = delete;
 
 private:
   // scene
@@ -56,7 +61,6 @@ private:
   std::thread textureSetterT;
 
   // dont want anyone to call this
-  GameEngine(GameEngine &g);
   // fallback map for testing
   bool initTestMap(); // for now initializes a static test map
 };

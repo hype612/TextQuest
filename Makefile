@@ -21,7 +21,7 @@ all: $(TARGET)
 
 # linking
 $(TARGET): $(OBJS)
-	$(CXX) $(OBJS) -o $@ -lncurses $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ -lncursesw $(LDFLAGS)
 
 # compiling
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp

@@ -26,9 +26,11 @@ void TextureMapper::GenerateTextureMask() {
   int tx_height = tx_width;
   for (int i = 0; i < tx_height; i++) {
     for (int j = 0; j < tx_width; j++) {
-      if (_textureMipMap[i * tx_width + i + j] == ' ')
+      if (i * (tx_width + 1) + j > _textureMipMap.size())
+        break;
+      if (_textureMipMap[i * (tx_width + 1) + j] == ' ')
         _textureMask.push_back(0);
-      else if (_textureMipMap[i * tx_width + i + j] == '\n')
+      else if (_textureMipMap[i * (tx_width + 1) + j] == '\n')
         _textureMask.push_back(-1);
       else
         _textureMask.push_back(1);

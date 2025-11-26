@@ -30,7 +30,7 @@ public:
   int getMapHeight() const;
   int getMapWidth() const;
   bool isMapAvailable() const;
-  void uploadTextureForWall(wchar_t mapChar, std::wstring &wallTex);
+  void uploadTextureForWall(const wchar_t &mapChar, std::wstring &wallTex);
 
   // Entity Related functions
   void AddEntity(Entity &entity);

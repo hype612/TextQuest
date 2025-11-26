@@ -24,7 +24,7 @@ bool SceneManager::isMapAvailable() const {
   return _mapManager.isMapAvailable();
 }
 
-void SceneManager::uploadTextureForWall(wchar_t mapChar,
+void SceneManager::uploadTextureForWall(const wchar_t &mapChar,
                                         std::wstring &wallTex) {
   _mapManager.uploadWallTextureFor(mapChar, wallTex);
 }

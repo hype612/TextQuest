@@ -32,7 +32,8 @@ bool MapManager::isMapAvailable() const {
   }
 }
 
-void MapManager::uploadWallTextureFor(wchar_t mapChar, std::wstring texture) {
+void MapManager::uploadWallTextureFor(const wchar_t &mapChar,
+                                      std::wstring texture) {
   _wallTexMappers[mapChar] = TextureMapper(texture);
 }
 
