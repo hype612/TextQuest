@@ -11,7 +11,7 @@ public:
   MapManager(const std::wstring &map, int map_width, int map_height);
 
   void uploadNewMap(const std::wstring &map, int newMapWidth, int newMapHeight);
-  std::wstring GetMap();
+  const std::wstring &GetMap() const;
   int mapHeight() const;
   int mapWidth() const;
   bool isWall(int test_x, int test_y) const;
@@ -23,6 +23,7 @@ public:
   std::wstring getWallTexColumnAt(int x, int y, int height);
 
 private:
+  bool isOutOfBounds(int test_x, int test_y) const;
   std::wstring _map;
   std::unordered_map<wchar_t, TextureMapper> _wallTexMappers;
   int _mapWidth;

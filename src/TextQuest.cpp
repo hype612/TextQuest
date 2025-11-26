@@ -6,7 +6,7 @@
 
 int main() {
   GameEngine ge;
-  SceneManager sceneMan = *(EngineState::GetInstance()->globalSceneManager);
+  SceneManager &sceneMan = *(EngineState::GetInstance()->globalSceneManager);
 
   std::wstring map = L"";
   map += L"##################";
@@ -24,7 +24,7 @@ int main() {
   sceneMan.uploadTextureForWall(L'#', texs["wall"]);
 
   Player &p = sceneMan.getPlayerRef();
-  p.set_x(1);
-  p.set_y(1);
+  p.set_x(6.f);
+  p.set_y(6.f);
   ge.run_game();
 }

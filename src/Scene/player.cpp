@@ -11,27 +11,23 @@ void Player::set_y(float new_y) { m_y_pos = new_y; }
 
 void Player::addto_x(float rval_x) {
   m_x_pos += rval_x;
-  if (_mapManager.GetMap()[(int)m_y_pos * _mapManager.mapWidth() +
-                           (int)m_x_pos] == '#')
+  if (_mapManager.isWall((int)m_y_pos, (int)m_x_pos))
     m_x_pos -= rval_x;
 }
 void Player::subtractf_x(float rval_x) {
   m_x_pos -= rval_x;
-  if (_mapManager.GetMap()[(int)m_y_pos * _mapManager.mapWidth() +
-                           (int)m_x_pos] == '#')
+  if (_mapManager.isWall((int)m_y_pos, (int)m_x_pos))
     m_x_pos += rval_x;
 }
 
 void Player::addto_y(float rval_y) {
   m_y_pos += rval_y;
-  if (_mapManager.GetMap()[(int)m_y_pos * _mapManager.mapWidth() +
-                           (int)m_x_pos] == '#')
+  if (_mapManager.isWall((int)m_y_pos, (int)m_x_pos))
     m_y_pos -= rval_y;
 }
 void Player::subtractf_y(float rval_y) {
   m_y_pos -= rval_y;
-  if (_mapManager.GetMap()[(int)m_y_pos * _mapManager.mapWidth() +
-                           (int)m_x_pos] == '#')
+  if (_mapManager.isWall((int)m_y_pos, (int)m_x_pos))
     m_y_pos += rval_y;
 }
 

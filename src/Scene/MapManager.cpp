@@ -12,12 +12,16 @@ void MapManager::uploadNewMap(const std::wstring &map, int newMapWidth,
   _mapHeight = newMapHeight;
 }
 
-std::wstring MapManager::GetMap() { return _map; }
+const std::wstring &MapManager::GetMap() const { return _map; }
 
 int MapManager::mapHeight() const { return _mapHeight; }
 int MapManager::mapWidth() const { return _mapWidth; }
 
 bool MapManager::isWall(int test_x, int test_y) const {
+  if (isOutOfBounds(test_x, test_y)) {
+    return false;
+  }
+
   if (_map[test_y * _mapWidth + test_x] == '#')
     return true;
   else
@@ -38,16 +42,37 @@ void MapManager::uploadWallTextureFor(const wchar_t &mapChar,
 }
 
 void MapManager::rescaleWallTextureAt(int x, int y, float distance) {
+  if (isOutOfBounds(x, y)) {
+    return;
+  }
   wchar_t mapChar = _map[y * _mapWidth + x];
   _wallTexMappers[mapChar].rescaleCurrentTexture(distance);
 }
 
 std::wstring MapManager::getWallTextureAt(int x, int y) {
+  if (isOutOfBounds(x, y)) {
+    return std::wstring();
+  }
   wchar_t mapChar = _map[y * _mapWidth + x];
   return _wallTexMappers[mapChar].getTexture();
 }
 
 std::wstring MapManager::getWallTexColumnAt(int x, int y, int height) {
+  if (isOutOfBounds(x, y)) {
+    return std::wstring();
+  }
   wchar_t mapChar = _map[y * _mapWidth + x];
   return _wallTexMappers[mapChar].getNextTexColumn(height);
+}
+
+bool MapManager::isOutOfBounds(int test_x, int test_y) const {
+  if (test_x < 0 || test_x >= _mapWidth || test_y < 0 || test_y >= _mapHeight) {
+    std::cerr << "ERROR: MapManager: given coordinates are out of bounds"
+              << std::endl;
+    std::cerr << "the following were provided: test_x = " << test_x
+              << " , test_y = " << test_y << std::endl;
+    return false;
+  } else {
+    return true;
+  }
 }
