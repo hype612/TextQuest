@@ -42,9 +42,7 @@ void Player::addto_angle(float rval_a) { m_angle += rval_a; }
 
 void Player::subtractf_angle(float rval_a) { m_angle -= rval_a; }
 
-/*
-float Player::get_x() { return m_x_pos; }
-float Player::get_y() { return m_y_pos; }
-float Player::get_angle() { return m_angle; }
-float Player::get_fov() { return m_fov; }
-*/
+float Player::get_x() const { return m_x_pos; }
+float Player::get_y() const { return m_y_pos; }
+float Player::get_angle() const { return m_angle; }
+float Player::get_fov() const { return m_fov; }

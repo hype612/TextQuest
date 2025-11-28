@@ -23,10 +23,10 @@ public:
   void addto_angle(float rval_a);
   void subtractf_angle(float rval_a);
 
-  float get_x() const { return m_x_pos; }
-  float get_y() const { return m_y_pos; }
-  float get_angle() const { return m_angle; }
-  float get_fov() const { return m_fov; }
+  float get_x() const;
+  float get_y() const;
+  float get_angle() const;
+  float get_fov() const;
 
 private:
   float m_x_pos;

@@ -94,6 +94,7 @@ bool GameEngine::initTestMap() {
 
 void GameEngine::run_game() {
   EngineState::GetInstance()->gameRunningf = true;
+  screen = new wchar_t[_screenWidth * _screenHeight];
   _textureSetterT =
       std::thread(&RenderAssetManager::TexturePreparator, &_renderAssetManager);
   if (!_sceneManager.isMapAvailable())
@@ -118,6 +119,7 @@ void GameEngine::run_game() {
 
     screen[_screenHeight * _screenWidth - 1] = '\0';
     _renderer->OverwriteBuffer(screen);
+    _renderer->PrintDebugInfo(_player, f_elapsed_time);
     _renderer->PrintBuffer();
   }
 }
@@ -189,15 +191,16 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
   wchar_t floorShade;
   int x = col;
   std::wstring toRender =
-      _renderAssetManager.getNextCharColumn(ceiling - floor);
+      _renderAssetManager.getNextCharColumn(ceiling - floor + 1);
   int toRenderIt = 0;
   for (int y = 0; y < _screenHeight; y++) {
-    if (y < ceiling && y > floor) {
+    if (y < ceiling) {
       screen[y * _screenWidth + x] = ' ';
-    } else if (y > ceiling && y <= floor) {
+    } else if (y >= ceiling && y <= floor) {
       screen[y * _screenWidth + x] = toRender[toRenderIt];
-      toRenderIt++;
-    } else if (y <= floor) {
+      if (toRenderIt < toRender.size())
+        toRenderIt++;
+    } else {
       float b = 1.0f - (((float)y - _screenHeight / 2.0f) /
                         ((float)_screenHeight / 2.0f));
       if (b < 0.25)
@@ -218,4 +221,5 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
 GameEngine::~GameEngine() {
   delete _renderer;
   delete _inputHandler;
+  delete[] screen;
 }

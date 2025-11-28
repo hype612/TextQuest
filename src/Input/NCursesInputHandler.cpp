@@ -11,34 +11,41 @@ void NCursesInputHandler::Init() {
 }
 
 void NCursesInputHandler::ReceiveMovementInput(float delta) {
-  int keyPressed = getch();
-  if (keyPressed == 'a' || keyPressed == 'A') {
+  std::unordered_set<int> keysPressed;
+
+  int key = getch();
+  while (key != ERR) {
+    keysPressed.insert(key);
+    key = getch();
+  }
+
+  if (keysPressed.count('a') || keysPressed.count('A')) {
     _player.subtractf_angle(1.2f * delta);
   }
-  if (keyPressed == 'd' || keyPressed == 'D') {
+  if (keysPressed.count('d') || keysPressed.count('D')) {
     _player.addto_angle(1.2f * delta);
   }
-  if (keyPressed == 'w' || keyPressed == 'W') {
+  if (keysPressed.count('w') || keysPressed.count('W')) {
     _player.addto_x(sinf(_player.get_angle()) * 5.0f * delta);
     _player.addto_y(cosf(_player.get_angle()) * 5.0f * delta);
   }
-  if (keyPressed == 's' || keyPressed == 'S') {
+  if (keysPressed.count('s') || keysPressed.count('S')) {
     _player.subtractf_x(sinf(_player.get_angle()) * 5.0f * delta);
     _player.subtractf_y(cosf(_player.get_angle()) * 5.0f * delta);
   }
-  if (keyPressed == 'q' || keyPressed == 'Q') {
+  if (keysPressed.count('q') || keysPressed.count('Q')) {
     _player.addto_x(sinf(_player.get_angle() - (3.14159f / 2.0f)) * 5.0f *
                     delta);
     _player.addto_y(cosf(_player.get_angle() - (3.14159f / 2.0f)) * 5.0f *
                     delta);
   }
-  if (keyPressed == 'e' || keyPressed == 'E') {
+  if (keysPressed.count('e') || keysPressed.count('E')) {
     _player.addto_x(sinf(_player.get_angle() + (3.14159f / 2.0f)) * 5.0f *
                     delta);
     _player.addto_y(cosf(_player.get_angle() + (3.14159f / 2.0f)) * 5.0f *
                     delta);
   }
-  if (keyPressed == 'x' || keyPressed == 'X') {
+  if (keysPressed.count('x') || keysPressed.count('X')) {
     EngineState::GetInstance()->gameRunningf = false;
   }
 }

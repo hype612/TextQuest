@@ -60,32 +60,36 @@ std::wstring RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
 
 std::wstring RenderAssetManager::getNextCharColumn(int height) {
   std::wstring col;
-  int x = std::get<0>(_depthStack.back());
-  int y = std::get<1>(_depthStack.back());
   while (!_depthStack.empty()) {
     std::wstring thisCol;
+    int x = std::get<0>(_depthStack.back());
+    int y = std::get<1>(_depthStack.back());
     if (std::get<2>(_depthStack.back()) == Tile::WALL) {
-      col = _mapManager.getWallTexColumnAt(
-          x, y,
-          height); // wall is always on the back, so just write it on retCol
+      col.append(_mapManager.getWallTexColumnAt(x, y, height));
       continue;
     }
-    // in case it is not a wall, proceed with
-    // handling the next one as Entity
     int id = _entityManager.getEntityIdAtPos(x, y);
+    if (col.empty()) {
+      col.append(_entityManager.getNextEntityCharColumn(id, height));
+      continue;
+    }
     thisCol = _entityManager.getNextEntityCharColumn(id, height);
     bool edge_detected = false;
-    int i = 0;
-    for (char c : thisCol) {
+    int i = col.size();
+    for (auto it = thisCol.rbegin(); it != thisCol.rend(); ++it) {
+      if (i < 0) {
+        break;
+      }
+      auto &c = *it;
       if (c == L' ' && edge_detected == false) {
-        i++;
         continue;
       }
       edge_detected = !edge_detected;
       if (c != L' ')
         col[i] = c;
-      i++;
+      i--;
     }
+    _depthStack.pop_back();
   }
   return col;
 }

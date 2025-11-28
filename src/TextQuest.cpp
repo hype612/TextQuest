@@ -24,7 +24,7 @@ int main() {
   sceneMan.uploadTextureForWall(L'#', texs["wall"]);
 
   Player &p = sceneMan.getPlayerRef();
-  p.set_x(6.f);
-  p.set_y(6.f);
+  p.set_x(5.f);
+  p.set_y(5.f);
   ge.run_game();
 }

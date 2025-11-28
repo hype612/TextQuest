@@ -1,4 +1,5 @@
 #include "../Headers/NCursesRenderer.h"
+#include <ncurses.h>
 
 #if (defined(LINUX) || defined(__linux__))
 
@@ -9,6 +10,8 @@ void NCursesRenderer::Init() {
   cbreak();
   keypad(stdscr, TRUE);
   noecho();
+  nodelay(stdscr, TRUE);
+  curs_set(0);
   _screenHeight = EngineState::GetInstance()->screenHeight;
   _screenWidth = EngineState::GetInstance()->screenWidth;
   _screenBuffer = nullptr;
@@ -19,12 +22,37 @@ void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
     std::cerr << "ERROR: no screenbuffer has been initialized yet. Please call "
                  "SetScreenSize before calling OverWriteBuffer"
               << std::endl;
+    return;
+  }
+  if (newBuffer == nullptr) {
+    std::cerr << "OverWriteBuffer: function was called with nullptr"
+              << std::endl;
+    return;
   }
   _screenBuffer = newBuffer;
-  addwstr(_screenBuffer);
+
+  if (!_screenBuffer)
+    return;
+
+  for (int y = 0; y < _screenHeight; y++) {
+    move(y, 0);
+    for (int x = 0; x < _screenWidth; x++) {
+      wchar_t c = _screenBuffer[y * _screenWidth + x];
+      addnwstr(&c, 1);
+    }
+  }
 }
 
 void NCursesRenderer::PrintBuffer() { refresh(); }
+
+void NCursesRenderer::PrintDebugInfo(const Player &player, float delta) {
+  int debugY = 0;
+  int debugX = 0;
+  mvprintw(debugY, debugX, "Player x: %.2f y: %.2f angle: %.2f", player.get_x(),
+           player.get_y(), player.get_angle());
+  debugY = 1;
+  mvprintw(debugY, debugX, "fps: %.2f", 1.f / delta / 1000);
+}
 
 std::tuple<int, int> NCursesRenderer::GetScreenSize() {
   return std::make_tuple(_screenWidth, _screenHeight);
@@ -33,7 +61,10 @@ std::tuple<int, int> NCursesRenderer::GetScreenSize() {
 void NCursesRenderer::SetScreenSize(int x, int y) {
   _screenWidth = x;
   _screenHeight = y;
-  delete[] _screenBuffer;
+  if (_screenBuffer) {
+    delete[] _screenBuffer;
+    _screenBuffer = nullptr;
+  }
   _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
 
   EngineState::GetInstance()->screenHeight = _screenHeight;
