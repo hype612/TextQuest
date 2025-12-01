@@ -21,9 +21,9 @@ public:
   void rescaleWallTextureAt(int x, int y, float distance);
   std::wstring getWallTextureAt(int x, int y);
   std::wstring getWallTexColumnAt(int x, int y, int height);
+  bool isOutOfBounds(int test_x, int test_y) const;
 
 private:
-  bool isOutOfBounds(int test_x, int test_y) const;
   std::wstring _map;
   std::unordered_map<wchar_t, TextureMapper> _wallTexMappers;
   int _mapWidth;

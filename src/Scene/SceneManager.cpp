@@ -56,16 +56,23 @@ void SceneManager::setPlayerX(int new_x) { _player.set_x(new_x); }
 void SceneManager::setPlayerY(int new_y) { _player.set_y(new_y); }
 Player &SceneManager::getPlayerRef() { return _player; }
 
+#include <fstream>
+
 // Other
 std::unordered_map<std::string, std::wstring>
 SceneManager::loadResources(const std::string &path) {
+  std::ofstream lf("debug_loadrs.log", std::ios::app);
+
   std::wstringstream temp;
   std::wstring value;
   std::string key;
   std::unordered_map<std::string, std::wstring> returned_textures;
+  lf << "starting iteraton through directory: " << path << std::endl;
   for (const auto &entry : std::filesystem::directory_iterator(path)) {
     if (std::filesystem::is_regular_file(entry)) {
       std::wifstream current_file(entry.path());
+      lf << "working through file: " << entry.path() << std::endl;
+      current_file.imbue(std::locale("en_US.UTF-8"));
       if (current_file.fail()) {
         std::cerr << "ERROR: failed to open file: " << entry.path().string()
                   << " reading next texture file..." << std::endl;
@@ -84,9 +91,11 @@ SceneManager::loadResources(const std::string &path) {
         continue;
       }
       value = temp.str();
+      lf << "Read file: " << key << " ,len: " << value.size() << std::endl;
       returned_textures[key] = value;
       current_file.close();
     }
   }
+  lf.close();
   return returned_textures;
 }

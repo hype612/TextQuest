@@ -99,13 +99,13 @@ void GameEngine::run_game() {
       std::thread(&RenderAssetManager::TexturePreparator, &_renderAssetManager);
   if (!_sceneManager.isMapAvailable())
     initTestMap();
+  auto tp1 = std::chrono::system_clock::now();
+  auto tp2 = std::chrono::system_clock::now();
   while (EngineState::GetInstance()->gameRunningf == true) {
     if (textureSetterT.joinable() &&
         !EngineState::GetInstance()->gameRunningf) {
       textureSetterT.join();
     }
-    auto tp1 = std::chrono::system_clock::now();
-    auto tp2 = std::chrono::system_clock::now();
 
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;

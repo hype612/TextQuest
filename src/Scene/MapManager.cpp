@@ -71,8 +71,8 @@ bool MapManager::isOutOfBounds(int test_x, int test_y) const {
               << std::endl;
     std::cerr << "the following were provided: test_x = " << test_x
               << " , test_y = " << test_y << std::endl;
-    return false;
-  } else {
     return true;
+  } else {
+    return false;
   }
 }
