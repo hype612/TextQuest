@@ -1,6 +1,6 @@
 #include "../Headers/TextureMapper.h"
 
-TextureMapper::TextureMapper(std::wstring initTexture)
+TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMap(initTexture) {
   GenerateTextureMask();
 }
@@ -22,11 +22,11 @@ float TextureMapper::estimateWidth(float distance) {
 // if the shading is dependant of the mask
 void TextureMapper::GenerateTextureMask() {
   _textureMask.clear();
-  int tx_width = _textureMipMap.find(L'\n');
+  int tx_width = _textureMipMap.find('\n');
   int tx_height = tx_width;
   for (int i = 0; i < tx_height; i++) {
     for (int j = 0; j < tx_width; j++) {
-      if (i * (tx_width + 1) + j > _textureMipMap.size())
+      if (i * (tx_width + 1) + j >= _textureMipMap.size())
         break;
       if (_textureMipMap[i * (tx_width + 1) + j] == ' ')
         _textureMask.push_back(0);
@@ -39,13 +39,13 @@ void TextureMapper::GenerateTextureMask() {
 }
 
 void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
-                                      std::wstring *tex) {
+                                      std::string *tex) {
   _stepper = 0;
   int height = (int)(estimateHeight(distance));
   int width = (int)(estimateWidth(distance));
-
-  std::wstring line = *tex;
-  _texWidth = line.find(L'\n');
+  _stepper = 0;
+  std::string line = *tex;
+  _texWidth = line.find('\n');
 
   _texHeight = _texWidth;
   _textureMipMap = *tex;
@@ -87,7 +87,7 @@ void TextureMapper::rescaleCurrentTexture(float distance) {
 }
 
 void TextureMapper::repeatingHorizontalDownscale(int width) {
-  std::wstring tex = L"";
+  std::string tex = "";
   tex.reserve(_texHeight * (width + 1));
   if (_texWidth > width) {
     for (int i = 0; i < _texHeight; i++) {
@@ -105,9 +105,9 @@ void TextureMapper::repeatingVerticalDownscale(int height, int width) {
 }
 
 void TextureMapper::repeatingHorizontalUpscale(int height, int width) {
-  std::wstring line = L"";
+  std::string line = "";
   line.reserve(width);
-  std::wstring new_tex = L"";
+  std::string new_tex = "";
   new_tex.reserve(height * width);
 
   for (int i = 0; i < _texHeight; i++) {
@@ -122,7 +122,7 @@ void TextureMapper::repeatingHorizontalUpscale(int height, int width) {
 }
 
 void TextureMapper::repeatingVerticalUpscale(int height, int width) {
-  std::wstring new_tex = _textureMipMap;
+  std::string new_tex = _textureMipMap;
   int i = 0;
   while (_texHeight < height) {
     new_tex += new_tex.substr((_texWidth + 1) * i, _texWidth);
@@ -132,22 +132,24 @@ void TextureMapper::repeatingVerticalUpscale(int height, int width) {
   _textureMipMap = std::move(new_tex);
 }
 
-std::wstring TextureMapper::getNextTexColumn(int height) {
+std::string TextureMapper::getNextTexColumn(int height) {
   if (_texHeight < 1 || _texWidth < 1) {
-    return std::wstring(L"");
+    return std::string("");
   }
   if (_stepper >= _texWidth) {
     _stepper = 0;
   }
-  std::wstring ret = L"";
+  std::string ret = "";
   ret.reserve(height);
 
   for (int i = 0; i < _texHeight; i++) {
-    ret.push_back(_textureMipMap[(i % _texHeight) * _texWidth + _stepper]);
+    ret.push_back(
+        _textureMipMap[(i % _texHeight) * (_texWidth + 1) + _stepper]);
   }
   int j = 0;
   while (ret.length() < height) {
-    ret.push_back(_textureMipMap[(j % _texHeight) * _texWidth + _stepper]);
+    ret.push_back(
+        _textureMipMap[(j % _texHeight) * (_texWidth + 1) + _stepper]);
     j++;
   }
   _stepper++;
@@ -172,14 +174,14 @@ std::vector<int> TextureMapper::getMaskColumn(int height) const {
   return ret;
 }
 
-const std::wstring &TextureMapper::getTexture() const { return _textureMipMap; }
+const std::string &TextureMapper::getTexture() const { return _textureMipMap; }
 const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 
 // =======================
 //  interpolation scaling
 // =======================
 void TextureMapper::nxInterpolationDownscale(int width) {
-  std::wstring new_tex;
+  std::string new_tex;
   new_tex.reserve(width * _texHeight);
 
   float x_ratio = static_cast<float>(_texWidth) / width;
@@ -187,11 +189,11 @@ void TextureMapper::nxInterpolationDownscale(int width) {
   for (int y = 0; y < _texHeight; y++) {
     for (int x = 0; x < width; x++) {
       int src_x = static_cast<int>(x * x_ratio);
-      wchar_t pb = _textureMipMap[y * _texWidth + src_x + y];
-      if (pb != L'\n')
+      char pb = _textureMipMap[y * (_texWidth + 1) + src_x];
+      if (pb != '\n')
         new_tex.push_back(pb);
       else
-        new_tex.push_back(_textureMipMap[y * _texWidth + src_x - 1]);
+        new_tex.push_back(_textureMipMap[y * (_texWidth + 1) + src_x - 1]);
     }
     new_tex.push_back(L'\n');
   }
@@ -200,7 +202,7 @@ void TextureMapper::nxInterpolationDownscale(int width) {
 }
 
 void TextureMapper::nxInterpolationUpscale(int width) {
-  std::wstring new_tex;
+  std::string new_tex;
   new_tex.reserve(width * _texHeight);
 
   float x_ratio = static_cast<float>(_texWidth) / width;
@@ -208,11 +210,11 @@ void TextureMapper::nxInterpolationUpscale(int width) {
   for (int y = 0; y < _texHeight; y++) {
     for (int x = 0; x < width; x++) {
       int src_x = static_cast<int>(x * x_ratio);
-      wchar_t pb = _textureMipMap[y * _texWidth + src_x + y];
-      if (pb != L'\n')
+      char pb = _textureMipMap[y * (_texWidth + 1) + src_x];
+      if (pb != '\n')
         new_tex.push_back(pb);
       else
-        new_tex.push_back(_textureMipMap[y * _texWidth + src_x - 1]);
+        new_tex.push_back(_textureMipMap[y * (_texWidth + 1) + src_x - 1]);
     }
     new_tex.push_back(L'\n');
   }
@@ -221,7 +223,7 @@ void TextureMapper::nxInterpolationUpscale(int width) {
 }
 
 void TextureMapper::nyInterpolationDownscale(int height) {
-  std::wstring new_tex;
+  std::string new_tex;
   new_tex.reserve(_texWidth * height);
 
   float y_ratio = static_cast<float>(_texHeight) / height;
@@ -229,20 +231,20 @@ void TextureMapper::nyInterpolationDownscale(int height) {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < _texWidth; x++) {
       int src_y = static_cast<int>(y * y_ratio);
-      wchar_t pb = _textureMipMap[src_y * _texWidth + x + src_y];
-      if (pb != L'\n')
+      char pb = _textureMipMap[src_y * (_texWidth + 1) + x];
+      if (pb != '\n')
         new_tex.push_back(pb);
       else
-        new_tex.push_back(_textureMipMap[src_y * _texWidth + x - 1]);
+        new_tex.push_back(_textureMipMap[src_y * (_texWidth + 1) + x - 1]);
     }
-    new_tex.push_back(L'\n');
+    new_tex.push_back('\n');
   }
   _textureMipMap = std::move(new_tex);
   _texHeight = height;
 }
 
 void TextureMapper::nyInterpolationUpscale(int height) {
-  std::wstring new_tex;
+  std::string new_tex;
   new_tex.reserve(_texWidth * height);
 
   float y_ratio = static_cast<float>(_texHeight) / height;
@@ -250,23 +252,23 @@ void TextureMapper::nyInterpolationUpscale(int height) {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < _texWidth; x++) {
       int src_y = static_cast<int>(y * y_ratio);
-      wchar_t pb = _textureMipMap[src_y * _texWidth + x + src_y];
-      if (pb != L'\n')
+      char pb = _textureMipMap[src_y * (_texWidth + 1) + x];
+      if (pb != '\n')
         new_tex.push_back(pb);
       else
-        new_tex.push_back(_textureMipMap[src_y * _texWidth + x - 1]);
+        new_tex.push_back(_textureMipMap[src_y * (_texWidth + 1) + x - 1]);
     }
-    new_tex.push_back(L'\n');
+    new_tex.push_back('\n');
   }
   _textureMipMap = std::move(new_tex);
   _texHeight = height;
 }
 
-std::wstring TextureMapper::ScaleToHeight(int height, std::wstring column) {
-  std::wstring r_column = L"";
+std::string TextureMapper::ScaleToHeight(int height, std::string column) {
+  std::string r_column = "";
   r_column.reserve(height);
   while (r_column.length() < height) {
-    for (wchar_t c : column) {
+    for (char c : column) {
       r_column.push_back(c);
     }
   }

@@ -12,7 +12,7 @@ class NCursesRenderer : public IRenderer {
 public:
   NCursesRenderer();
   void Init() override;
-  void OverwriteBuffer(wchar_t *newBuffer) override;
+  void OverwriteBuffer(char *newBuffer) override;
   void PrintBuffer() override;
   void PrintDebugInfo(const Player &player, float delta) override;
   std::tuple<int, int> GetScreenSize() override;

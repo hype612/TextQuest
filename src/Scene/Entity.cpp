@@ -4,7 +4,7 @@
 // Constructors
 // =============
 
-Entity::Entity(int x, int y, std::wstring *tex, int initHP,
+Entity::Entity(int x, int y, std::string *tex, int initHP,
                EntityState initState)
     : _id(-1), _x(x), _y(y), _texMapper(*tex), _health(initHP),
       _state(initState) {}
@@ -28,9 +28,9 @@ std::tuple<int, int> Entity::getCoordinates() {
   return std::tuple<int, int>(_x, _y);
 }
 
-std::wstring Entity::getTexture() const { return _texMapper.getTexture(); }
+std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 
-std::wstring Entity::getNextTexColumn(int height) {
+std::string Entity::getNextTexColumn(int height) {
   return _texMapper.getNextTexColumn(height);
 }
 

@@ -45,7 +45,7 @@ RenderAssetManager::RenderAssetManager(EntityManager &entityMan,
                                        TextureRequestQueue &texReqQ)
     : _entityManager(entityMan), _mapManager(mapMan), _texRequestQ(texReqQ) {}
 
-std::wstring RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
+std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
   if (_mapManager.isWall(pos_x, pos_y) == true) {
     return _mapManager.getWallTextureAt(pos_x, pos_y);
   }
@@ -54,14 +54,14 @@ std::wstring RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
     return _entityManager.getCurrentEntityTexture(e_id);
   } else {
     std::cerr << "invalid position" << std::endl;
-    return std::wstring();
+    return std::string();
   }
 }
 
-std::wstring RenderAssetManager::getNextCharColumn(int height) {
-  std::wstring col;
+std::string RenderAssetManager::getNextCharColumn(int height) {
+  std::string col;
   while (!_depthStack.empty()) {
-    std::wstring thisCol;
+    std::string thisCol;
     int x = std::get<0>(_depthStack.back());
     int y = std::get<1>(_depthStack.back());
     if (std::get<2>(_depthStack.back()) == Tile::WALL) {

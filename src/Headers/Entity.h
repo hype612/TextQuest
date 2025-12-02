@@ -12,7 +12,7 @@ enum EntityState { IDLE, WALKING, FIGHT };
 class Entity {
 public:
   // constructors
-  Entity(int x, int y, std::wstring *tex, int initHP, EntityState initState);
+  Entity(int x, int y, std::string *tex, int initHP, EntityState initState);
 
   virtual void process();
 
@@ -24,8 +24,8 @@ public:
   int discreteY() const;
 
   std::tuple<int, int> getCoordinates();
-  std::wstring getTexture() const;
-  std::wstring getNextTexColumn(int height);
+  std::string getTexture() const;
+  std::string getNextTexColumn(int height);
   const std::vector<int> &getTexMask() const;
   std::vector<int> getMaskColumn(int height) const;
 
@@ -43,8 +43,6 @@ private:
   int _id;
   float _x;
   float _y;
-  // std::wstring* _texture;
-  // std::vector<int> texture_mask;
   TextureMapper _texMapper;
   int _health;
   EntityState _state;

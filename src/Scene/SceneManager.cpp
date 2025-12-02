@@ -12,7 +12,7 @@ void SceneManager::process() {
 }
 
 // Map Related functions
-void SceneManager::initializeNewMap(std::wstring &map, int mapWidth,
+void SceneManager::initializeNewMap(std::string &map, int mapWidth,
                                     int mapHeight) {
   _mapManager.uploadNewMap(map, mapWidth, mapHeight);
 }
@@ -24,8 +24,8 @@ bool SceneManager::isMapAvailable() const {
   return _mapManager.isMapAvailable();
 }
 
-void SceneManager::uploadTextureForWall(const wchar_t &mapChar,
-                                        std::wstring &wallTex) {
+void SceneManager::uploadTextureForWall(const char &mapChar,
+                                        std::string &wallTex) {
   _mapManager.uploadWallTextureFor(mapChar, wallTex);
 }
 
@@ -59,43 +59,45 @@ Player &SceneManager::getPlayerRef() { return _player; }
 #include <fstream>
 
 // Other
-std::unordered_map<std::string, std::wstring>
-SceneManager::loadResources(const std::string &path) {
-  std::ofstream lf("debug_loadrs.log", std::ios::app);
+void SceneManager::loadResources(
+    const std::string &filePath,
+    std::unordered_map<std::string, std::string> &outTextures) {
+  std::ofstream lf("debug_loadrs.log", std::ios::trunc);
 
-  std::wstringstream temp;
-  std::wstring value;
+  std::stringstream temp;
+  std::string value;
   std::string key;
-  std::unordered_map<std::string, std::wstring> returned_textures;
-  lf << "starting iteraton through directory: " << path << std::endl;
-  for (const auto &entry : std::filesystem::directory_iterator(path)) {
+  lf << "starting iteraton through directory: " << filePath << std::endl;
+  for (const auto &entry : std::filesystem::directory_iterator(filePath)) {
     if (std::filesystem::is_regular_file(entry)) {
-      std::wifstream current_file(entry.path());
+      std::ifstream current_file(entry.path());
       lf << "working through file: " << entry.path() << std::endl;
-      current_file.imbue(std::locale("en_US.UTF-8"));
       if (current_file.fail()) {
         std::cerr << "ERROR: failed to open file: " << entry.path().string()
                   << " reading next texture file..." << std::endl;
         continue;
       }
 
-      temp.str(std::wstring());
+      temp.str(std::string());
       temp << current_file.rdbuf();
       key = entry.path().stem().string();
-      if (returned_textures.find(key) != returned_textures.end()) {
+      if (outTextures.find(key) != outTextures.end()) {
         std::cerr << "ERROR: texture for this type of tile is already present. "
                      "Skipping this one...."
                   << std::endl;
         std::cerr << "texture: " << std::endl;
-        std::wcout << temp.str() << std::endl;
+        std::cout << temp.str() << std::endl;
         continue;
       }
       value = temp.str();
       lf << "Read file: " << key << " ,len: " << value.size() << std::endl;
-      returned_textures[key] = value;
+      outTextures[key] = value;
       current_file.close();
     }
   }
+  lf << "function done. read files: " << std::endl;
+  for (const auto &[key, value] : outTextures) {
+    lf << key << "; " << value.size() << "| ";
+  }
   lf.close();
-  return returned_textures;
 }

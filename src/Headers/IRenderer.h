@@ -9,7 +9,7 @@
 class IRenderer {
 public:
   virtual void Init() = 0;
-  virtual void OverwriteBuffer(wchar_t *newBuffer) = 0;
+  virtual void OverwriteBuffer(char *newBuffer) = 0;
   virtual void PrintBuffer() = 0;
 
   virtual std::tuple<int, int> GetScreenSize() = 0;
@@ -19,7 +19,7 @@ public:
 
 protected:
   IRenderer() {}
-  wchar_t *_screenBuffer;
+  char *_screenBuffer;
   int &_screenHeight = EngineState::GetInstance()->screenHeight;
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
 };

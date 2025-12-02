@@ -17,7 +17,7 @@ void NCursesRenderer::Init() {
   _screenBuffer = nullptr;
 }
 
-void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
+void NCursesRenderer::OverwriteBuffer(char *newBuffer) {
   if (_screenBuffer == nullptr) {
     std::cerr << "ERROR: no screenbuffer has been initialized yet. Please call "
                  "SetScreenSize before calling OverWriteBuffer"
@@ -37,8 +37,8 @@ void NCursesRenderer::OverwriteBuffer(wchar_t *newBuffer) {
   for (int y = 0; y < _screenHeight; y++) {
     move(y, 0);
     for (int x = 0; x < _screenWidth; x++) {
-      wchar_t c = _screenBuffer[y * _screenWidth + x];
-      addnwstr(&c, 1);
+      char c = _screenBuffer[y * _screenWidth + x];
+      addnstr(&c, 1);
     }
   }
 }
@@ -65,7 +65,7 @@ void NCursesRenderer::SetScreenSize(int x, int y) {
     delete[] _screenBuffer;
     _screenBuffer = nullptr;
   }
-  _screenBuffer = new wchar_t[_screenWidth * _screenHeight];
+  _screenBuffer = new char[_screenWidth * _screenHeight];
 
   EngineState::GetInstance()->screenHeight = _screenHeight;
   EngineState::GetInstance()->screenWidth = _screenWidth;

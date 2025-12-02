@@ -16,8 +16,8 @@ public:
                      TextureRequestQueue &texReqQ);
 
   void TexturePreparator();
-  std::wstring getTextureAt(int pos_x, int pos_y);
-  std::wstring getNextCharColumn(int height);
+  std::string getTextureAt(int pos_x, int pos_y);
+  std::string getNextCharColumn(int height);
 
 private:
   void prepareEntityTexture(const std::tuple<int, int, Tile, float> &toPrepare);

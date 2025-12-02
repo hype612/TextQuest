@@ -27,8 +27,6 @@ public:
   GameEngine(int sc_width, int sc_height);
   GameEngine();
   void run_game();
-  void SetScaledTexture(std::wstring &source, std::wstring &into,
-                        float distance);
   void RayCastingProcess();
   void RenderScreen(int ceiling, int floor, int col);
   ~GameEngine();
@@ -49,7 +47,7 @@ private:
   // rendering vars and consts
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
-  wchar_t *screen;
+  char *screen;
   int &_screenHeight = EngineState::GetInstance()->screenHeight;
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;

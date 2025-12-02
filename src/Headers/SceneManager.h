@@ -26,18 +26,18 @@ public:
   Tile isOccupied(int x, int y) const;
 
   // Map Related functions
-  void initializeNewMap(std::wstring &map, int mapWidth, int mapHeight);
+  void initializeNewMap(std::string &map, int mapWidth, int mapHeight);
   int getMapHeight() const;
   int getMapWidth() const;
   bool isMapAvailable() const;
-  void uploadTextureForWall(const wchar_t &mapChar, std::wstring &wallTex);
+  void uploadTextureForWall(const char &mapChar, std::string &wallTex);
 
   // Entity Related functions
   void AddEntity(Entity &entity);
   void removeEntity(Entity &entity);
   void removeEntity(int entityId);
   void removeAllEntities();
-  void uploadTextureForEntity(std::wstring &entityTex);
+  void uploadTextureForEntity(std::string &entityTex);
 
   // Player
   void setPlayerX(int new_x);
@@ -45,8 +45,8 @@ public:
   Player &getPlayerRef();
 
   // Other
-  std::unordered_map<std::string, std::wstring>
-  loadResources(const std::string &filePath);
+  void loadResources(const std::string &filePath,
+                     std::unordered_map<std::string, std::string> &outTextures);
 
 private:
   EntityManager &_entityManager;

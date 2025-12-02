@@ -11,7 +11,7 @@ public:
   float estimateHeight(float distance);
   float estimateWidth(float distance);
   void setCurrentTexture(float distance, const std::string &mode,
-                         std::wstring *tex);
+                         std::string *tex);
   void rescaleCurrentTexture(float distance);
   // =============================
   // repeating scaling
@@ -34,23 +34,23 @@ public:
   // =========================
   //   return of textures
   // =========================
-  std::wstring getNextTexColumn(int height);
+  std::string getNextTexColumn(int height);
   std::vector<int> getMaskColumn(int height) const;
-  const std::wstring &getTexture() const;
+  const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
 
-  TextureMapper(std::wstring initTexture);
+  TextureMapper(std::string initTexture);
   TextureMapper() = default;
 
 private:
-  std::wstring _textureMipMap = L"";
+  std::string _textureMipMap = "";
   std::vector<int> _textureMask;
   int _stepper = -1;
   int _texHeight = -1;
   int _texWidth = -1;
 
   void GenerateTextureMask();
-  std::wstring ScaleToHeight(int height, std::wstring column);
+  std::string ScaleToHeight(int height, std::string column);
 };
 
 #endif

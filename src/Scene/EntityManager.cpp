@@ -59,11 +59,11 @@ void EntityManager::changeEntityTextureScale(Entity &entity, float distance) {
   entity.rescaleTexture(distance);
 }
 
-std::wstring EntityManager::getCurrentEntityTexture(int EntityId) {
+std::string EntityManager::getCurrentEntityTexture(int EntityId) {
   return _entityContainer[EntityId].getTexture();
 }
 
-std::wstring EntityManager::getCurrentEntityTexture(const Entity &entity) {
+std::string EntityManager::getCurrentEntityTexture(const Entity &entity) {
   return entity.getTexture();
 }
 
@@ -76,7 +76,7 @@ EntityManager::getCurrentEntityTexMask(const Entity &entity) {
   return entity.getTexMask();
 }
 
-std::wstring EntityManager::getNextEntityCharColumn(int EntityId, int height) {
+std::string EntityManager::getNextEntityCharColumn(int EntityId, int height) {
   return _entityContainer[EntityId].getNextTexColumn(height);
 }
 

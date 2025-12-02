@@ -2,17 +2,17 @@
 
 MapManager::MapManager() {} // so far nothing needs to be inited
 
-MapManager::MapManager(const std::wstring &map, int mapWidth, int mapHeight)
+MapManager::MapManager(const std::string &map, int mapWidth, int mapHeight)
     : _map(map), _mapWidth(mapWidth), _mapHeight(mapHeight) {}
 
-void MapManager::uploadNewMap(const std::wstring &map, int newMapWidth,
+void MapManager::uploadNewMap(const std::string &map, int newMapWidth,
                               int newMapHeight) {
   _map = map;
   _mapWidth = newMapWidth;
   _mapHeight = newMapHeight;
 }
 
-const std::wstring &MapManager::GetMap() const { return _map; }
+const std::string &MapManager::GetMap() const { return _map; }
 
 int MapManager::mapHeight() const { return _mapHeight; }
 int MapManager::mapWidth() const { return _mapWidth; }
@@ -29,15 +29,15 @@ bool MapManager::isWall(int test_x, int test_y) const {
 }
 
 bool MapManager::isMapAvailable() const {
-  if (_map == L"") {
+  if (_map == "") {
     return false;
   } else {
     return true;
   }
 }
 
-void MapManager::uploadWallTextureFor(const wchar_t &mapChar,
-                                      std::wstring texture) {
+void MapManager::uploadWallTextureFor(const char &mapChar,
+                                      std::string texture) {
   _wallTexMappers[mapChar] = TextureMapper(texture);
 }
 
@@ -45,23 +45,23 @@ void MapManager::rescaleWallTextureAt(int x, int y, float distance) {
   if (isOutOfBounds(x, y)) {
     return;
   }
-  wchar_t mapChar = _map[y * _mapWidth + x];
+  char mapChar = _map[y * _mapWidth + x];
   _wallTexMappers[mapChar].rescaleCurrentTexture(distance);
 }
 
-std::wstring MapManager::getWallTextureAt(int x, int y) {
+std::string MapManager::getWallTextureAt(int x, int y) {
   if (isOutOfBounds(x, y)) {
-    return std::wstring();
+    return std::string();
   }
-  wchar_t mapChar = _map[y * _mapWidth + x];
+  char mapChar = _map[y * _mapWidth + x];
   return _wallTexMappers[mapChar].getTexture();
 }
 
-std::wstring MapManager::getWallTexColumnAt(int x, int y, int height) {
+std::string MapManager::getWallTexColumnAt(int x, int y, int height) {
   if (isOutOfBounds(x, y)) {
-    return std::wstring();
+    return std::string();
   }
-  wchar_t mapChar = _map[y * _mapWidth + x];
+  char mapChar = _map[y * _mapWidth + x];
   return _wallTexMappers[mapChar].getNextTexColumn(height);
 }
 
