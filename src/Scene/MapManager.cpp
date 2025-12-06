@@ -36,6 +36,10 @@ bool MapManager::isMapAvailable() const {
   }
 }
 
+const std::string &MapManager::getWallTexForMapChar(const char &mapChar) {
+  return _wallTexMappers[mapChar].getTexture();
+}
+
 void MapManager::uploadWallTextureFor(const char &mapChar,
                                       std::string texture) {
   _wallTexMappers[mapChar] = TextureMapper(texture);

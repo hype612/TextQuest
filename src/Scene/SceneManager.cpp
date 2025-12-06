@@ -29,6 +29,10 @@ void SceneManager::uploadTextureForWall(const char &mapChar,
   _mapManager.uploadWallTextureFor(mapChar, wallTex);
 }
 
+const std::string &SceneManager::getWallTextureForMapChar(const char &mapChar) {
+  return _mapManager.getWallTexForMapChar(mapChar);
+}
+
 // Entity Related functions
 void SceneManager::AddEntity(Entity &entity) {
   _entityManager.addEntity(entity);
@@ -56,22 +60,17 @@ void SceneManager::setPlayerX(int new_x) { _player.set_x(new_x); }
 void SceneManager::setPlayerY(int new_y) { _player.set_y(new_y); }
 Player &SceneManager::getPlayerRef() { return _player; }
 
-#include <fstream>
-
 // Other
 void SceneManager::loadResources(
     const std::string &filePath,
     std::unordered_map<std::string, std::string> &outTextures) {
-  std::ofstream lf("debug_loadrs.log", std::ios::trunc);
 
   std::stringstream temp;
   std::string value;
   std::string key;
-  lf << "starting iteraton through directory: " << filePath << std::endl;
   for (const auto &entry : std::filesystem::directory_iterator(filePath)) {
     if (std::filesystem::is_regular_file(entry)) {
       std::ifstream current_file(entry.path());
-      lf << "working through file: " << entry.path() << std::endl;
       if (current_file.fail()) {
         std::cerr << "ERROR: failed to open file: " << entry.path().string()
                   << " reading next texture file..." << std::endl;
@@ -90,14 +89,8 @@ void SceneManager::loadResources(
         continue;
       }
       value = temp.str();
-      lf << "Read file: " << key << " ,len: " << value.size() << std::endl;
       outTextures[key] = value;
       current_file.close();
     }
   }
-  lf << "function done. read files: " << std::endl;
-  for (const auto &[key, value] : outTextures) {
-    lf << key << "; " << value.size() << "| ";
-  }
-  lf.close();
 }

@@ -66,11 +66,13 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
     int y = std::get<1>(_depthStack.back());
     if (std::get<2>(_depthStack.back()) == Tile::WALL) {
       col.append(_mapManager.getWallTexColumnAt(x, y, height));
+      _depthStack.pop_back();
       continue;
     }
     int id = _entityManager.getEntityIdAtPos(x, y);
     if (col.empty()) {
       col.append(_entityManager.getNextEntityCharColumn(id, height));
+      _depthStack.pop_back();
       continue;
     }
     thisCol = _entityManager.getNextEntityCharColumn(id, height);

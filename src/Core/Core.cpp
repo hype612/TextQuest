@@ -1,4 +1,6 @@
 #include "../Headers/Core.h"
+#include <algorithm>
+#include <fstream>
 #include <ncurses.h>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
@@ -93,7 +95,6 @@ bool GameEngine::initTestMap() {
 }
 
 void GameEngine::run_game() {
-  std::ofstream logFile("debug_rung.log", std::ios::trunc);
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
   _textureSetterT =
@@ -102,7 +103,6 @@ void GameEngine::run_game() {
     initTestMap();
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
-  logFile << "finished init in run_game" << std::endl;
   while (EngineState::GetInstance()->gameRunningf == true) {
     if (_textureSetterT.joinable() &&
         !EngineState::GetInstance()->gameRunningf) {
@@ -115,24 +115,18 @@ void GameEngine::run_game() {
     float f_elapsed_time = elapsed_time.count();
 
     _inputHandler->ReceiveMovementInput(f_elapsed_time);
-    logFile << "inputs read..." << std::endl;
     _sceneManager.process();
-    logFile << "sceneMan processes called..." << std::endl;
 
     RayCastingProcess();
-    logFile << "rayCasting process done..." << std::endl;
 
-    screen[_screenHeight * _screenWidth - 1] = '\0';
+    // screen[_screenHeight * _screenWidth - 1] = '\0';
     _renderer->OverwriteBuffer(screen);
     _renderer->PrintDebugInfo(_player, f_elapsed_time);
     _renderer->PrintBuffer();
   }
-  logFile.close();
 }
 
 void GameEngine::RayCastingProcess() {
-  std::ofstream logFile("debug_rcp.log", std::ios::trunc);
-  logFile << "=================================" << std::endl;
   bool hitwall;
 
   int currentObjX = -1;
@@ -164,8 +158,7 @@ void GameEngine::RayCastingProcess() {
       } else {
         // ray is inbounds > test if is a wall block
         if (_sceneManager.isOccupied(test_x, test_y) == Tile::WALL &&
-                currentObjX != test_x ||
-            currentObjY != test_y) {
+            (currentObjX != test_x || currentObjY != test_y)) {
           hitwall = true;
           isCurrentObj = currentObjX == test_x && currentObjY == test_y;
           if (!isCurrentObj) {
@@ -176,8 +169,7 @@ void GameEngine::RayCastingProcess() {
           }
         }
         if (_sceneManager.isOccupied(test_x, test_y) == Tile::ENTITY &&
-                currentObjX != test_x ||
-            currentObjY != test_y) {
+            (currentObjX != test_x || currentObjY != test_y)) {
           isCurrentObj = currentObjX == test_x && currentObjY == test_y;
           if (!isCurrentObj) {
             _texRequestQueue.push(std::tuple<int, int, Tile, float>(
@@ -188,34 +180,33 @@ void GameEngine::RayCastingProcess() {
         }
       }
     }
-    logFile << "rayCasting done... " << std::endl;
-    logFile << "___________________________________" << std::endl;
     int ceiling = int((float)(_screenHeight / 2.0f) -
                       _screenHeight / ((float)distance_to_wall));
     int floor = _screenHeight - ceiling;
     _texRequestQueue.setRayCompleted(true);
     _texRequestQueue.waitForTextures();
-    logFile << "texs rdy... " << std::endl;
     RenderScreen(ceiling, floor, x);
   }
 }
 
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
-  std::ofstream logFile("debug_rcp.log", std::ios::app);
-  logFile << "entered renderscreen..." << std::endl;
   wchar_t floorShade;
   int x = col;
   std::string toRender =
       _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
-  logFile << "got charCol from RAM..." << std::endl;
   int toRenderIt = 0;
+  int colHeight =
+      std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
   for (int y = 0; y < _screenHeight; y++) {
     if (y < ceiling) {
       screen[y * _screenWidth + x] = ' ';
     } else if (y >= ceiling && y <= floor) {
-      screen[y * _screenWidth + x] = toRender[toRenderIt];
-      if (toRenderIt < toRender.size())
+      if (toRenderIt < colHeight) {
+        screen[y * _screenWidth + x] = toRender[toRenderIt];
         toRenderIt++;
+      } else {
+        screen[y * _screenWidth + x] = ' ';
+      }
     } else {
       float b = 1.0f - (((float)y - _screenHeight / 2.0f) /
                         ((float)_screenHeight / 2.0f));
@@ -232,8 +223,6 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
       screen[y * _screenWidth + x] = floorShade;
     }
   }
-  logFile << "rendered col " << col << " onto screen of " << _screenWidth
-          << " cols..." << std::endl;
 }
 
 GameEngine::~GameEngine() {

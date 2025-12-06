@@ -51,6 +51,7 @@ private:
 
   void GenerateTextureMask();
   std::string ScaleToHeight(int height, std::string column);
+  char sampleNN(float u, float v);
 };
 
 #endif

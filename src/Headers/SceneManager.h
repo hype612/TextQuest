@@ -31,6 +31,7 @@ public:
   int getMapWidth() const;
   bool isMapAvailable() const;
   void uploadTextureForWall(const char &mapChar, std::string &wallTex);
+  const std::string &getWallTextureForMapChar(const char &mapChar);
 
   // Entity Related functions
   void AddEntity(Entity &entity);

@@ -16,6 +16,7 @@ public:
   int mapWidth() const;
   bool isWall(int test_x, int test_y) const;
   bool isMapAvailable() const;
+  const std::string &getWallTexForMapChar(const char &mapChar);
 
   void uploadWallTextureFor(const char &mapChar, std::string texture);
   void rescaleWallTextureAt(int x, int y, float distance);

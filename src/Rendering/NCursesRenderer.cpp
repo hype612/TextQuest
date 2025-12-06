@@ -36,10 +36,14 @@ void NCursesRenderer::OverwriteBuffer(char *newBuffer) {
 
   for (int y = 0; y < _screenHeight; y++) {
     move(y, 0);
+    std::string line(_screenBuffer + y * _screenWidth, _screenWidth);
+    mvaddnstr(y, 0, line.c_str(), _screenWidth);
+    /*
     for (int x = 0; x < _screenWidth; x++) {
       char c = _screenBuffer[y * _screenWidth + x];
-      addnstr(&c, 1);
-    }
+      addch(c);
+      // addnstr(&c, 1);
+    }*/
   }
 }
 
