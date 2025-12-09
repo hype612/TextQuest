@@ -9,13 +9,7 @@ enum class RunningOS { WINDOWS, LINUX };
 class EngineState {
 public:
   EngineState(const EngineState &obj) = delete;
-
-  static EngineState *GetInstance() {
-    if (instancePtr == nullptr) {
-      instancePtr = new EngineState();
-    }
-    return instancePtr;
-  }
+  static EngineState *GetInstance();
 
 #if (defined(LINUX) || defined(__linux__))
   RunningOS opSystem = RunningOS::LINUX;
