@@ -64,7 +64,11 @@ Player &SceneManager::getPlayerRef() { return _player; }
 void SceneManager::loadResources(
     const std::string &filePath,
     std::unordered_map<std::string, std::string> &outTextures) {
+  Logger::GetInstance()->log("===========================================",
+                             LogType::TEXPREP, LogLevel::INFO);
 
+  Logger::GetInstance()->log("starting loadResources.", LogType::TEXPREP,
+                             LogLevel::INFO);
   std::stringstream temp;
   std::string value;
   std::string key;
@@ -90,6 +94,12 @@ void SceneManager::loadResources(
       }
       value = temp.str();
       outTextures[key] = value;
+      Logger::GetInstance()->log("Printing texture: " + key, LogType::TEXPREP,
+                                 LogLevel::INFO);
+      Logger::GetInstance()->log(value, LogType::TEXPREP, LogLevel::INFO);
+      Logger::GetInstance()->log(
+          "===========================================\n\n", LogType::TEXPREP,
+          LogLevel::INFO);
       current_file.close();
     }
   }

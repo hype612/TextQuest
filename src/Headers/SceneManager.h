@@ -4,6 +4,7 @@
 #include "./EngineState.h"
 #include "./Entity.h"
 #include "./EntityManager.h"
+#include "./Logger.h"
 #include "./MapManager.h"
 #include "./Tile.h"
 #include "./player.h"

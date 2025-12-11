@@ -1,6 +1,7 @@
 #include "../Headers/TextureMapper.h"
 
 #include <algorithm>
+#include <string>
 
 TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMap(initTexture) {
@@ -44,15 +45,18 @@ void TextureMapper::GenerateTextureMask() {
 
 void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
                                       std::string *tex) {
-  _stepper = 0;
   int height = (int)(estimateHeight(distance));
   int width = (int)(estimateWidth(distance));
   _stepper = 0;
   std::string line = *tex;
   _texWidth = line.find('\n');
-
-  _texHeight = _texWidth;
+  _texHeight = std::count(line.begin(), line.end(), '\n');
   _textureMipMap = *tex;
+  Logger::GetInstance()->log("setCurrentTexture: starting scaling to " +
+                                 std::to_string(_texWidth) + "x" +
+                                 std::to_string(_texHeight),
+                             LogType::TEXPREP, LogLevel::INFO);
+
   // HORIZONTAL SCALE
   if (mode == "repeat") {
     if (_texWidth < width) {
@@ -69,6 +73,10 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
       repeatingVerticalDownscale(height, width);
     }
   } else if (mode == "interpolating") {
+    if (_texWidth != width || _texHeight != height) {
+      nxyInterpolationScale(width, height);
+    }
+    /*
     if (_texWidth < width) {
       nxInterpolationUpscale(width);
     }
@@ -81,8 +89,13 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
     }
     if (_texHeight > height) {
       nyInterpolationDownscale(height);
-    }
+    }*/
   }
+  Logger::GetInstance()->log("generated texture:", LogType::TEXPREP,
+                             LogLevel::INFO);
+  Logger::GetInstance()->log(_textureMipMap, LogType::TEXPREP, LogLevel::INFO);
+  Logger::GetInstance()->log("=====================================\n\n",
+                             LogType::TEXPREP, LogLevel::INFO);
   GenerateTextureMask();
 }
 
@@ -165,6 +178,9 @@ std::string TextureMapper::getNextTexColumn(int height) {
     i++;
   }
   _stepper++;
+  Logger::GetInstance()->log(
+      "getNextTexColumn: the returned col:", LogType::RENDER, LogLevel::INFO);
+  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
   return ret;
 }
 
@@ -204,9 +220,26 @@ char TextureMapper::sampleNN(float u, float v) {
   y = std::clamp(y, 0, _texHeight - 1);
   size_t idx = static_cast<size_t>(y) * static_cast<size_t>(_texWidth + 1) +
                static_cast<size_t>(x);
-  if (idx >= _textureMipMap.size())
+  if (idx >= _textureMipMap.size()) {
     return ' ';
+  }
   return _textureMipMap[idx];
+}
+
+void TextureMapper::nxyInterpolationScale(int width, int height) {
+  std::string out;
+  out.resize((width + 1) * height);
+  for (int y = 0; y < height; y++) {
+    float v = (float)y / (float)(height - 1);
+    for (int x = 0; x < width; x++) {
+      float u = (float)x / (float)(width - 1);
+      out[y * (width + 1) + x] = sampleNN(u, v);
+    }
+    out[y * (width + 1) + width] = '\n';
+  }
+  _texHeight = height;
+  _texWidth = width;
+  _textureMipMap = std::move(out);
 }
 
 void TextureMapper::nxInterpolationDownscale(int width) {

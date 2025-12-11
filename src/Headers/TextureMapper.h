@@ -1,6 +1,7 @@
 #ifndef TEXTUREMAPPER_H
 #define TEXTUREMAPPER_H
 
+#include "./Logger.h"
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,7 @@ public:
   //   interpolation scaling(nn)
   // =============================
 
+  void nxyInterpolationScale(int width, int height);
   void nxInterpolationDownscale(int width);
   void nxInterpolationUpscale(int width);
   void nyInterpolationDownscale(int height);
