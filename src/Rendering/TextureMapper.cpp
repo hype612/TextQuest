@@ -156,6 +156,7 @@ std::string TextureMapper::getNextTexColumn(int height) {
   if (_stepper >= _texWidth) {
     _stepper = 0;
   }
+  /*
   std::string ret = "";
   ret.reserve(height);
 
@@ -181,6 +182,21 @@ std::string TextureMapper::getNextTexColumn(int height) {
   Logger::GetInstance()->log(
       "getNextTexColumn: the returned col:", LogType::RENDER, LogLevel::INFO);
   Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
+  return ret;*/
+  std::string ret = "";
+  ret.reserve(height);
+
+  float x_pos = (float)_stepper / (float)_texWidth;
+  for (int y = 0; y < height; y++) {
+    float y_pos = (float)y / (float)_texHeight;
+    ret.push_back(sampleNN(x_pos, y_pos));
+  }
+
+  Logger::GetInstance()->log("getNextTexColumn: the returned col for height: " +
+                                 std::to_string(height),
+                             LogType::RENDER, LogLevel::INFO);
+  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
+  _stepper++;
   return ret;
 }
 

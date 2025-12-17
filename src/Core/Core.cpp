@@ -1,7 +1,9 @@
 #include "../Headers/Core.h"
 #include <algorithm>
 #include <fstream>
+#include <memory>
 #include <ncurses.h>
+#include <string>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
     : _sceneManager(_entityManager, _mapManager),
@@ -108,7 +110,6 @@ void GameEngine::run_game() {
         !EngineState::GetInstance()->gameRunningf) {
       _textureSetterT.join();
     }
-
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
@@ -133,6 +134,9 @@ void GameEngine::RayCastingProcess() {
   int currentObjY = -1;
   bool isCurrentObj = false;
   const int max_raylength = 8;
+
+  static float prev_ceiling;
+  bool firstCeilingCalculation = true;
 
   for (int x = 0; x < _screenWidth; x++) {
     _texRequestQueue.setRayCompleted(false);
@@ -180,9 +184,24 @@ void GameEngine::RayCastingProcess() {
         }
       }
     }
-    int ceiling = int((float)(_screenHeight / 2.0f) -
+    /*int ceiling = int((float)(_screenHeight / 2.0f) -
                       _screenHeight / ((float)distance_to_wall));
+    int floor = _screenHeight - ceiling;*/
+
+    float target_ceiling =
+        (_screenHeight / 2.0f) - (_screenHeight / distance_to_wall);
+    if (firstCeilingCalculation) {
+      prev_ceiling = target_ceiling;
+      firstCeilingCalculation = false;
+    }
+    float smooth_factor = 0.01f; // 0 < factor <= 1
+    float ceiling_f =
+        prev_ceiling + (target_ceiling - prev_ceiling) * smooth_factor;
+    int ceiling = static_cast<int>(ceiling_f + 0.5f);
+    prev_ceiling = ceiling_f;
+
     int floor = _screenHeight - ceiling;
+
     _texRequestQueue.setRayCompleted(true);
     _texRequestQueue.waitForTextures();
     RenderScreen(ceiling, floor, x);
@@ -192,6 +211,9 @@ void GameEngine::RayCastingProcess() {
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
   wchar_t floorShade;
   int x = col;
+  Logger::GetInstance()->log("floor: " + std::to_string(floor) +
+                                 " ceiling: " + std::to_string(ceiling),
+                             LogType::RENDER, LogLevel::INFO);
   std::string toRender =
       _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
   int toRenderIt = 0;
