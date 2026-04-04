@@ -2,7 +2,9 @@
 #define PLAYER_H
 
 #include "./MapManager.h"
+#include <cmath>
 #include <string>
+#include <tuple>
 
 class Player {
 public:
@@ -27,6 +29,7 @@ public:
   float get_y() const;
   float get_angle() const;
   float get_fov() const;
+  std::tuple<float, float> get_angle_unitv() const;
 
 private:
   float m_x_pos;

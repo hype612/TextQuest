@@ -1,4 +1,6 @@
 #include "../Headers/player.h"
+#include <cmath>
+#include <tuple>
 
 Player::Player(float x_pos, float y_pos, float angle, float fov,
                MapManager &mapManager)
@@ -50,3 +52,7 @@ float Player::get_x() const { return m_x_pos; }
 float Player::get_y() const { return m_y_pos; }
 float Player::get_angle() const { return m_angle; }
 float Player::get_fov() const { return m_fov; }
+
+std::tuple<float, float> Player::get_angle_unitv() const {
+  return std::tuple<float, float>(std::cos(m_angle), -std::sin(m_angle));
+}

@@ -16,6 +16,7 @@
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
 #include "player.h"
+#include "WallSide.h"
 #include <chrono>
 #include <cmath>
 #include <iostream>

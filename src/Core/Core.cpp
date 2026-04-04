@@ -1,7 +1,5 @@
 #include "../Headers/Core.h"
 #include <algorithm>
-#include <fstream>
-#include <memory>
 #include <ncurses.h>
 #include <string>
 
@@ -149,12 +147,18 @@ void GameEngine::RayCastingProcess() {
     float eye_x = sinf(ray_angle);
     float eye_y = cosf(ray_angle);
 
+    float f_test_x;
+    float f_test_y;
     int test_x;
     int test_y;
     while (!hitwall && distance_to_wall < max_raylength) {
-      distance_to_wall += 0.1f;
-      test_x = (int)(_player.get_x() + eye_x * distance_to_wall);
-      test_y = (int)(_player.get_y() + eye_y * distance_to_wall);
+      distance_to_wall += .1f;
+
+      f_test_x = (_player.get_x() + eye_x * distance_to_wall);
+      f_test_y = (_player.get_y() + eye_y * distance_to_wall);
+
+      test_x = (int)f_test_x;
+      test_y = (int)f_test_y;
       if (test_x < 0 || test_x >= _sceneManager.getMapWidth() || test_y < 0 ||
           test_y >= _sceneManager.getMapHeight()) {
         hitwall = true;
@@ -168,8 +172,10 @@ void GameEngine::RayCastingProcess() {
           if (!isCurrentObj) {
             _texRequestQueue.push(std::tuple<int, int, Tile, float>(
                 test_x, test_y, Tile::WALL, distance_to_wall));
-            currentObjY = test_y;
-            currentObjX = test_x;
+            // currentObjY = test_y;
+            // currentObjX = test_x;
+
+            // calculate hitpoint
           }
         }
         if (_sceneManager.isOccupied(test_x, test_y) == Tile::ENTITY &&
