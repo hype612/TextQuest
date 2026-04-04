@@ -1,5 +1,6 @@
 #include "../Headers/Core.h"
 #include <algorithm>
+#include <cmath>
 #include <ncurses.h>
 #include <string>
 
@@ -126,92 +127,89 @@ void GameEngine::run_game() {
 }
 
 void GameEngine::RayCastingProcess() {
-  bool hitwall;
 
-  int currentObjX = -1;
-  int currentObjY = -1;
-  bool isCurrentObj = false;
-  const int max_raylength = 8;
-
-  static float prev_ceiling;
-  bool firstCeilingCalculation = true;
+  const float max_raylength = 8.f;
 
   for (int x = 0; x < _screenWidth; x++) {
+    bool isCurrentObj = false;
+    int currentObjX = -1;
+    int currentObjY = -1;
     _texRequestQueue.setRayCompleted(false);
     _texRequestQueue.setTexturesReady(false);
     float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) +
                       ((float)x / (float)_screenWidth) * _player.get_fov();
-    float distance_to_wall = 0.0f;
-    hitwall = false;
+    // float distance_to_wall = 0.0f;
+    bool hitwall = false;
 
-    float eye_x = sinf(ray_angle);
-    float eye_y = cosf(ray_angle);
+    // init for DDA
+    float rayDirX = std::sinf(ray_angle);
+    float rayDirY = std::cosf(ray_angle);
+    float deltaDistX = (rayDirX == 0.f) ? 1e30f : std::fabs(1.f / rayDirX);
+    float deltaDistY = (rayDirY == 0.f) ? 1e30f : std::fabs(1.f / rayDirY);
+    int stepX = (rayDirX >= 0.f) ? 1 : -1;
+    int stepY = (rayDirY >= 0.f) ? 1 : -1;
+    float sideDistX = (stepX == 1)
+                          ? std::floorf(_player.get_x()) + 1.f - _player.get_x()
+                          : _player.get_x() - std::floorf(_player.get_x());
+    sideDistX = sideDistX * deltaDistX;
+    float sideDistY = (stepY == 1)
+                          ? std::floorf(_player.get_y()) + 1.f - _player.get_y()
+                          : _player.get_y() - std::floorf(_player.get_y());
+    sideDistY = sideDistY * deltaDistY;
 
-    float f_test_x;
-    float f_test_y;
-    int test_x;
-    int test_y;
-    while (!hitwall && distance_to_wall < max_raylength) {
-      distance_to_wall += .1f;
+    int mapX = std::floorf(_player.get_x());
+    int mapY = std::floorf(_player.get_y());
 
-      f_test_x = (_player.get_x() + eye_x * distance_to_wall);
-      f_test_y = (_player.get_y() + eye_y * distance_to_wall);
+    WallSide side = WallSide::NOHIT;
 
-      test_x = (int)f_test_x;
-      test_y = (int)f_test_y;
-      if (test_x < 0 || test_x >= _sceneManager.getMapWidth() || test_y < 0 ||
-          test_y >= _sceneManager.getMapHeight()) {
-        hitwall = true;
-        distance_to_wall = max_raylength;
+    while (!hitwall) {
+      if (mapX < 0 || mapY < 0 || mapX >= _mapManager.mapWidth() ||
+          mapY >= _mapManager.mapHeight()) {
+        sideDistX = max_raylength;
+        sideDistY = max_raylength;
+        break;
+      }
+      if (sideDistX < sideDistY) {
+        sideDistX += deltaDistX;
+        mapX += stepX;
+        side = WallSide::HORIZONTAL;
       } else {
-        // ray is inbounds > test if is a wall block
-        if (_sceneManager.isOccupied(test_x, test_y) == Tile::WALL &&
-            (currentObjX != test_x || currentObjY != test_y)) {
-          hitwall = true;
-          isCurrentObj = currentObjX == test_x && currentObjY == test_y;
-          if (!isCurrentObj) {
-            _texRequestQueue.push(std::tuple<int, int, Tile, float>(
-                test_x, test_y, Tile::WALL, distance_to_wall));
-            // currentObjY = test_y;
-            // currentObjX = test_x;
-
-            // calculate hitpoint
-          }
-        }
-        if (_sceneManager.isOccupied(test_x, test_y) == Tile::ENTITY &&
-            (currentObjX != test_x || currentObjY != test_y)) {
-          isCurrentObj = currentObjX == test_x && currentObjY == test_y;
-          if (!isCurrentObj) {
-            _texRequestQueue.push(std::tuple<int, int, Tile, float>(
-                test_x, test_y, Tile::ENTITY, distance_to_wall));
-            currentObjY = test_y;
-            currentObjX = test_x;
-          }
-        }
+        sideDistY += deltaDistY;
+        mapY += stepY;
+        side = WallSide::VERTICAL;
+      }
+      if (_sceneManager.isOccupied(mapX, mapY) == Tile::WALL &&
+          (currentObjX != mapX || currentObjY != mapY)) {
+        hitwall = true;
+      }
+      if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY &&
+          (currentObjX != mapX || currentObjY != mapY)) {
+        // addition calculations are needed for entity
+        //_texRequestQueue.push(std::tuple<int, int, Tile, float>(
+        // mapX, mapY, Tile::ENTITY, distance_to_wall));
+        currentObjY = mapY;
+        currentObjX = mapX;
       }
     }
-    /*int ceiling = int((float)(_screenHeight / 2.0f) -
-                      _screenHeight / ((float)distance_to_wall));
-    int floor = _screenHeight - ceiling;*/
-
-    float target_ceiling =
-        (_screenHeight / 2.0f) - (_screenHeight / distance_to_wall);
-    if (firstCeilingCalculation) {
-      prev_ceiling = target_ceiling;
-      firstCeilingCalculation = false;
-    }
-    float smooth_factor = 0.01f; // 0 < factor <= 1
-    float ceiling_f =
-        prev_ceiling + (target_ceiling - prev_ceiling) * smooth_factor;
-    int ceiling = static_cast<int>(ceiling_f + 0.5f);
-    prev_ceiling = ceiling_f;
-
-    int floor = _screenHeight - ceiling;
-
     _texRequestQueue.setRayCompleted(true);
     _texRequestQueue.waitForTextures();
+    float distance_to_wall = (side == WallSide::HORIZONTAL)
+                                 ? sideDistX - deltaDistX
+                                 : sideDistY - deltaDistY;
+    float hitpoint = (side == WallSide::HORIZONTAL)
+                         ? _player.get_y() + distance_to_wall * rayDirY
+                         : _player.get_x() + distance_to_wall * rayDirX;
+    hitpoint -= std::floorf(hitpoint);
+    int ceiling = int((float)(_screenHeight / 2.0f) -
+                      _screenHeight / ((float)distance_to_wall));
+    int floor = _screenHeight - ceiling;
     RenderScreen(ceiling, floor, x);
   }
+
+  /*int ceiling = int((float)(_screenHeight / 2.0f) -
+                    _screenHeight /
+  ((float)distance_to_wall)); int floor = _screenHeight
+  - ceiling;*/
 }
 
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
