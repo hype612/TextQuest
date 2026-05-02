@@ -149,76 +149,6 @@ void TextureMapper::repeatingVerticalUpscale(int height, int width) {
   _textureMipMap = std::move(new_tex);
 }
 
-std::string TextureMapper::getNextTexColumn(int height) {
-  if (_texHeight < 1 || _texWidth < 1) {
-    return std::string("");
-  }
-  if (_stepper >= _texWidth) {
-    _stepper = 0;
-  }
-  /*
-  std::string ret = "";
-  ret.reserve(height);
-
-  for (int i = 0; i < _texHeight; i++) {
-    if (_textureMipMap[(i % _texHeight) * (_texWidth + 1) + _stepper] != '\n') {
-      ret.push_back(
-          _textureMipMap[(i % _texHeight) * (_texWidth + 1) + _stepper]);
-    } else {
-      ret.push_back(' ');
-    }
-  }
-  int i = 0;
-  while (ret.length() < height) {
-    if (_textureMipMap[(i % _texHeight) * (_texWidth + 1) + _stepper] != '\n') {
-      ret.push_back(
-          _textureMipMap[(i % _texHeight) * (_texWidth + 1) + _stepper]);
-    } else {
-      ret.push_back(' ');
-    }
-    i++;
-  }
-  _stepper++;
-  Logger::GetInstance()->log(
-      "getNextTexColumn: the returned col:", LogType::RENDER, LogLevel::INFO);
-  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
-  return ret;*/
-  std::string ret = "";
-  ret.reserve(height);
-
-  float x_pos = (float)_stepper / (float)_texWidth;
-  for (int y = 0; y < height; y++) {
-    float y_pos = (float)y / (float)_texHeight;
-    ret.push_back(sampleNN(x_pos, y_pos));
-  }
-
-  Logger::GetInstance()->log("getNextTexColumn: the returned col for height: " +
-                                 std::to_string(height),
-                             LogType::RENDER, LogLevel::INFO);
-  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
-  _stepper++;
-  return ret;
-}
-
-std::vector<int> TextureMapper::getMaskColumn(int height) const {
-  if (_texHeight < 1 || _texWidth < 1) {
-    return std::vector<int>(0);
-  }
-  std::vector<int> ret;
-  ret.reserve(height);
-
-  for (int i = 0; i < _texHeight; i++) {
-    ret.push_back(_textureMask[i * _texWidth + (_stepper % _texWidth)]);
-  }
-  int j = 0;
-  while (ret.size() < height) {
-    ret.push_back(
-        _textureMask[(j % _texHeight) * _texWidth + (_stepper % _texWidth)]);
-    j++;
-  }
-  return ret;
-}
-
 const std::string &TextureMapper::getTexture() const { return _textureMipMap; }
 const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 
@@ -362,4 +292,30 @@ std::string TextureMapper::ScaleToHeight(int height, std::string column) {
     }
   }
   return r_column.substr(0, height);
+}
+std::string TextureMapper::getTextColumnAt(int height, float hitpoint) {
+  std::string ret = "";
+  ret.reserve(height);
+  for (int y = 0; y < height; y++) {
+    float y_pos = (float)y / (float)_texHeight;
+    ret.push_back(sampleNN(hitpoint, y_pos));
+  }
+
+  Logger::GetInstance()->log("getTexColumnAt: the returned col for height: " +
+                                 std::to_string(height),
+                             LogType::RENDER, LogLevel::INFO);
+  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
+  _stepper++;
+  return ret;
+}
+std::vector<int> TextureMapper::getMaskColumnAt(int height, float hitpoint) {
+  std::vector<int> ret;
+  ret.reserve(height);
+  int x = static_cast<int>(hitpoint * (_texWidth - 1) + 0.5f);
+  x = std::clamp(x, 0, _texWidth - 1);
+  for (int y = 0; y < height; y++) {
+    int ty = (y % _texHeight);
+    ret.push_back(_textureMask[ty * _texWidth + x]);
+  }
+  return ret;
 }

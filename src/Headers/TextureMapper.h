@@ -36,8 +36,10 @@ public:
   // =========================
   //   return of textures
   // =========================
-  std::string getNextTexColumn(int height);
-  std::vector<int> getMaskColumn(int height) const;
+  std::string getTextColumnAt(int height, float hitpoint);
+  std::vector<int> getMaskColumnAt(int height, float hitpoint);
+  // std::string getNextTexColumn(int height);
+  // std::vector<int> getMaskColumn(int height) const;
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
 

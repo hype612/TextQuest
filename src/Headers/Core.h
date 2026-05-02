@@ -12,11 +12,12 @@
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
 #include "TextureMapper.h"
+#include "TextureRequest.h"
 #include "TextureRequestQueue.h"
+#include "WallSide.h"
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
 #include "player.h"
-#include "WallSide.h"
 #include <chrono>
 #include <cmath>
 #include <iostream>

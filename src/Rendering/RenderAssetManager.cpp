@@ -1,34 +1,17 @@
 #include "../Headers/RenderAssetManager.h"
 
+// UPDATE: Rescaling is unneccessary and just takes up processing time
+// do the scaling at fetch. This class will be remodeled to
+// handle the texture-combing of different layers probably
+
 void RenderAssetManager::TexturePreparator() {
-  while (EngineState::GetInstance()->gameRunningf == true) {
-    std::tuple<int, int, Tile, float> current = _texRequestQ.pop();
-
-    if (std::get<0>(current) == -1 && std::get<1>(current) == -1 &&
-        _texRequestQ.isRayCompleted()) {
-      _texRequestQ.setTexturesReady(true);
-      continue;
-    }
-
-    switch (std::get<2>(current)) {
-    case Tile::ENTITY:
-      prepareEntityTexture(current);
-      break;
-    case Tile::WALL:
-      prepareWallTexture(current);
-      break;
-    default:
-      continue;
-    }
-    _depthStack.push_back(std::tuple<int, int, Tile>(
-        std::get<0>(current), std::get<1>(current), std::get<2>(current)));
+  // fetch col
+  while (!_texRequestQ.isEmpty()) {
   }
 }
 
 void RenderAssetManager::prepareEntityTexture(
     const std::tuple<int, int, Tile, float> &toPrepare) {
-  // TODO: make it available to have multiple entities on a
-  // single tile. For that, entity texture preparation needs to work with arrays
   int id = _entityManager.getEntityIdAtPos(std::get<0>(toPrepare),
                                            std::get<1>(toPrepare));
   //_entityManager.rescaleEntityTexture(id, std::get<3>(toPrepare));
@@ -60,40 +43,10 @@ std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
 
 std::string RenderAssetManager::getNextCharColumn(int height) {
   std::string col;
+  while (!_texRequestQ.isEmpty()) {
+    TextureRequest t = _texRequestQ.pop();
+  }
   /*
-  while (!_depthStack.empty()) {
-    std::string thisCol;
-    int x = std::get<0>(_depthStack.back());
-    int y = std::get<1>(_depthStack.back());
-    if (std::get<2>(_depthStack.back()) == Tile::WALL) {
-      col.append(_mapManager.getWallTexColumnAt(x, y, height));
-      _depthStack.pop_back();
-      continue;
-    }
-    int id = _entityManager.getEntityIdAtPos(x, y);
-    if (col.empty()) {
-      col.append(_entityManager.getNextEntityCharColumn(id, height));
-      _depthStack.pop_back();
-      continue;
-    }
-    thisCol = _entityManager.getNextEntityCharColumn(id, height);
-    bool edge_detected = false;
-    int i = col.size();
-    for (auto it = thisCol.rbegin(); it != thisCol.rend(); ++it) {
-      if (i < 0) {
-        break;
-      }
-      auto &c = *it;
-      if (c == L' ' && edge_detected == false) {
-        continue;
-      }
-      edge_detected = !edge_detected;
-      if (c != L' ')
-        col[i] = c;
-      i--;
-    }
-    _depthStack.pop_back();
-  }*/
   if (_depthStack.empty()) {
     col = std::string(height, ' ');
     return col;
@@ -105,6 +58,6 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
     _depthStack.pop_back();
   }
   while (!_depthStack.empty())
-    _depthStack.pop_back();
+    _depthStack.pop_back();*/
   return col;
 }

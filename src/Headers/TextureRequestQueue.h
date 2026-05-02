@@ -2,6 +2,7 @@
 #define TEXTUREREQUESTQUEUE_H
 
 #include "./Tile.h"
+#include "TextureRequest.h"
 #include <algorithm>
 #include <condition_variable>
 #include <deque>
@@ -14,24 +15,26 @@ public:
   TextureRequestQueue() = default;
   ~TextureRequestQueue() = default;
 
-  void push(std::tuple<int, int, Tile, float> input);
-  std::tuple<int, int, Tile, float> pop();
+  void push(TextureRequest input);
+  TextureRequest pop();
   bool isEmpty() const;
 
+  /*
   void setRayCompleted(bool done);
   bool isRayCompleted();
-
   void setTexturesReady(bool done);
   bool areTexturesReady();
   void waitForTextures();
-
+  */
 private:
-  std::deque<std::tuple<int, int, Tile, float>> _texQueue;
+  std::deque<TextureRequest> _texQueue;
+  /*
   mutable std::shared_mutex _mtx;
   mutable std::mutex _cvMtx;
   std::condition_variable_any _cv;
   bool _rayCompleted = false;
   bool _texturesReady = false;
+  */
 };
 
 #endif // TEXTUREREQUESTQUEUE_H

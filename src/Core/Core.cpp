@@ -46,46 +46,19 @@ GameEngine::GameEngine()
 
 bool GameEngine::initTestMap() {
   std::string map;
-  map += "###############################################################";
-  map += "#.............................................................#";
-  map += "#..............########################################....####";
-  map += "#..............#............#.................................#";
-  map += "#..............#............#.................................#";
-  map += "#..............#............#.................................#";
-  map += "#..............##############...........###...................#";
-  map += "#......#####...#.....................###...##.................#";
-  map += "#..............#....................#........#................#";
-  map += "#########......#....................#........#................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#.....................#......#.................#";
-  map += "#..............#...................##........##...............#";
-  map += "#......#####...#..................##..........##..............#";
-  map += "#..............#..................#....#..#....#..............#";
-  map += "#########......#...................####....####...............#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#.............................................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#......#####...#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#########......#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#..............#..............................................#";
-  map += "#.............................................................#";
-  map += "#..............#..............................................#";
-  map += "###############################################################";
+  map += "###############################";
+  map += "#.............................#";
+  map += "#..............###........#####";
+  map += "#..............#............#.#";
+  map += "#..............#..............#";
+  map += "#..............#..............#";
+  map += "#..............#..............#";
+  map += "#..............#..............#";
+  map += "#..............#..............#";
+  map += "#..............#..............#";
+  map += "#.............................#";
+  map += "#..............#..............#";
+  map += "###############################";
 
   int map_w = map.find("\n");
   int map_h = map.size() / map_w;
@@ -134,8 +107,9 @@ void GameEngine::RayCastingProcess() {
     bool isCurrentObj = false;
     int currentObjX = -1;
     int currentObjY = -1;
-    _texRequestQueue.setRayCompleted(false);
-    _texRequestQueue.setTexturesReady(false);
+    // removed for trying single-thread performance
+    //_texRequestQueue.setRayCompleted(false);
+    //_texRequestQueue.setTexturesReady(false);
     float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) +
                       ((float)x / (float)_screenWidth) * _player.get_fov();
     // float distance_to_wall = 0.0f;
@@ -161,8 +135,9 @@ void GameEngine::RayCastingProcess() {
     int mapY = std::floorf(_player.get_y());
 
     WallSide side = WallSide::NOHIT;
+    float rayLength = 0;
 
-    while (!hitwall) {
+    while (!hitwall || rayLength < max_raylength) {
       if (mapX < 0 || mapY < 0 || mapX >= _mapManager.mapWidth() ||
           mapY >= _mapManager.mapHeight()) {
         sideDistX = max_raylength;
@@ -181,35 +156,50 @@ void GameEngine::RayCastingProcess() {
       if (_sceneManager.isOccupied(mapX, mapY) == Tile::WALL &&
           (currentObjX != mapX || currentObjY != mapY)) {
         hitwall = true;
+        float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
+                                                    : sideDistY - deltaDistY;
+        int height =
+            int((float)(_screenHeight / 2.f) - _screenHeight / ((float)dist));
+        float hitp = (side == WallSide::HORIZONTAL)
+                         ? _player.get_y() + dist * rayDirY
+                         : _player.get_x() + dist * rayDirX;
+        hitp -= std::floorf(hitp);
+        _texRequestQueue.push({mapX, mapY, Tile::WALL, height, hitp, dist});
       }
       if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY &&
           (currentObjX != mapX || currentObjY != mapY)) {
-        // addition calculations are needed for entity
-        //_texRequestQueue.push(std::tuple<int, int, Tile, float>(
-        // mapX, mapY, Tile::ENTITY, distance_to_wall));
-        currentObjY = mapY;
-        currentObjX = mapX;
+        float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
+                                                    : sideDistY - deltaDistY;
+        int height =
+            int((float)(_screenHeight / 2.f) - _screenHeight / ((float)dist));
+        float hitp = (side == WallSide::HORIZONTAL)
+                         ? _player.get_y() + dist * rayDirY
+                         : _player.get_x() + dist * rayDirX;
+        hitp -= std::floorf(hitp);
+        _texRequestQueue.push({mapX, mapY, Tile::ENTITY, height, hitp, dist});
       }
+      rayLength = (side == WallSide::HORIZONTAL) ? sideDistX : sideDistY;
     }
-    _texRequestQueue.setRayCompleted(true);
-    _texRequestQueue.waitForTextures();
+    // Removed for trying single-threaded performance.
+    //_texRequestQueue.setRayCompleted(true);
+    //_texRequestQueue.waitForTextures();
     float distance_to_wall = (side == WallSide::HORIZONTAL)
                                  ? sideDistX - deltaDistX
                                  : sideDistY - deltaDistY;
     float hitpoint = (side == WallSide::HORIZONTAL)
                          ? _player.get_y() + distance_to_wall * rayDirY
                          : _player.get_x() + distance_to_wall * rayDirX;
+    if (side == WallSide::NOHIT) {
+      distance_to_wall = max_raylength;
+      hitpoint = 0.f;
+    }
+
     hitpoint -= std::floorf(hitpoint);
-    int ceiling = int((float)(_screenHeight / 2.0f) -
+    int ceiling = int((float)(_screenHeight / 2.f) -
                       _screenHeight / ((float)distance_to_wall));
     int floor = _screenHeight - ceiling;
     RenderScreen(ceiling, floor, x);
   }
-
-  /*int ceiling = int((float)(_screenHeight / 2.0f) -
-                    _screenHeight /
-  ((float)distance_to_wall)); int floor = _screenHeight
-  - ceiling;*/
 }
 
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
