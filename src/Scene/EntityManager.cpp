@@ -50,15 +50,6 @@ void EntityManager::removeAllEntities() {
   _entityContainer.shrink_to_fit();
 }
 
-// for renderer
-void EntityManager::rescaleEntityTexture(int EntityId, float distance) {
-  _entityContainer[EntityId].rescaleTexture(distance);
-}
-
-void EntityManager::changeEntityTextureScale(Entity &entity, float distance) {
-  entity.rescaleTexture(distance);
-}
-
 std::string EntityManager::getCurrentEntityTexture(int EntityId) {
   return _entityContainer[EntityId].getTexture();
 }
@@ -76,10 +67,14 @@ EntityManager::getCurrentEntityTexMask(const Entity &entity) {
   return entity.getTexMask();
 }
 
-std::string EntityManager::getNextEntityCharColumn(int EntityId, int height) {
-  return _entityContainer[EntityId].getNextTexColumn(height);
+std::string EntityManager::getEntityTexColAt(int mapX, int mapY, int height,
+                                             float hitpoint) {
+  int id = getEntityIdAtPos(mapX, mapY);
+  return _entityContainer[id].getTextColumnAt(height, hitpoint);
 }
 
-std::vector<int> EntityManager::getEntityMaskColumn(int EntityId, int height) {
-  return _entityContainer[EntityId].getMaskColumn(height);
+std::vector<int> EntityManager::getEntityMaskColAt(int mapX, int mapY,
+                                                   int height, float hitpoint) {
+  int id = getEntityIdAtPos(mapX, mapY);
+  return _entityContainer[id].getMaskColumnAt(height, hitpoint);
 }

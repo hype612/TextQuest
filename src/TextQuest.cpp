@@ -32,12 +32,11 @@ int main() {
   // logFile.flush();
 
   // logFile.flush();
-
   sceneMan.uploadTextureForWall('#', texs["wall"]);
   // logFile << sceneMan.getWallTextureForMapChar('#') << std::endl;
   Player &p = sceneMan.getPlayerRef();
-  p.set_x(3.f);
-  p.set_y(3.f);
-  p.set_angle(.7f);
+  p.set_x(2.f);
+  p.set_y(2.f);
+  p.set_angle(.0f);
   ge.run_game();
 }

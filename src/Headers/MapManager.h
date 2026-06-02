@@ -19,9 +19,8 @@ public:
   const std::string &getWallTexForMapChar(const char &mapChar);
 
   void uploadWallTextureFor(const char &mapChar, std::string texture);
-  void rescaleWallTextureAt(int x, int y, float distance);
   std::string getWallTextureAt(int x, int y);
-  std::string getWallTexColumnAt(int x, int y, int height);
+  std::string getWallTexColumnAt(int x, int y, int height, float hitpoint);
   bool isOutOfBounds(int test_x, int test_y) const;
 
 private:

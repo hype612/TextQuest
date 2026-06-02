@@ -8,8 +8,8 @@ TextureRequest TextureRequestQueue::pop() {
   if (_texQueue.empty()) {
     return TextureRequest{-1, -1, Tile::NONE, -1, -1.f, -1.f};
   }
-  TextureRequest topEl = _texQueue.front();
-  _texQueue.pop_front();
+  TextureRequest topEl = _texQueue.back();
+  _texQueue.pop_back();
   return topEl;
 }
 

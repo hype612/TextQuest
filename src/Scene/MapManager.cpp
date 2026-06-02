@@ -45,14 +45,6 @@ void MapManager::uploadWallTextureFor(const char &mapChar,
   _wallTexMappers[mapChar] = TextureMapper(texture);
 }
 
-void MapManager::rescaleWallTextureAt(int x, int y, float distance) {
-  if (isOutOfBounds(x, y)) {
-    return;
-  }
-  char mapChar = _map[y * _mapWidth + x];
-  _wallTexMappers[mapChar].rescaleCurrentTexture(distance);
-}
-
 std::string MapManager::getWallTextureAt(int x, int y) {
   if (isOutOfBounds(x, y)) {
     return std::string();
@@ -61,12 +53,13 @@ std::string MapManager::getWallTextureAt(int x, int y) {
   return _wallTexMappers[mapChar].getTexture();
 }
 
-std::string MapManager::getWallTexColumnAt(int x, int y, int height) {
+std::string MapManager::getWallTexColumnAt(int x, int y, int height,
+                                           float hitpoint) {
   if (isOutOfBounds(x, y)) {
     return std::string();
   }
   char mapChar = _map[y * _mapWidth + x];
-  return _wallTexMappers[mapChar].getNextTexColumn(height);
+  return _wallTexMappers[mapChar].getTextColumnAt(height, hitpoint);
 }
 
 bool MapManager::isOutOfBounds(int test_x, int test_y) const {

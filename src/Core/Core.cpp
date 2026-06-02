@@ -104,7 +104,6 @@ void GameEngine::RayCastingProcess() {
   const float max_raylength = 8.f;
 
   for (int x = 0; x < _screenWidth; x++) {
-    bool isCurrentObj = false;
     int currentObjX = -1;
     int currentObjY = -1;
     // removed for trying single-thread performance

@@ -1,11 +1,9 @@
 #include "../Headers/RenderAssetManager.h"
-
-// UPDATE: Rescaling is unneccessary and just takes up processing time
-// do the scaling at fetch. This class will be remodeled to
-// handle the texture-combing of different layers probably
+#include <cstddef>
+#include <string>
+#include <vector>
 
 void RenderAssetManager::TexturePreparator() {
-  // fetch col
   while (!_texRequestQ.isEmpty()) {
   }
 }
@@ -14,14 +12,10 @@ void RenderAssetManager::prepareEntityTexture(
     const std::tuple<int, int, Tile, float> &toPrepare) {
   int id = _entityManager.getEntityIdAtPos(std::get<0>(toPrepare),
                                            std::get<1>(toPrepare));
-  //_entityManager.rescaleEntityTexture(id, std::get<3>(toPrepare));
 }
 
 void RenderAssetManager::prepareWallTexture(
-    const std::tuple<int, int, Tile, float> &toPrepare) {
-  //_mapManager.rescaleWallTextureAt(
-  //    std::get<0>(toPrepare), std::get<1>(toPrepare), std::get<3>(toPrepare));
-}
+    const std::tuple<int, int, Tile, float> &toPrepare) {}
 
 RenderAssetManager::RenderAssetManager(EntityManager &entityMan,
                                        MapManager &mapMan,
@@ -43,21 +37,26 @@ std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
 
 std::string RenderAssetManager::getNextCharColumn(int height) {
   std::string col;
+  col.reserve(height);
   while (!_texRequestQ.isEmpty()) {
     TextureRequest t = _texRequestQ.pop();
+    if (t.mapX == -1 && t.mapY == -1 && t.tileType == Tile::NONE) {
+      break;
+    }
+    if (t.tileType == Tile::WALL) {
+      col =
+          _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height, t.hitPoint);
+    } else if (t.tileType == Tile::ENTITY) {
+      std::vector<int> txMask = _entityManager.getEntityMaskColAt(
+          t.mapX, t.mapY, t.height, t.hitPoint);
+      std::string tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY,
+                                                        t.height, t.hitPoint);
+      for (size_t i = 0; i < t.height; i++) {
+        if (txMask[i] == 1)
+          col[i] = tx[i];
+      }
+    }
   }
-  /*
-  if (_depthStack.empty()) {
-    col = std::string(height, ' ');
-    return col;
-  }
-  int x = std::get<0>(_depthStack.back());
-  int y = std::get<1>(_depthStack.back());
-  if (std::get<2>(_depthStack.back()) == Tile::WALL) {
-    col.append(_mapManager.getWallTexColumnAt(x, y, height));
-    _depthStack.pop_back();
-  }
-  while (!_depthStack.empty())
-    _depthStack.pop_back();*/
+
   return col;
 }

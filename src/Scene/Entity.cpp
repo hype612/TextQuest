@@ -30,16 +30,26 @@ std::tuple<int, int> Entity::getCoordinates() {
 
 std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 
-std::string Entity::getNextTexColumn(int height) {
-  return _texMapper.getNextTexColumn(height);
-}
-
 const std::vector<int> &Entity::getTexMask() const {
   return _texMapper.getMask();
 }
 
+/*
 std::vector<int> Entity::getMaskColumn(int height) const {
   return _texMapper.getMaskColumn(height);
+
+
+std::string Entity::getNextTexColumn(int height) {
+  return _texMapper.getNextTexColumn(height);
+}
+}*/
+
+std::string Entity::getTextColumnAt(int height, float hitpoint) {
+  return _texMapper.getTextColumnAt(height, hitpoint);
+}
+
+std::vector<int> Entity::getMaskColumnAt(int height, float hitpoint) {
+  return _texMapper.getMaskColumnAt(height, hitpoint);
 }
 
 int Entity::getHP() { return _health; }

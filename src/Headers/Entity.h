@@ -25,9 +25,11 @@ public:
 
   std::tuple<int, int> getCoordinates();
   std::string getTexture() const;
-  std::string getNextTexColumn(int height);
+  // std::string getNextTexColumn(int height);
+  std::string getTextColumnAt(int height, float hitpoint);
+  std::vector<int> getMaskColumnAt(int height, float hitpoint);
   const std::vector<int> &getTexMask() const;
-  std::vector<int> getMaskColumn(int height) const;
+  // std::vector<int> getMaskColumn(int height) const;
 
   int getHP();
 

@@ -18,26 +18,26 @@ public:
   // repeating scaling
   // =============================
 
-  void repeatingVerticalDownscale(int height, int width);
-  void repeatingHorizontalDownscale(int width);
-  void repeatingHorizontalUpscale(int height, int width);
-  void repeatingVerticalUpscale(int height, int width);
+  void repeatingVerticalDownscale(unsigned int height, unsigned int width);
+  void repeatingHorizontalDownscale(unsigned int width);
+  void repeatingHorizontalUpscale(unsigned int height, unsigned int width);
+  void repeatingVerticalUpscale(unsigned int height, unsigned int width);
 
   // =============================
   //   interpolation scaling(nn)
   // =============================
 
-  void nxyInterpolationScale(int width, int height);
-  void nxInterpolationDownscale(int width);
-  void nxInterpolationUpscale(int width);
-  void nyInterpolationDownscale(int height);
-  void nyInterpolationUpscale(int height);
+  void nxyInterpolationScale(unsigned int width, unsigned int height);
+  void nxInterpolationDownscale(unsigned int width);
+  void nxInterpolationUpscale(unsigned int width);
+  void nyInterpolationDownscale(unsigned int height);
+  void nyInterpolationUpscale(unsigned int height);
 
   // =========================
   //   return of textures
   // =========================
-  std::string getTextColumnAt(int height, float hitpoint);
-  std::vector<int> getMaskColumnAt(int height, float hitpoint);
+  std::string getTextColumnAt(unsigned int height, float hitpoint);
+  std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint);
   // std::string getNextTexColumn(int height);
   // std::vector<int> getMaskColumn(int height) const;
   const std::string &getTexture() const;
@@ -50,11 +50,11 @@ private:
   std::string _textureMipMap = "";
   std::vector<int> _textureMask;
   int _stepper = -1;
-  int _texHeight = -1;
-  int _texWidth = -1;
+  unsigned int _texHeight = -1;
+  unsigned int _texWidth = -1;
 
   void GenerateTextureMask();
-  std::string ScaleToHeight(int height, std::string column);
+  std::string ScaleToHeight(unsigned int height, std::string column);
   char sampleNN(float u, float v);
 };
 

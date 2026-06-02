@@ -24,15 +24,14 @@ public:
   void removeAllEntities();
 
   // for renderer
-  void rescaleEntityTexture(int EntityId, float distance);
-  void changeEntityTextureScale(Entity &entity, float distance);
   std::string getCurrentEntityTexture(int EntityId);
   std::string getCurrentEntityTexture(const Entity &entity);
   const std::vector<int> &getCurrentEntityTexMask(int EntityId);
   const std::vector<int> &getCurrentEntityTexMask(const Entity &entity);
 
-  std::string getNextEntityCharColumn(int EntityId, int height);
-  std::vector<int> getEntityMaskColumn(int EntityId, int height);
+  std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint);
+  std::vector<int> getEntityMaskColAt(int mapX, int mapY, int height,
+                                      float hitpoint);
 
 private:
   std::vector<Entity> _entityContainer;

@@ -19,22 +19,8 @@ public:
   TextureRequest pop();
   bool isEmpty() const;
 
-  /*
-  void setRayCompleted(bool done);
-  bool isRayCompleted();
-  void setTexturesReady(bool done);
-  bool areTexturesReady();
-  void waitForTextures();
-  */
 private:
   std::deque<TextureRequest> _texQueue;
-  /*
-  mutable std::shared_mutex _mtx;
-  mutable std::mutex _cvMtx;
-  std::condition_variable_any _cv;
-  bool _rayCompleted = false;
-  bool _texturesReady = false;
-  */
 };
 
 #endif // TEXTUREREQUESTQUEUE_H
