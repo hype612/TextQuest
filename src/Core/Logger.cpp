@@ -34,6 +34,13 @@ void Logger::log(const std::string &msg, LogType type, LogLevel lv) {
 
 void Logger::setLogLevel(LogLevel newLv) { _logLv = newLv; }
 
+void Logger::forceFlush() {
+  _coreLog.flush();
+  _inputLog.flush();
+  _renderLog.flush();
+  _texprepLog.flush();
+}
+
 Logger::~Logger() {
   _coreLog.close();
   _inputLog.close();

@@ -87,6 +87,7 @@ void GameEngine::run_game() {
         !EngineState::GetInstance()->gameRunningf) {
       _textureSetterT.join();
     }*/
+
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
@@ -94,22 +95,15 @@ void GameEngine::run_game() {
 
     _inputHandler->ReceiveMovementInput(f_elapsed_time);
     _sceneManager.process();
-
-    auto t0 = std::chrono::high_resolution_clock::now();
     RayCastingProcess();
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    float ray_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
     _renderer->OverwriteBuffer(screen);
     _renderer->PrintDebugInfo(_player, f_elapsed_time);
     _renderer->PrintBuffer();
-    auto t2 = std::chrono::high_resolution_clock::now();
-    float render_ms = std::chrono::duration<float, std::milli>(t2 - t1).count();
   }
 }
 
 void GameEngine::RayCastingProcess() {
-
   const float max_raylength = 8.f;
 
   for (int x = 0; x < _screenWidth; x++) {
@@ -131,13 +125,13 @@ void GameEngine::RayCastingProcess() {
     float sideDistX = (stepX == 1)
                           ? std::floorf(_player.get_x()) + 1.f - _player.get_x()
                           : _player.get_x() - std::floorf(_player.get_x());
-    if (sideDistX == 0.f)
+    if (sideDistX < 0.0001f)
       sideDistX = 1.f;
     sideDistX = sideDistX * deltaDistX;
     float sideDistY = (stepY == 1)
                           ? std::floorf(_player.get_y()) + 1.f - _player.get_y()
                           : _player.get_y() - std::floorf(_player.get_y());
-    if (sideDistY == 0.f)
+    if (sideDistY < 0.0001f)
       sideDistY = 1.f;
     sideDistY = sideDistY * deltaDistY;
 
@@ -165,12 +159,13 @@ void GameEngine::RayCastingProcess() {
         sideDistY = max_raylength;
         break;
       }
+
       if (_sceneManager.isOccupied(mapX, mapY) == Tile::WALL) {
         hitwall = true;
         float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
                                                     : sideDistY - deltaDistY;
-        int height =
-            int((float)(_screenHeight / 2.f) - _screenHeight / ((float)dist));
+
+        int height = (int)(_screenHeight / dist);
         float hitp = (side == WallSide::HORIZONTAL)
                          ? _player.get_y() + dist * rayDirY
                          : _player.get_x() + dist * rayDirX;
@@ -178,6 +173,7 @@ void GameEngine::RayCastingProcess() {
         _texRequestQueue.push({mapX, mapY, Tile::WALL, height, hitp, dist});
       }
       if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY) {
+
         float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
                                                     : sideDistY - deltaDistY;
         int height =
@@ -205,9 +201,18 @@ void GameEngine::RayCastingProcess() {
     }
 
     hitpoint -= std::floorf(hitpoint);
-    int ceiling = int((float)(_screenHeight / 2.f) -
-                      _screenHeight / ((float)distance_to_wall));
-    int floor = _screenHeight - ceiling;
+    // int ceiling = int((float)(_screenHeight / 2.f) -
+    //                   _screenHeight / ((float)distance_to_wall));
+    // int floor = _screenHeight - ceiling;
+    if (distance_to_wall < 0.0001f)
+      distance_to_wall = 0.0001f;
+
+    int wallHeight = (int)(_screenHeight / distance_to_wall);
+    int ceiling = (_screenHeight / 2) - (wallHeight / 2);
+    int floor = ceiling + wallHeight;
+
+    ceiling = std::max(0, ceiling);
+    floor = std::min(_screenHeight - 1, floor);
     RenderScreen(ceiling, floor, x);
   }
 }

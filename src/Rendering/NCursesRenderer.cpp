@@ -49,7 +49,7 @@ void NCursesRenderer::PrintDebugInfo(const Player &player, float delta) {
   mvprintw(debugY, debugX, "Player x: %.2f y: %.2f angle: %.2f", player.get_x(),
            player.get_y(), player.get_angle());
   debugY = 1;
-  mvprintw(debugY, debugX, "fps: %.2f", 1.f / delta / 1000);
+  mvprintw(debugY, debugX, "fps: %.2f", 1.f / delta);
 }
 
 std::tuple<int, int> NCursesRenderer::GetScreenSize() {

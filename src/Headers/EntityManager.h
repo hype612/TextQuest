@@ -15,6 +15,7 @@ public:
   std::optional<std::reference_wrapper<Entity>> getEntityAtPos(int coord_x,
                                                                int coord_y);
   int getEntityIdAtPos(int coord_x, int coord_y) const;
+  int getEntityCount() const;
   void process();
 
   // ways to access the container

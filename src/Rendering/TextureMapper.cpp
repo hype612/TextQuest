@@ -53,10 +53,6 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
   _texWidth = line.find('\n');
   _texHeight = std::count(line.begin(), line.end(), '\n');
   _textureMipMap = *tex;
-  Logger::GetInstance()->log("setCurrentTexture: starting scaling to " +
-                                 std::to_string(_texWidth) + "x" +
-                                 std::to_string(_texHeight),
-                             LogType::TEXPREP, LogLevel::INFO);
 
   // HORIZONTAL SCALE
   if (mode == "repeat") {
@@ -92,11 +88,6 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
       nyInterpolationDownscale(height);
     }*/
   }
-  Logger::GetInstance()->log("generated texture:", LogType::TEXPREP,
-                             LogLevel::INFO);
-  Logger::GetInstance()->log(_textureMipMap, LogType::TEXPREP, LogLevel::INFO);
-  Logger::GetInstance()->log("=====================================\n\n",
-                             LogType::TEXPREP, LogLevel::INFO);
   GenerateTextureMask();
 }
 
@@ -307,10 +298,6 @@ std::string TextureMapper::getTextColumnAt(unsigned int height,
     ret.push_back(sampleNN(hitpoint, y_pos));
   }
 
-  Logger::GetInstance()->log("getTexColumnAt: the returned col for height: " +
-                                 std::to_string(height),
-                             LogType::RENDER, LogLevel::INFO);
-  Logger::GetInstance()->log(ret, LogType::RENDER, LogLevel::INFO);
   _stepper++;
   return ret;
 }

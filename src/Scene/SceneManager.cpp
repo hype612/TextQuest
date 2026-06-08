@@ -46,9 +46,9 @@ void SceneManager::removeEntity(int entityId) {
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
 
 Tile SceneManager::isOccupied(int x, int y) const {
+
   if (_entityManager.getEntityIdAtPos(x, y) != -1)
     return Tile::ENTITY;
-  bool wall = _mapManager.isWall(x, y);
   if (_mapManager.isWall(x, y) == true)
     return Tile::WALL;
 
@@ -64,11 +64,6 @@ Player &SceneManager::getPlayerRef() { return _player; }
 void SceneManager::loadResources(
     const std::string &filePath,
     std::unordered_map<std::string, std::string> &outTextures) {
-  Logger::GetInstance()->log("===========================================",
-                             LogType::TEXPREP, LogLevel::INFO);
-
-  Logger::GetInstance()->log("starting loadResources.", LogType::TEXPREP,
-                             LogLevel::INFO);
   std::stringstream temp;
   std::string value;
   std::string key;

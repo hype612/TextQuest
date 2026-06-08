@@ -15,7 +15,7 @@ public:
   static Logger *GetInstance();
   static void log(const std::string &msg, LogType type, LogLevel lv);
   static void setLogLevel(LogLevel newLv);
-
+  static void forceFlush();
   ~Logger();
 
 private:

@@ -17,13 +17,13 @@ void Player::addto_x(float rval_x) {
       _mapManager.isOutOfBounds((int)m_x_pos, (int)m_y_pos))
     m_x_pos -= rval_x;
 }
+
 void Player::subtractf_x(float rval_x) {
   m_x_pos -= rval_x;
   if (_mapManager.isWall((int)m_x_pos, (int)m_y_pos) ||
       _mapManager.isOutOfBounds((int)m_x_pos, (int)m_y_pos))
     m_x_pos += rval_x;
 }
-
 void Player::addto_y(float rval_y) {
   m_y_pos += rval_y;
   if (_mapManager.isWall((int)m_x_pos, (int)m_y_pos) ||

@@ -20,6 +20,7 @@ int MapManager::mapHeight() const { return _mapHeight; }
 int MapManager::mapWidth() const { return _mapWidth; }
 
 bool MapManager::isWall(int test_x, int test_y) const {
+
   if (isOutOfBounds(test_x, test_y)) {
     return false;
   }
@@ -65,19 +66,6 @@ std::string MapManager::getWallTexColumnAt(int x, int y, int height,
 
 bool MapManager::isOutOfBounds(int test_x, int test_y) const {
   if (test_x < 0 || test_x >= _mapWidth || test_y < 0 || test_y >= _mapHeight) {
-    std::cerr << "ERROR: MapManager: given coordinates are out of bounds"
-              << std::endl;
-    std::cerr << "the following were provided: test_x = " << test_x
-              << " , test_y = " << test_y << std::endl;
-    void *callstack[32];
-    int frames = backtrace(callstack, 32);
-    char **symbols = backtrace_symbols(callstack, frames);
-
-    std::cerr << "Stack trace:\n";
-    for (int i = 0; i < frames; ++i)
-      std::cerr << symbols[i] << "\n";
-
-    free(symbols);
     return true;
   } else {
     return false;

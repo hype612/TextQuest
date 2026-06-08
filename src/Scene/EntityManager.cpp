@@ -20,6 +20,8 @@ int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
   return -1;
 }
 
+int EntityManager::getEntityCount() const { return _entityContainer.size(); }
+
 void EntityManager::process() {
   for (Entity &e : _entityContainer) {
     e.process();
