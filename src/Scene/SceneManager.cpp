@@ -2,7 +2,7 @@
 
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
     : _entityManager(entityMan), _mapManager(mapMan),
-      _player(-1, -1, 0.f, 60, mapMan) {
+      _player(-1, -1, 0.f, 1.0472f, mapMan) {
   EngineState::globalSceneManager = this;
 }
 
