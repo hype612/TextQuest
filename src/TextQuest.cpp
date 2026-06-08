@@ -1,14 +1,15 @@
 #include "Headers/Core.h"
 #include "Headers/EngineState.h"
 #include "Headers/SceneManager.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 int main() {
   // logger init
   // std::ofstream logFile("debug.log", std::ios::trunc);
-
-  GameEngine ge;
+  auto ge_ptr = std::make_unique<GameEngine>();
+  // GameEngine ge;
   SceneManager &sceneMan = *(EngineState::GetInstance()->globalSceneManager);
 
   std::string map = "";
@@ -38,5 +39,5 @@ int main() {
   p.set_x(2.f);
   p.set_y(2.f);
   p.set_angle(.0f);
-  ge.run_game();
+  ge_ptr->run_game();
 }

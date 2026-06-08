@@ -68,7 +68,7 @@ void TextureMapper::setCurrentTexture(float distance, const std::string &mode,
     }
     // VERTICAL SCALE
     if (_texHeight < height) {
-      repeatingVerticalUpscale(height, width);
+      repeatingVerticalUpscale(height);
     }
     if (_texHeight > height) {
       repeatingVerticalDownscale(height, width);
@@ -141,8 +141,7 @@ void TextureMapper::repeatingHorizontalUpscale(unsigned int height,
   _texWidth = width;
 }
 
-void TextureMapper::repeatingVerticalUpscale(unsigned int height,
-                                             unsigned int width) {
+void TextureMapper::repeatingVerticalUpscale(unsigned int height) {
   std::string new_tex = _textureMipMap;
   int i = 0;
   while (_texHeight < height) {

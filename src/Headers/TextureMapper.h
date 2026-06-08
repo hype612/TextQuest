@@ -21,7 +21,7 @@ public:
   void repeatingVerticalDownscale(unsigned int height, unsigned int width);
   void repeatingHorizontalDownscale(unsigned int width);
   void repeatingHorizontalUpscale(unsigned int height, unsigned int width);
-  void repeatingVerticalUpscale(unsigned int height, unsigned int width);
+  void repeatingVerticalUpscale(unsigned int height);
 
   // =============================
   //   interpolation scaling(nn)

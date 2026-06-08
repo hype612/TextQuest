@@ -1,4 +1,6 @@
 #include "../Headers/MapManager.h"
+#include <execinfo.h>
+#include <string>
 
 MapManager::MapManager() {} // so far nothing needs to be inited
 
@@ -21,7 +23,6 @@ bool MapManager::isWall(int test_x, int test_y) const {
   if (isOutOfBounds(test_x, test_y)) {
     return false;
   }
-
   if (_map[test_y * _mapWidth + test_x] == '#')
     return true;
   else
@@ -68,6 +69,15 @@ bool MapManager::isOutOfBounds(int test_x, int test_y) const {
               << std::endl;
     std::cerr << "the following were provided: test_x = " << test_x
               << " , test_y = " << test_y << std::endl;
+    void *callstack[32];
+    int frames = backtrace(callstack, 32);
+    char **symbols = backtrace_symbols(callstack, frames);
+
+    std::cerr << "Stack trace:\n";
+    for (int i = 0; i < frames; ++i)
+      std::cerr << symbols[i] << "\n";
+
+    free(symbols);
     return true;
   } else {
     return false;

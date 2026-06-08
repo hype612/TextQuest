@@ -46,6 +46,12 @@ private:
 
   Player &_player;
 
+  // DONT FORGET TO REMOVE
+  // DONT FORGET TO REMOVE
+  // DONT FORGET TO REMOVE
+  // DONT FORGET TO REMOVE
+  int _steps;
+
   // rendering vars and consts
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
@@ -54,11 +60,11 @@ private:
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
-  std::thread _textureSetterT;
+  // std::thread _textureSetterT;
 
   // for multithreading
   int _max_thread_num = -1;
-  std::thread textureSetterT;
+  // std::thread textureSetterT;
 
   // dont want anyone to call this
   // fallback map for testing

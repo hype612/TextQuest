@@ -8,15 +8,6 @@ void RenderAssetManager::TexturePreparator() {
   }
 }
 
-void RenderAssetManager::prepareEntityTexture(
-    const std::tuple<int, int, Tile, float> &toPrepare) {
-  int id = _entityManager.getEntityIdAtPos(std::get<0>(toPrepare),
-                                           std::get<1>(toPrepare));
-}
-
-void RenderAssetManager::prepareWallTexture(
-    const std::tuple<int, int, Tile, float> &toPrepare) {}
-
 RenderAssetManager::RenderAssetManager(EntityManager &entityMan,
                                        MapManager &mapMan,
                                        TextureRequestQueue &texReqQ)
@@ -51,7 +42,7 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
           t.mapX, t.mapY, t.height, t.hitPoint);
       std::string tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY,
                                                         t.height, t.hitPoint);
-      for (size_t i = 0; i < t.height; i++) {
+      for (int i = 0; i < t.height; i++) {
         if (txMask[i] == 1)
           col[i] = tx[i];
       }

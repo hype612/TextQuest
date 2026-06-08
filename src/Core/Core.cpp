@@ -1,7 +1,10 @@
 #include "../Headers/Core.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <ncurses.h>
+#include <random>
+#include <ratio>
 #include <string>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
@@ -29,7 +32,7 @@ GameEngine::GameEngine()
       _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
-  _max_thread_num = std::thread::hardware_concurrency();
+  //_max_thread_num = std::thread::hardware_concurrency();
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
   _inputHandler = new NCursesInputHandler(_player);
@@ -71,17 +74,19 @@ bool GameEngine::initTestMap() {
 void GameEngine::run_game() {
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
-  _textureSetterT =
-      std::thread(&RenderAssetManager::TexturePreparator, &_renderAssetManager);
+  //_textureSetterT =
+  //    std::thread(&RenderAssetManager::TexturePreparator,
+  //    &_renderAssetManager);
   if (!_sceneManager.isMapAvailable())
     initTestMap();
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
   while (EngineState::GetInstance()->gameRunningf == true) {
+    /*
     if (_textureSetterT.joinable() &&
         !EngineState::GetInstance()->gameRunningf) {
       _textureSetterT.join();
-    }
+    }*/
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
@@ -90,12 +95,16 @@ void GameEngine::run_game() {
     _inputHandler->ReceiveMovementInput(f_elapsed_time);
     _sceneManager.process();
 
+    auto t0 = std::chrono::high_resolution_clock::now();
     RayCastingProcess();
 
-    // screen[_screenHeight * _screenWidth - 1] = '\0';
+    auto t1 = std::chrono::high_resolution_clock::now();
+    float ray_ms = std::chrono::duration<float, std::milli>(t1 - t0).count();
     _renderer->OverwriteBuffer(screen);
     _renderer->PrintDebugInfo(_player, f_elapsed_time);
     _renderer->PrintBuffer();
+    auto t2 = std::chrono::high_resolution_clock::now();
+    float render_ms = std::chrono::duration<float, std::milli>(t2 - t1).count();
   }
 }
 
@@ -104,8 +113,6 @@ void GameEngine::RayCastingProcess() {
   const float max_raylength = 8.f;
 
   for (int x = 0; x < _screenWidth; x++) {
-    int currentObjX = -1;
-    int currentObjY = -1;
     // removed for trying single-thread performance
     //_texRequestQueue.setRayCompleted(false);
     //_texRequestQueue.setTexturesReady(false);
@@ -124,10 +131,14 @@ void GameEngine::RayCastingProcess() {
     float sideDistX = (stepX == 1)
                           ? std::floorf(_player.get_x()) + 1.f - _player.get_x()
                           : _player.get_x() - std::floorf(_player.get_x());
+    if (sideDistX == 0.f)
+      sideDistX = 1.f;
     sideDistX = sideDistX * deltaDistX;
     float sideDistY = (stepY == 1)
                           ? std::floorf(_player.get_y()) + 1.f - _player.get_y()
                           : _player.get_y() - std::floorf(_player.get_y());
+    if (sideDistY == 0.f)
+      sideDistY = 1.f;
     sideDistY = sideDistY * deltaDistY;
 
     int mapX = std::floorf(_player.get_x());
@@ -135,14 +146,9 @@ void GameEngine::RayCastingProcess() {
 
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
-
-    while (!hitwall || rayLength < max_raylength) {
-      if (mapX < 0 || mapY < 0 || mapX >= _mapManager.mapWidth() ||
-          mapY >= _mapManager.mapHeight()) {
-        sideDistX = max_raylength;
-        sideDistY = max_raylength;
-        break;
-      }
+    _steps = 0;
+    while (!hitwall && rayLength < max_raylength) {
+      _steps++;
       if (sideDistX < sideDistY) {
         sideDistX += deltaDistX;
         mapX += stepX;
@@ -152,8 +158,14 @@ void GameEngine::RayCastingProcess() {
         mapY += stepY;
         side = WallSide::VERTICAL;
       }
-      if (_sceneManager.isOccupied(mapX, mapY) == Tile::WALL &&
-          (currentObjX != mapX || currentObjY != mapY)) {
+
+      if (mapX < 0 || mapY < 0 || mapX >= _mapManager.mapWidth() ||
+          mapY >= _mapManager.mapHeight()) {
+        sideDistX = max_raylength;
+        sideDistY = max_raylength;
+        break;
+      }
+      if (_sceneManager.isOccupied(mapX, mapY) == Tile::WALL) {
         hitwall = true;
         float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
                                                     : sideDistY - deltaDistY;
@@ -165,8 +177,7 @@ void GameEngine::RayCastingProcess() {
         hitp -= std::floorf(hitp);
         _texRequestQueue.push({mapX, mapY, Tile::WALL, height, hitp, dist});
       }
-      if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY &&
-          (currentObjX != mapX || currentObjY != mapY)) {
+      if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY) {
         float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
                                                     : sideDistY - deltaDistY;
         int height =
@@ -204,9 +215,6 @@ void GameEngine::RayCastingProcess() {
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
   wchar_t floorShade;
   int x = col;
-  Logger::GetInstance()->log("floor: " + std::to_string(floor) +
-                                 " ceiling: " + std::to_string(ceiling),
-                             LogType::RENDER, LogLevel::INFO);
   std::string toRender =
       _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
   int toRenderIt = 0;

@@ -21,11 +21,6 @@ public:
   std::string getNextCharColumn(int height);
 
 private:
-  void prepareEntityTexture(const std::tuple<int, int, Tile, float> &toPrepare);
-  void prepareWallTexture(const std::tuple<int, int, Tile, float> &toPrepare);
-
-  // kinda redundant to have another deque. removing it temporarily
-  // std::deque<std::tuple<int, int, Tile>> _depthStack;
   EntityManager &_entityManager;
   MapManager &_mapManager;
   TextureRequestQueue &_texRequestQ;
