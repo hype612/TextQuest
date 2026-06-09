@@ -29,6 +29,7 @@ public:
   float get_y() const;
   float get_angle() const;
   float get_fov() const;
+  float get_fov_rad() const;
   std::tuple<float, float> get_angle_unitv() const;
 
 private:

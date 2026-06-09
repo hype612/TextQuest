@@ -110,8 +110,8 @@ void GameEngine::RayCastingProcess() {
     // removed for trying single-thread performance
     //_texRequestQueue.setRayCompleted(false);
     //_texRequestQueue.setTexturesReady(false);
-    float ray_angle = (_player.get_angle() - _player.get_fov() / 2.0f) +
-                      ((float)x / (float)_screenWidth) * _player.get_fov();
+    float ray_angle = (_player.get_angle() - _player.get_fov_rad() / 2.0f) +
+                      ((float)x / (float)_screenWidth) * _player.get_fov_rad();
     // float distance_to_wall = 0.0f;
     bool hitwall = false;
 

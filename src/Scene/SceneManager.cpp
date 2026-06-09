@@ -2,10 +2,10 @@
 
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
     : _entityManager(entityMan), _mapManager(mapMan),
-      _player(-1, -1, 0.f, 1.0472f, mapMan) {
+      _player(-1, -1, 0.f, 60.f, mapMan) {
   EngineState::globalSceneManager = this;
 }
-
+// 1.0472
 void SceneManager::process() {
   _entityManager.process();
   //_eventManager.process();

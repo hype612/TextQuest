@@ -52,7 +52,7 @@ float Player::get_x() const { return m_x_pos; }
 float Player::get_y() const { return m_y_pos; }
 float Player::get_angle() const { return m_angle; }
 float Player::get_fov() const { return m_fov; }
-
+float Player::get_fov_rad() const { return (m_fov * 3.14159f) / 180; }
 std::tuple<float, float> Player::get_angle_unitv() const {
   return std::tuple<float, float>(std::cos(m_angle), -std::sin(m_angle));
 }
