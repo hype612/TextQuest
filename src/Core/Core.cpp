@@ -104,8 +104,8 @@ void GameEngine::run_game() {
 }
 
 void GameEngine::RayCastingProcess() {
-  const float max_raylength = 8.f;
-
+  const float max_raylength = 50.f;
+  Logger::GetInstance()->log("NEWFRAME", LogType::CORE, LogLevel::INFO);
   for (int x = 0; x < _screenWidth; x++) {
     // removed for trying single-thread performance
     //_texRequestQueue.setRayCompleted(false);
@@ -122,22 +122,19 @@ void GameEngine::RayCastingProcess() {
     float deltaDistY = (rayDirY == 0.f) ? 1e30f : std::fabs(1.f / rayDirY);
     int stepX = (rayDirX >= 0.f) ? 1 : -1;
     int stepY = (rayDirY >= 0.f) ? 1 : -1;
-    float sideDistX = (stepX == 1)
-                          ? std::floorf(_player.get_x()) + 1.f - _player.get_x()
-                          : _player.get_x() - std::floorf(_player.get_x());
+    int mapX = std::floorf(_player.get_x());
+    int mapY = std::floorf(_player.get_y());
+    float sideDistX =
+        (stepX == 1) ? mapX + 1.f - _player.get_x() : _player.get_x() - mapX;
     if (sideDistX < 0.0001f)
       sideDistX = 1.f;
     sideDistX = sideDistX * deltaDistX;
-    float sideDistY = (stepY == 1)
-                          ? std::floorf(_player.get_y()) + 1.f - _player.get_y()
-                          : _player.get_y() - std::floorf(_player.get_y());
+    float sideDistY =
+        (stepY == 1) ? mapY + 1.f - _player.get_y() : _player.get_y() - mapY;
+
     if (sideDistY < 0.0001f)
       sideDistY = 1.f;
     sideDistY = sideDistY * deltaDistY;
-
-    int mapX = std::floorf(_player.get_x());
-    int mapY = std::floorf(_player.get_y());
-
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
     _steps = 0;
@@ -146,10 +143,12 @@ void GameEngine::RayCastingProcess() {
       if (sideDistX < sideDistY) {
         sideDistX += deltaDistX;
         mapX += stepX;
+        rayLength = sideDistX;
         side = WallSide::HORIZONTAL;
       } else {
         sideDistY += deltaDistY;
         mapY += stepY;
+        rayLength = sideDistY;
         side = WallSide::VERTICAL;
       }
 
@@ -184,7 +183,29 @@ void GameEngine::RayCastingProcess() {
         hitp -= std::floorf(hitp);
         _texRequestQueue.push({mapX, mapY, Tile::ENTITY, height, hitp, dist});
       }
-      rayLength = (side == WallSide::HORIZONTAL) ? sideDistX : sideDistY;
+      std::string sideStr;
+      switch (side) {
+      case WallSide::NOHIT:
+        sideStr = "NOHIT";
+        break;
+      case WallSide::HORIZONTAL:
+        sideStr = "HORIZONTAL";
+        break;
+      case WallSide::VERTICAL:
+        sideStr = "VERTICAL";
+        break;
+      }
+      if (x == 77) {
+        Logger::GetInstance()->log(
+            "side=" + sideStr + " mapX=" + std::to_string(mapX) + " mapY=" +
+                std::to_string(mapY) + " hitwall=" + std::to_string(hitwall) +
+                " rayLength=" + std::to_string(rayLength) +
+                " deltaDistX=" + std::to_string(deltaDistX) +
+                " deltaDistY=" + std::to_string(deltaDistY) +
+                " sideDistX=" + std::to_string(sideDistX) +
+                " sideDistY=" + std::to_string(sideDistY),
+            LogType::CORE, LogLevel::INFO);
+      }
     }
     // Removed for trying single-threaded performance.
     //_texRequestQueue.setRayCompleted(true);
@@ -195,7 +216,8 @@ void GameEngine::RayCastingProcess() {
     float hitpoint = (side == WallSide::HORIZONTAL)
                          ? _player.get_y() + distance_to_wall * rayDirY
                          : _player.get_x() + distance_to_wall * rayDirX;
-    if (side == WallSide::NOHIT) {
+    if (!hitwall) {
+      side = WallSide::NOHIT;
       distance_to_wall = max_raylength;
       hitpoint = 0.f;
     }
@@ -213,6 +235,12 @@ void GameEngine::RayCastingProcess() {
 
     ceiling = std::max(0, ceiling);
     floor = std::min(_screenHeight - 1, floor);
+    /*
+    if (side == WallSide::NOHIT) {
+      ceiling = (_screenHeight / 2.f);
+      floor = (_screenHeight / 2.f);
+    }
+    */
     RenderScreen(ceiling, floor, x);
   }
 }
@@ -227,7 +255,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
       std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
   for (int y = 0; y < _screenHeight; y++) {
     if (y < ceiling) {
-      screen[y * _screenWidth + x] = ' ';
+      screen[y * _screenWidth + x] = 'F';
     } else if (y >= ceiling && y <= floor) {
       if (toRenderIt < colHeight) {
         screen[y * _screenWidth + x] = toRender[toRenderIt];
@@ -236,8 +264,8 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
         screen[y * _screenWidth + x] = ' ';
       }
     } else {
-      float b = 1.0f - (((float)y - _screenHeight / 2.0f) /
-                        ((float)_screenHeight / 2.0f));
+      float b = 1 - (((float)y - _screenHeight / 2.0f) /
+                     ((float)_screenHeight / 2.0f));
       if (b < 0.25)
         floorShade = '#';
       else if (b < 0.5)
