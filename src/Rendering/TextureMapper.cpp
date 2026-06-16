@@ -294,7 +294,7 @@ std::string TextureMapper::getTextColumnAt(unsigned int height,
   std::string ret = "";
   ret.reserve(height);
   for (size_t y = 0; y < height; y++) {
-    float y_pos = (float)y / (float)_texHeight;
+    float y_pos = (float)y / (float)height;
     ret.push_back(sampleNN(hitpoint, y_pos));
   }
 

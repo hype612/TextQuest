@@ -18,7 +18,6 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
     keysPressed.insert(key);
     key = getch();
   }
-
   if (keysPressed.count('a') || keysPressed.count('A')) {
     _player.subtractf_angle(10.f * delta);
   }

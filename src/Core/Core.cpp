@@ -74,19 +74,11 @@ bool GameEngine::initTestMap() {
 void GameEngine::run_game() {
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
-  //_textureSetterT =
-  //    std::thread(&RenderAssetManager::TexturePreparator,
-  //    &_renderAssetManager);
   if (!_sceneManager.isMapAvailable())
     initTestMap();
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
   while (EngineState::GetInstance()->gameRunningf == true) {
-    /*
-    if (_textureSetterT.joinable() &&
-        !EngineState::GetInstance()->gameRunningf) {
-      _textureSetterT.join();
-    }*/
 
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
@@ -107,12 +99,8 @@ void GameEngine::RayCastingProcess() {
   const float max_raylength = 50.f;
   Logger::GetInstance()->log("NEWFRAME", LogType::CORE, LogLevel::INFO);
   for (int x = 0; x < _screenWidth; x++) {
-    // removed for trying single-thread performance
-    //_texRequestQueue.setRayCompleted(false);
-    //_texRequestQueue.setTexturesReady(false);
     float ray_angle = (_player.get_angle() - _player.get_fov_rad() / 2.0f) +
                       ((float)x / (float)_screenWidth) * _player.get_fov_rad();
-    // float distance_to_wall = 0.0f;
     bool hitwall = false;
 
     // init for DDA
@@ -195,21 +183,7 @@ void GameEngine::RayCastingProcess() {
         sideStr = "VERTICAL";
         break;
       }
-      if (x == 77) {
-        Logger::GetInstance()->log(
-            "side=" + sideStr + " mapX=" + std::to_string(mapX) + " mapY=" +
-                std::to_string(mapY) + " hitwall=" + std::to_string(hitwall) +
-                " rayLength=" + std::to_string(rayLength) +
-                " deltaDistX=" + std::to_string(deltaDistX) +
-                " deltaDistY=" + std::to_string(deltaDistY) +
-                " sideDistX=" + std::to_string(sideDistX) +
-                " sideDistY=" + std::to_string(sideDistY),
-            LogType::CORE, LogLevel::INFO);
-      }
     }
-    // Removed for trying single-threaded performance.
-    //_texRequestQueue.setRayCompleted(true);
-    //_texRequestQueue.waitForTextures();
     float distance_to_wall = (side == WallSide::HORIZONTAL)
                                  ? sideDistX - deltaDistX
                                  : sideDistY - deltaDistY;
@@ -223,9 +197,6 @@ void GameEngine::RayCastingProcess() {
     }
 
     hitpoint -= std::floorf(hitpoint);
-    // int ceiling = int((float)(_screenHeight / 2.f) -
-    //                   _screenHeight / ((float)distance_to_wall));
-    // int floor = _screenHeight - ceiling;
     if (distance_to_wall < 0.0001f)
       distance_to_wall = 0.0001f;
 
@@ -235,12 +206,6 @@ void GameEngine::RayCastingProcess() {
 
     ceiling = std::max(0, ceiling);
     floor = std::min(_screenHeight - 1, floor);
-    /*
-    if (side == WallSide::NOHIT) {
-      ceiling = (_screenHeight / 2.f);
-      floor = (_screenHeight / 2.f);
-    }
-    */
     RenderScreen(ceiling, floor, x);
   }
 }
@@ -255,7 +220,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
       std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
   for (int y = 0; y < _screenHeight; y++) {
     if (y < ceiling) {
-      screen[y * _screenWidth + x] = 'F';
+      screen[y * _screenWidth + x] = ' ';
     } else if (y >= ceiling && y <= floor) {
       if (toRenderIt < colHeight) {
         screen[y * _screenWidth + x] = toRender[toRenderIt];
