@@ -1,6 +1,7 @@
 #include "../Headers/MapManager.h"
 #include <execinfo.h>
 #include <string>
+#include <vector>
 
 MapManager::MapManager() {} // so far nothing needs to be inited
 
@@ -45,6 +46,11 @@ const std::string &MapManager::getWallTexForMapChar(const char &mapChar) {
 void MapManager::uploadWallTextureFor(const char &mapChar,
                                       std::string texture) {
   _wallTexMappers[mapChar] = TextureMapper(texture);
+}
+
+void MapManager::uploadWallTextureVecFor(const char &mapChar,
+                                         std::vector<std::string> textureV) {
+  _wallTexMappers[mapChar] = TextureMapper(textureV);
 }
 
 std::string MapManager::getWallTextureAt(int x, int y) {

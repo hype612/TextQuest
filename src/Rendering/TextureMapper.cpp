@@ -3,11 +3,21 @@
 #include <algorithm>
 #include <cstddef>
 #include <string>
+#include <vector>
 
 TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMap(initTexture) {
   GenerateTextureMask();
   _texWidth = initTexture.find('\n');
+  _texHeight = _texWidth;
+}
+
+// Expects all textures of the same kind
+// to be the same size, which is a reasonable constraint
+TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
+    : _textureMipMaps(initTextureVec) {
+  GenerateTextureMask();
+  _texWidth = initTextureVec[0].find('\n');
   _texHeight = _texWidth;
 }
 
@@ -22,10 +32,6 @@ float TextureMapper::estimateWidth(float distance) {
   return (-(distance / 0.0375f) + 294.f);
 }
 
-// naive mask generator
-// technically works, but later when its
-// shading time, the most bright pixels wont be shaded
-// if the shading is dependant of the mask
 void TextureMapper::GenerateTextureMask() {
   _textureMask.clear();
   unsigned int tx_width = _textureMipMap.find('\n');
