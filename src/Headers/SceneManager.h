@@ -32,6 +32,8 @@ public:
   int getMapWidth() const;
   bool isMapAvailable() const;
   void uploadTextureForWall(const char &mapChar, std::string &wallTex);
+  void uploadTextureVecForWall(const char &mapChar,
+                               std::vector<std::string> &wallTexV);
   const std::string &getWallTextureForMapChar(const char &mapChar);
 
   // Entity Related functions
@@ -40,6 +42,7 @@ public:
   void removeEntity(int entityId);
   void removeAllEntities();
   void uploadTextureForEntity(std::string &entityTex);
+  void uploadTextureVecForEntity(std::vector<std::string> &entityTex);
 
   // Player
   void setPlayerX(int new_x);

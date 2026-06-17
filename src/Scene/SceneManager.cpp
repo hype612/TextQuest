@@ -1,4 +1,5 @@
 #include "../Headers/SceneManager.h"
+#include <vector>
 
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
     : _entityManager(entityMan), _mapManager(mapMan),
@@ -27,6 +28,11 @@ bool SceneManager::isMapAvailable() const {
 void SceneManager::uploadTextureForWall(const char &mapChar,
                                         std::string &wallTex) {
   _mapManager.uploadWallTextureFor(mapChar, wallTex);
+}
+
+void SceneManager::uploadTextureVecForWall(const char &mapChar,
+                                           std::vector<std::string> &wallTexV) {
+  _mapManager.uploadWallTextureVecFor(mapChar, wallTexV);
 }
 
 const std::string &SceneManager::getWallTextureForMapChar(const char &mapChar) {
@@ -89,12 +95,6 @@ void SceneManager::loadResources(
       }
       value = temp.str();
       outTextures[key] = value;
-      Logger::GetInstance()->log("Printing texture: " + key, LogType::TEXPREP,
-                                 LogLevel::INFO);
-      Logger::GetInstance()->log(value, LogType::TEXPREP, LogLevel::INFO);
-      Logger::GetInstance()->log(
-          "===========================================\n\n", LogType::TEXPREP,
-          LogLevel::INFO);
       current_file.close();
     }
   }

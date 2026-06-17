@@ -38,16 +38,16 @@ public:
   // =========================
   std::string getTextColumnAt(unsigned int height, float hitpoint);
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint);
-  // std::string getNextTexColumn(int height);
-  // std::vector<int> getMaskColumn(int height) const;
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
 
   TextureMapper(std::string initTexture);
+  TextureMapper(std::vector<std::string> initTexture);
   TextureMapper() = default;
 
 private:
   std::string _textureMipMap = "";
+  std::vector<std::string> _textureMipMaps;
   std::vector<int> _textureMask;
   int _stepper = -1;
   unsigned int _texHeight = -1;
