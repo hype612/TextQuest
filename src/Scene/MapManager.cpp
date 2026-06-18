@@ -67,7 +67,7 @@ std::string MapManager::getWallTexColumnAt(int x, int y, int height,
     return std::string();
   }
   char mapChar = _map[y * _mapWidth + x];
-  return _wallTexMappers[mapChar].getTextColumnAt(height, hitpoint);
+  return _wallTexMappers[mapChar].getTexColumnAt(height, hitpoint);
 }
 
 bool MapManager::isOutOfBounds(int test_x, int test_y) const {

@@ -26,7 +26,7 @@ public:
   std::tuple<int, int> getCoordinates();
   std::string getTexture() const;
   // std::string getNextTexColumn(int height);
-  std::string getTextColumnAt(int height, float hitpoint);
+  std::string getTexColumnAt(int height, float hitpoint);
   std::vector<int> getMaskColumnAt(int height, float hitpoint);
   const std::vector<int> &getTexMask() const;
   // std::vector<int> getMaskColumn(int height) const;
@@ -38,8 +38,6 @@ public:
   void setY(int y);
   void setID(int id);
   void modifyHealth(int amount);
-
-  void rescaleTexture(float distance);
 
 private:
   int _id;

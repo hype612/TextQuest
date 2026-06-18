@@ -72,6 +72,8 @@ bool GameEngine::initTestMap() {
 }
 
 void GameEngine::run_game() {
+  Logger::GetInstance()->log("main loop running", LogType::CORE,
+                             LogLevel::INFO);
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
   if (!_sceneManager.isMapAvailable())
