@@ -9,11 +9,11 @@
 
 class TextureMapper {
 public:
-  float estimateHeight(float distance);
-  float estimateWidth(float distance);
-  void setCurrentTexture(float distance, const std::string &mode,
-                         std::string *tex);
-  void rescaleCurrentTexture(float distance);
+  // For the implementation of distance based shading
+  // everything that has been unused for a while been treated as
+  // only working for distance based shading turned off
+  // TODO: implement repeating scaling for distance based shading
+
   // =============================
   // repeating scaling
   // =============================
@@ -27,16 +27,15 @@ public:
   //   interpolation scaling(nn)
   // =============================
 
-  void nxyInterpolationScale(unsigned int width, unsigned int height);
-  void nxInterpolationDownscale(unsigned int width);
-  void nxInterpolationUpscale(unsigned int width);
-  void nyInterpolationDownscale(unsigned int height);
-  void nyInterpolationUpscale(unsigned int height);
+  void nxyInterpolationScale(unsigned int width, unsigned int height,
+                             float distance);
 
   // =========================
   //   return of textures
   // =========================
-  std::string getTextColumnAt(unsigned int height, float hitpoint);
+  std::string getTexColumnAt(unsigned int height, float hitpoint);
+  std::string getTexColumnAt(unsigned int height, float hitpoint,
+                             float distance);
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint);
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
@@ -46,16 +45,13 @@ public:
   TextureMapper() = default;
 
 private:
-  std::string _textureMipMap = "";
   std::vector<std::string> _textureMipMaps;
   std::vector<int> _textureMask;
-  int _stepper = -1;
   unsigned int _texHeight = -1;
   unsigned int _texWidth = -1;
 
   void GenerateTextureMask();
-  std::string ScaleToHeight(unsigned int height, std::string column);
-  char sampleNN(float u, float v);
+  char sampleNN(float u, float v, int distIdx);
 };
 
 #endif

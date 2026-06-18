@@ -44,8 +44,8 @@ std::string Entity::getNextTexColumn(int height) {
 }
 }*/
 
-std::string Entity::getTextColumnAt(int height, float hitpoint) {
-  return _texMapper.getTextColumnAt(height, hitpoint);
+std::string Entity::getTexColumnAt(int height, float hitpoint) {
+  return _texMapper.getTexColumnAt(height, hitpoint);
 }
 
 std::vector<int> Entity::getMaskColumnAt(int height, float hitpoint) {
@@ -72,8 +72,4 @@ void Entity::modifyHealth(int amount) {
   if (_health <= 0) {
     // destroy object
   }
-}
-
-void Entity::rescaleTexture(float distance) {
-  _texMapper.rescaleCurrentTexture(distance);
 }

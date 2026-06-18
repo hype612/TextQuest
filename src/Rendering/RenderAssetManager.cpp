@@ -1,5 +1,4 @@
 #include "../Headers/RenderAssetManager.h"
-#include <cstddef>
 #include <string>
 #include <vector>
 
