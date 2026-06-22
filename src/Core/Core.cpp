@@ -3,8 +3,6 @@
 #include <chrono>
 #include <cmath>
 #include <ncurses.h>
-#include <random>
-#include <ratio>
 #include <string>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
@@ -24,6 +22,7 @@ GameEngine::GameEngine(int sc_width, int sc_height)
 #endif
   _renderer->Init();
   _renderer->SetScreenSize(sc_width, sc_height);
+  _renderAssetManager.setDistanceShading(true);
 }
 
 GameEngine::GameEngine()
@@ -45,6 +44,7 @@ GameEngine::GameEngine()
   int row, col;
   getmaxyx(stdscr, row, col);
   _renderer->SetScreenSize(col, row);
+  _renderAssetManager.setDistanceShading(true);
 }
 
 bool GameEngine::initTestMap() {
@@ -74,6 +74,7 @@ bool GameEngine::initTestMap() {
 void GameEngine::run_game() {
   Logger::GetInstance()->log("main loop running", LogType::CORE,
                              LogLevel::INFO);
+  Logger::forceFlush();
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
   //_textureSetterT =
@@ -172,6 +173,10 @@ void GameEngine::RayCastingProcess() {
                          : _player.get_x() + dist * rayDirX;
         hitp -= std::floorf(hitp);
         _texRequestQueue.push({mapX, mapY, Tile::WALL, height, hitp, dist});
+        Logger::GetInstance()->log("pushed WALL request dist=" +
+                                       std::to_string(dist),
+                                   LogType::CORE, LogLevel::INFO);
+        Logger::GetInstance()->forceFlush();
       }
       if (_sceneManager.isOccupied(mapX, mapY) == Tile::ENTITY) {
 
@@ -196,17 +201,6 @@ void GameEngine::RayCastingProcess() {
       case WallSide::VERTICAL:
         sideStr = "VERTICAL";
         break;
-      }
-      if (x == 77) {
-        Logger::GetInstance()->log(
-            "side=" + sideStr + " mapX=" + std::to_string(mapX) + " mapY=" +
-                std::to_string(mapY) + " hitwall=" + std::to_string(hitwall) +
-                " rayLength=" + std::to_string(rayLength) +
-                " deltaDistX=" + std::to_string(deltaDistX) +
-                " deltaDistY=" + std::to_string(deltaDistY) +
-                " sideDistX=" + std::to_string(sideDistX) +
-                " sideDistY=" + std::to_string(sideDistY),
-            LogType::CORE, LogLevel::INFO);
       }
     }
     // Removed for trying single-threaded performance.
@@ -248,6 +242,12 @@ void GameEngine::RayCastingProcess() {
 }
 
 void GameEngine::RenderScreen(int ceiling, int floor, int col) {
+  Logger::GetInstance()->log(
+      "RenderScreen col=" + std::to_string(col) + " queueEmpty=" +
+          std::to_string(
+              _texRequestQueue.isEmpty()), // assuming you can access it here
+      LogType::RENDER, LogLevel::INFO);
+  Logger::GetInstance()->forceFlush();
   wchar_t floorShade;
   int x = col;
   std::string toRender =

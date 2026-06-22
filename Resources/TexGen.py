@@ -45,8 +45,7 @@ for texSource in tex_files:
     tex = img_in.resize(new_size)
     tex = tex.convert("L")
     tex = ImageOps.autocontrast(tex, cutoff=2)
-    texData = tex.load()   # no quantize() at all
-
+    texData = tex.load()
     for lv in range(shadow_levels):
         tex_name = "./Textures/" + \
             str(texSource.stem) + "lv" + str(lv) + ".txt"

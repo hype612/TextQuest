@@ -18,9 +18,15 @@ TextureMapper::TextureMapper(std::string initTexture)
 // and the last one to be the faintest
 TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
     : _textureMipMaps(initTextureVec) {
-  GenerateTextureMask();
+  Logger::GetInstance()->log("Starting TexMask generation...", LogType::TEXPREP,
+                             LogLevel::INFO);
+  Logger::forceFlush();
   _texWidth = initTextureVec[0].find('\n');
   _texHeight = _texWidth;
+  GenerateTextureMask();
+  Logger::GetInstance()->log("TexMask generation COMPLETE", LogType::TEXPREP,
+                             LogLevel::INFO);
+  Logger::forceFlush();
 }
 
 void TextureMapper::GenerateTextureMask() {
@@ -97,6 +103,7 @@ const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 // =======================
 
 char TextureMapper::sampleNN(float u, float v, int distIdx) {
+  distIdx = std::clamp(distIdx, 0, (int)_textureMipMaps.size() - 1);
   if (_texWidth <= 0 || _texHeight <= 0 || _textureMipMaps[distIdx].empty())
     return ' ';
   unsigned int x = static_cast<unsigned int>(u * (_texWidth - 1) + 0.5f);
@@ -136,6 +143,13 @@ std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
                                           float distance) {
   std::string ret = "";
   ret.reserve(height);
+  Logger::GetInstance()->log(
+      "getTexColumnAt: height=" + std::to_string(height) + " hitpoint=" +
+          std::to_string(hitpoint) + " distance=" + std::to_string(distance) +
+          " mipMapSize=" + std::to_string(_textureMipMaps.size()) + " texW=" +
+          std::to_string(_texWidth) + " texH=" + std::to_string(_texHeight),
+      LogType::TEXPREP, LogLevel::INFO);
+  Logger::GetInstance()->forceFlush();
   for (size_t y = 0; y < height; y++) {
     float y_pos = (float)y / (float)height;
     ret.push_back(sampleNN(hitpoint, y_pos, (int)(distance)));

@@ -26,6 +26,10 @@ std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
 }
 
 std::string RenderAssetManager::getNextCharColumn(int height) {
+  Logger::GetInstance()->log("getNextCharColumn called, queue empty=" +
+                                 std::to_string(_texRequestQ.isEmpty()),
+                             LogType::RENDER, LogLevel::INFO);
+  Logger::GetInstance()->forceFlush();
   std::string col;
   col.reserve(height);
   while (!_texRequestQ.isEmpty()) {
@@ -34,13 +38,22 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
       break;
     }
     if (t.tileType == Tile::WALL) {
-      col =
-          _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height, t.hitPoint);
+      if (_distanceShadingEnabled)
+        col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
+                                             t.hitPoint, t.distance);
+      else
+        col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
+                                             t.hitPoint);
     } else if (t.tileType == Tile::ENTITY) {
       std::vector<int> txMask = _entityManager.getEntityMaskColAt(
           t.mapX, t.mapY, t.height, t.hitPoint);
-      std::string tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY,
-                                                        t.height, t.hitPoint);
+      std::string tx;
+      if (_distanceShadingEnabled)
+        tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
+                                              t.hitPoint, t.distance);
+      else
+        tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
+                                              t.hitPoint);
       for (int i = 0; i < t.height; i++) {
         if (txMask[i] == 1)
           col[i] = tx[i];
@@ -49,4 +62,8 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
   }
 
   return col;
+}
+
+void RenderAssetManager::setDistanceShading(bool enabled) {
+  _distanceShadingEnabled = enabled;
 }
