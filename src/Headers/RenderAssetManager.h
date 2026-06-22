@@ -19,10 +19,12 @@ public:
   void TexturePreparator();
   std::string getTextureAt(int pos_x, int pos_y);
   std::string getNextCharColumn(int height);
+  void setDistanceShading(bool enabled);
 
 private:
   EntityManager &_entityManager;
   MapManager &_mapManager;
   TextureRequestQueue &_texRequestQ;
+  bool _distanceShadingEnabled = false;
 };
 #endif // RENDERASSETMANAGER_H

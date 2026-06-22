@@ -14,19 +14,19 @@ void Logger::log(const std::string &msg, LogType type, LogLevel lv) {
   }
   switch (type) {
   case LogType::CORE:
-    _commonLog << "CORE:" << lv << ": " << msg;
+    _commonLog << "CORE:" << lv << ": " << msg << std::endl;
     _coreLog << msg << std::endl;
     break;
   case LogType::INPUT:
-    _commonLog << "INPUT:" << lv << ": " << msg;
+    _commonLog << "INPUT:" << lv << ": " << msg << std::endl;
     _inputLog << msg << std::endl;
     break;
   case LogType::RENDER:
-    _commonLog << "RENDER:" << lv << ": " << msg;
+    _commonLog << "RENDER:" << lv << ": " << msg << std::endl;
     _renderLog << msg << std::endl;
     break;
   case LogType::TEXPREP:
-    _commonLog << "TEXPREP:" << lv << ": " << msg;
+    _commonLog << "TEXPREP:" << lv << ": " << msg << std::endl;
     _texprepLog << msg << std::endl;
     break;
   }
@@ -35,6 +35,7 @@ void Logger::log(const std::string &msg, LogType type, LogLevel lv) {
 void Logger::setLogLevel(LogLevel newLv) { _logLv = newLv; }
 
 void Logger::forceFlush() {
+  _commonLog.flush();
   _coreLog.flush();
   _inputLog.flush();
   _renderLog.flush();
@@ -42,6 +43,7 @@ void Logger::forceFlush() {
 }
 
 Logger::~Logger() {
+  _commonLog.close();
   _coreLog.close();
   _inputLog.close();
   _renderLog.close();
@@ -53,7 +55,7 @@ Logger::~Logger() {
 
 Logger *Logger::instancePtr = nullptr;
 LogLevel Logger::_logLv = LogLevel::INFO;
-std::ofstream Logger::_commonLog("/logs/common.log", std::ios_base::trunc);
+std::ofstream Logger::_commonLog("./logs/common.log", std::ios_base::trunc);
 std::ofstream Logger::_coreLog("./logs/core.log", std::ios_base::trunc);
 std::ofstream Logger::_inputLog("./logs/input.log", std::ios_base::trunc);
 std::ofstream Logger::_renderLog("./logs/render.log", std::ios_base::trunc);
