@@ -48,8 +48,8 @@ std::string Entity::getTexColumnAt(int height, float hitpoint) {
   return getTexColumnAt(height, hitpoint, 0);
 }
 
-std::string Entity::getTexColumnAt(int height, float hitpoint, float distance) {
-  return _texMapper.getTexColumnAt(height, hitpoint, distance);
+std::string Entity::getTexColumnAt(int height, float hitpoint, int shadingIdx) {
+  return _texMapper.getTexColumnAt(height, hitpoint, shadingIdx);
 }
 
 std::vector<int> Entity::getMaskColumnAt(int height, float hitpoint) {

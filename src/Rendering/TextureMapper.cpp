@@ -102,9 +102,9 @@ const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 //  interpolation scaling
 // =======================
 
-char TextureMapper::sampleNN(float u, float v, int distIdx) {
-  distIdx = std::clamp(distIdx, 0, (int)_textureMipMaps.size() - 1);
-  if (_texWidth <= 0 || _texHeight <= 0 || _textureMipMaps[distIdx].empty())
+char TextureMapper::sampleNN(float u, float v, int shadingIdx) {
+  shadingIdx = std::clamp(shadingIdx, 0, (int)_textureMipMaps.size() - 1);
+  if (_texWidth <= 0 || _texHeight <= 0 || _textureMipMaps[shadingIdx].empty())
     return ' ';
   unsigned int x = static_cast<unsigned int>(u * (_texWidth - 1) + 0.5f);
   unsigned int y = static_cast<unsigned int>(v * (_texHeight - 1) + 0.5f);
@@ -113,10 +113,10 @@ char TextureMapper::sampleNN(float u, float v, int distIdx) {
   y = std::clamp(y, 0u, _texHeight - 1);
   size_t idx = static_cast<size_t>(y) * static_cast<size_t>(_texWidth + 1) +
                static_cast<size_t>(x);
-  if (idx >= _textureMipMaps[distIdx].size()) {
+  if (idx >= _textureMipMaps[shadingIdx].size()) {
     return ' ';
   }
-  return _textureMipMaps[distIdx][idx];
+  return _textureMipMaps[shadingIdx][idx];
 }
 
 void TextureMapper::nxyInterpolationScale(unsigned int width,
@@ -140,23 +140,19 @@ std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint) {
   return getTexColumnAt(height, hitpoint, 0);
 }
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          float distance) {
+                                          int shadingIdx) {
   std::string ret = "";
   ret.reserve(height);
   Logger::GetInstance()->log(
       "getTexColumnAt: height=" + std::to_string(height) + " hitpoint=" +
-          std::to_string(hitpoint) + " distance=" + std::to_string(distance) +
+          std::to_string(hitpoint) + " distance=" + std::to_string(shadingIdx) +
           " mipMapSize=" + std::to_string(_textureMipMaps.size()) + " texW=" +
           std::to_string(_texWidth) + " texH=" + std::to_string(_texHeight),
       LogType::TEXPREP, LogLevel::INFO);
   Logger::GetInstance()->forceFlush();
   for (size_t y = 0; y < height; y++) {
     float y_pos = (float)y / (float)height;
-<<<<<<< HEAD
-    ret.push_back(sampleNN(hitpoint, y_pos));
-=======
-    ret.push_back(sampleNN(hitpoint, y_pos, (int)(distance)));
->>>>>>> f92cf18 (Distance based shading is implemented all throughout. Remaining things are: passing the actual distance from the core, adjusting repeating scaling, generating the textures)
+    ret.push_back(sampleNN(hitpoint, y_pos, shadingIdx));
   }
 
   return ret;

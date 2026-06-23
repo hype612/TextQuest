@@ -32,7 +32,7 @@ public:
 
   std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint);
   std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint,
-                                float distance);
+                                int shadingidx);
   std::vector<int> getEntityMaskColAt(int mapX, int mapY, int height,
                                       float hitpoint);
 

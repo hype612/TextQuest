@@ -27,7 +27,7 @@ public:
   std::string getTexture() const;
   // std::string getNextTexColumn(int height);
   std::string getTexColumnAt(int height, float hitpoint);
-  std::string getTexColumnAt(int height, float hitpoint, float distance);
+  std::string getTexColumnAt(int height, float hitpoint, int shadingIdx);
   std::vector<int> getMaskColumnAt(int height, float hitpoint);
   const std::vector<int> &getTexMask() const;
   // std::vector<int> getMaskColumn(int height) const;

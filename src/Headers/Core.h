@@ -33,6 +33,9 @@ public:
   void RenderScreen(int ceiling, int floor, int col);
   ~GameEngine();
 
+  void enableDistanceShading(bool enabled);
+  void setDistanceShadingThresholds(const std::vector<float> &thresholds);
+
   GameEngine(const GameEngine &g) = delete;
   GameEngine &operator=(const GameEngine &) = delete;
   GameEngine(GameEngine &) = delete;

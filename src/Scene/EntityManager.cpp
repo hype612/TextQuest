@@ -75,9 +75,9 @@ std::string EntityManager::getEntityTexColAt(int mapX, int mapY, int height,
 }
 
 std::string EntityManager::getEntityTexColAt(int mapX, int mapY, int height,
-                                             float hitpoint, float distance) {
+                                             float hitpoint, int shadingidx) {
   int id = getEntityIdAtPos(mapX, mapY);
-  return _entityContainer[id].getTexColumnAt(height, hitpoint, distance);
+  return _entityContainer[id].getTexColumnAt(height, hitpoint, shadingidx);
 }
 
 std::vector<int> EntityManager::getEntityMaskColAt(int mapX, int mapY,

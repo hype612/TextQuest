@@ -28,14 +28,14 @@ public:
   // =============================
 
   void nxyInterpolationScale(unsigned int width, unsigned int height,
-                             float distance);
+                             float shadingIdx);
 
   // =========================
   //   return of textures
   // =========================
   std::string getTexColumnAt(unsigned int height, float hitpoint);
   std::string getTexColumnAt(unsigned int height, float hitpoint,
-                             float distance);
+                             int shadingIdx);
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint);
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
@@ -51,7 +51,7 @@ private:
   unsigned int _texWidth = -1;
 
   void GenerateTextureMask();
-  char sampleNN(float u, float v, int distIdx);
+  char sampleNN(float u, float v, int shadingIdx);
 };
 
 #endif

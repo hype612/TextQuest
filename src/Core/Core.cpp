@@ -44,7 +44,14 @@ GameEngine::GameEngine()
   int row, col;
   getmaxyx(stdscr, row, col);
   _renderer->SetScreenSize(col, row);
-  _renderAssetManager.setDistanceShading(true);
+}
+
+void GameEngine::enableDistanceShading(bool enabled) {
+  _renderAssetManager.setDistanceShading(enabled);
+}
+void GameEngine::setDistanceShadingThresholds(
+    const std::vector<float> &thresholds) {
+  _renderAssetManager.setDistanceShadingThresholds(thresholds);
 }
 
 bool GameEngine::initTestMap() {

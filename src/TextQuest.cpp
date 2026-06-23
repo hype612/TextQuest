@@ -10,7 +10,7 @@
 int main() {
   auto ge_ptr = std::make_unique<GameEngine>();
   SceneManager &sceneMan = *(EngineState::GetInstance()->globalSceneManager);
-
+  Logger::setLogLevel(LogLevel::WARNING);
   std::string map = "";
   map += "##################";
   map += "#................#";
@@ -27,7 +27,7 @@ int main() {
                              LogLevel::INFO);
   Logger::forceFlush();
   sceneMan.loadResources(
-      "/home/attila/Kitchen/TextQuest/Resources/Textures/walltexs/", texs);
+      "/home/attila/Kitchen/TextQuest/Resources/Textures/wall/", texs);
   Logger::GetInstance()->log("read walltex folder. (COMPLETE)",
                              LogType::TEXPREP, LogLevel::INFO);
   Logger::forceFlush();
@@ -59,6 +59,11 @@ int main() {
   p.set_x(2.f);
   p.set_y(2.f);
   p.set_angle(.0f);
+  ge_ptr->enableDistanceShading(true);
+  std::vector<float> shadingThresholds;
+  for (int i = 1; i < 8; i++)
+    shadingThresholds.push_back(i * 2);
+  ge_ptr->setDistanceShadingThresholds(shadingThresholds);
   Logger::GetInstance()->log("starting game", LogType::TEXPREP, LogLevel::INFO);
   ge_ptr->run_game();
 }

@@ -37,10 +37,18 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
     if (t.mapX == -1 && t.mapY == -1 && t.tileType == Tile::NONE) {
       break;
     }
+    if (_distanceShadingEnabled && _shadingThresholds.empty()) {
+      Logger::GetInstance()->log(
+          "WARNING: Distance based shading is enabled, but the thresholds are "
+          "not set. Disabling distance based shading...",
+          LogType::TEXPREP, LogLevel::WARNING);
+      _distanceShadingEnabled = false;
+    }
+    int shadingIdx = (int)t.distance;
     if (t.tileType == Tile::WALL) {
       if (_distanceShadingEnabled)
         col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
-                                             t.hitPoint, t.distance);
+                                             t.hitPoint, shadingIdx);
       else
         col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
                                              t.hitPoint);
@@ -50,7 +58,7 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
       std::string tx;
       if (_distanceShadingEnabled)
         tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
-                                              t.hitPoint, t.distance);
+                                              t.hitPoint, shadingIdx);
       else
         tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
                                               t.hitPoint);
@@ -66,4 +74,9 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
 
 void RenderAssetManager::setDistanceShading(bool enabled) {
   _distanceShadingEnabled = enabled;
+}
+
+void RenderAssetManager::setDistanceShadingThresholds(
+    const std::vector<float> &thresholds) {
+  _shadingThresholds = thresholds;
 }
