@@ -109,13 +109,22 @@ void GameEngine::RayCastingProcess() {
   const float max_raylength = 50.f;
   Logger::GetInstance()->log("NEWFRAME", LogType::CORE, LogLevel::INFO);
   for (int x = 0; x < _screenWidth; x++) {
-    float ray_angle = (_player.get_angle() - _player.get_fov_rad() / 2.0f) +
-                      ((float)x / (float)_screenWidth) * _player.get_fov_rad();
+    // float ray_angle = (_player.get_angle() - _player.get_fov_rad() / 2.0f) +
+    //                   ((float)x / (float)_screenWidth) *
+    //                   _player.get_fov_rad();
     bool hitwall = false;
 
     // init for DDA
-    float rayDirX = std::sinf(ray_angle);
-    float rayDirY = std::cosf(ray_angle);
+    float cameraX = 2.f * x / (float)_screenWidth - 1.f;
+    float playerDirX = std::sinf(_player.get_angle());
+    float playerDirY = std::cosf(_player.get_angle());
+
+    float planeX =
+        std::cosf(_player.get_angle()) * std::tanf(_player.get_fov_rad() / 2.f);
+    float planeY = -std::sinf(_player.get_angle()) *
+                   std::tanf(_player.get_fov_rad() / 2.f);
+    float rayDirX = playerDirX + planeX * cameraX;
+    float rayDirY = playerDirY + planeY * cameraX;
     float deltaDistX = (rayDirX == 0.f) ? 1e30f : std::fabs(1.f / rayDirX);
     float deltaDistY = (rayDirY == 0.f) ? 1e30f : std::fabs(1.f / rayDirY);
     int stepX = (rayDirX >= 0.f) ? 1 : -1;
