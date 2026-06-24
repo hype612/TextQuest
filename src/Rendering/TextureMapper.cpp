@@ -1,5 +1,5 @@
 #include "../Headers/TextureMapper.h"
-
+#include "../Headers/EngineState.h"
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -136,21 +136,18 @@ void TextureMapper::nxyInterpolationScale(unsigned int width,
   _textureMipMaps[0] = std::move(out);
 }
 
-std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint) {
-  return getTexColumnAt(height, hitpoint, 0);
+std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
+                                          int wallTop) {
+  return getTexColumnAt(height, hitpoint, wallTop, 0);
 }
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          int shadingIdx) {
+                                          int wallTop, int shadingIdx) {
   std::string ret = "";
+  int scHeight = EngineState::screenHeight;
+  int visibleTop = std::max(0, -wallTop);
+  int visibleBot = std::min(scHeight - wallTop, (int)height);
   ret.reserve(height);
-  Logger::GetInstance()->log(
-      "getTexColumnAt: height=" + std::to_string(height) + " hitpoint=" +
-          std::to_string(hitpoint) + " distance=" + std::to_string(shadingIdx) +
-          " mipMapSize=" + std::to_string(_textureMipMaps.size()) + " texW=" +
-          std::to_string(_texWidth) + " texH=" + std::to_string(_texHeight),
-      LogType::TEXPREP, LogLevel::INFO);
-  Logger::GetInstance()->forceFlush();
-  for (size_t y = 0; y < height; y++) {
+  for (int y = visibleTop; y < visibleBot; y++) {
     float y_pos = (float)y / (float)height;
     ret.push_back(sampleNN(hitpoint, y_pos, shadingIdx));
   }

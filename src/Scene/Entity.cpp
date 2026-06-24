@@ -34,22 +34,13 @@ const std::vector<int> &Entity::getTexMask() const {
   return _texMapper.getMask();
 }
 
-/*
-std::vector<int> Entity::getMaskColumn(int height) const {
-  return _texMapper.getMaskColumn(height);
-
-
-std::string Entity::getNextTexColumn(int height) {
-  return _texMapper.getNextTexColumn(height);
-}
-}*/
-
-std::string Entity::getTexColumnAt(int height, float hitpoint) {
-  return getTexColumnAt(height, hitpoint, 0);
+std::string Entity::getTexColumnAt(int height, float hitpoint, int wallTop) {
+  return getTexColumnAt(height, hitpoint, wallTop, 0);
 }
 
-std::string Entity::getTexColumnAt(int height, float hitpoint, int shadingIdx) {
-  return _texMapper.getTexColumnAt(height, hitpoint, shadingIdx);
+std::string Entity::getTexColumnAt(int height, float hitpoint, int shadingIdx,
+                                   int wallTop) {
+  return _texMapper.getTexColumnAt(height, hitpoint, shadingIdx, wallTop);
 }
 
 std::vector<int> Entity::getMaskColumnAt(int height, float hitpoint) {

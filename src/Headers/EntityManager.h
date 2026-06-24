@@ -30,9 +30,10 @@ public:
   const std::vector<int> &getCurrentEntityTexMask(int EntityId);
   const std::vector<int> &getCurrentEntityTexMask(const Entity &entity);
 
-  std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint);
   std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint,
-                                int shadingidx);
+                                int wallTop);
+  std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint,
+                                int wallTop, int shadingidx);
   std::vector<int> getEntityMaskColAt(int mapX, int mapY, int height,
                                       float hitpoint);
 

@@ -48,20 +48,20 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
     if (t.tileType == Tile::WALL) {
       if (_distanceShadingEnabled)
         col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
-                                             t.hitPoint, shadingIdx);
+                                             t.hitPoint, t.wallTop, shadingIdx);
       else
         col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height,
-                                             t.hitPoint);
+                                             t.hitPoint, t.wallTop);
     } else if (t.tileType == Tile::ENTITY) {
       std::vector<int> txMask = _entityManager.getEntityMaskColAt(
           t.mapX, t.mapY, t.height, t.hitPoint);
       std::string tx;
       if (_distanceShadingEnabled)
-        tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
-                                              t.hitPoint, shadingIdx);
+        tx = _entityManager.getEntityTexColAt(
+            t.mapX, t.mapY, t.height, t.hitPoint, t.wallTop, shadingIdx);
       else
         tx = _entityManager.getEntityTexColAt(t.mapX, t.mapY, t.height,
-                                              t.hitPoint);
+                                              t.hitPoint, t.wallTop);
       for (int i = 0; i < t.height; i++) {
         if (txMask[i] == 1)
           col[i] = tx[i];

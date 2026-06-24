@@ -9,6 +9,7 @@ public:
   int mapY;
   Tile tileType;
   int height;
+  int wallTop;
   float hitPoint;
   float distance;
 };

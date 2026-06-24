@@ -172,11 +172,13 @@ void GameEngine::RayCastingProcess() {
                                                     : sideDistY - deltaDistY;
 
         int height = (int)(_screenHeight / dist);
+        int wallTop = (_screenHeight / 2) - (height / 2);
         float hitp = (side == WallSide::HORIZONTAL)
                          ? _player.get_y() + dist * rayDirY
                          : _player.get_x() + dist * rayDirX;
         hitp -= std::floorf(hitp);
-        _texRequestQueue.push({mapX, mapY, Tile::WALL, height, hitp, dist});
+        _texRequestQueue.push(
+            {mapX, mapY, Tile::WALL, height, wallTop, hitp, dist});
         Logger::GetInstance()->log("pushed WALL request dist=" +
                                        std::to_string(dist),
                                    LogType::CORE, LogLevel::INFO);
@@ -186,13 +188,14 @@ void GameEngine::RayCastingProcess() {
 
         float dist = (side == WallSide::HORIZONTAL) ? sideDistX - deltaDistX
                                                     : sideDistY - deltaDistY;
-        int height =
-            int((float)(_screenHeight / 2.f) - _screenHeight / ((float)dist));
+        int height = (int)(_screenHeight / dist);
+        int wallTop = (_screenHeight / 2) - (height / 2);
         float hitp = (side == WallSide::HORIZONTAL)
                          ? _player.get_y() + dist * rayDirY
                          : _player.get_x() + dist * rayDirX;
         hitp -= std::floorf(hitp);
-        _texRequestQueue.push({mapX, mapY, Tile::ENTITY, height, hitp, dist});
+        _texRequestQueue.push(
+            {mapX, mapY, Tile::ENTITY, height, wallTop, hitp, dist});
       }
       std::string sideStr;
       switch (side) {

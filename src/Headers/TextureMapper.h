@@ -33,8 +33,8 @@ public:
   // =========================
   //   return of textures
   // =========================
-  std::string getTexColumnAt(unsigned int height, float hitpoint);
-  std::string getTexColumnAt(unsigned int height, float hitpoint,
+  std::string getTexColumnAt(unsigned int height, float hitpoint, int wallTop);
+  std::string getTexColumnAt(unsigned int height, float hitpoint, int wallTop,
                              int shadingIdx);
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint);
   const std::string &getTexture() const;
