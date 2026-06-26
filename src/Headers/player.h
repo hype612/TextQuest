@@ -2,6 +2,9 @@
 #define PLAYER_H
 
 #include "./MapManager.h"
+#include "./MoveDirection.h"
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <string>
 #include <tuple>
@@ -11,33 +14,55 @@ public:
   Player(float x_pos, float y_pos, float angle, float fov,
          MapManager &mapManager);
 
-  void set_x(float new_x);
-  void addto_x(float rval_x);
-  void subtractf_x(float rval_x);
+  //====================
+  // Absolute setters
+  //====================
 
-  void set_y(float new_y);
-  void addto_y(float rval_y);
-  void subtractf_y(float rval_y);
+  void setX(float new_x);
+  void setY(float new_y);
+  void setAngle(float new_a);
+  void setPos(float new_x, float new_y);
+  void setMoveSpeedOnDirection(float new_speed, MoveDirection direction);
+  void setMoveSpeedAllDirectons(float new_speed);
+  void setTurnSpeedAlldirections(float new_speed);
+  //====================
+  // Relative setters
+  //====================
 
-  void set_pos(float new_x, float new_y);
+  void addToX(float rval_x);
+  void addToY(float rval_y);
+  void addToAngle(float rval_a);
+  void addToMoveSpeedOnDirection(float new_speed, MoveDirection direction);
+  void addToMoveSpeedAllDirections(float new_speed);
+  void addToTurnSpeedAlldirections(float new_speed);
 
-  void set_angle(float new_a);
-  void addto_angle(float rval_a);
-  void subtractf_angle(float rval_a);
+  void moveForward(float delta);
+  void moveBackward(float delta);
+  void moveRight(float delta);
+  void moveLeft(float delta);
+  void turnRight(float delta);
+  void turnLeft(float delta);
 
-  float get_x() const;
-  float get_y() const;
-  float get_angle() const;
-  float get_fov() const;
-  float get_fov_rad() const;
-  std::tuple<float, float> get_angle_unitv() const;
+  //====================
+  // Getters
+  //====================
+
+  float getX() const;
+  float getY() const;
+  float getAngle() const;
+  float getFov() const;
+  float getFovInRad() const;
+  float getMoveSpeedOnDirection(MoveDirection direction) const;
+  const std::array<float, moveDirectionCount> &getMoveSpeedArray() const;
+  std::tuple<float, float> getAngleUnitVector() const;
 
 private:
-  float m_x_pos;
-  float m_y_pos;
-  float m_angle;
-  float m_fov;
+  float _posX;
+  float _posY;
+  float _angle;
+  float _fov;
 
+  std::array<float, moveDirectionCount> _directionalSpeeds;
   MapManager &_mapManager;
 };
 

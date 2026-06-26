@@ -62,8 +62,8 @@ Tile SceneManager::isOccupied(int x, int y) const {
 }
 
 // Player related functions
-void SceneManager::setPlayerX(int new_x) { _player.set_x(new_x); }
-void SceneManager::setPlayerY(int new_y) { _player.set_y(new_y); }
+void SceneManager::setPlayerX(int new_x) { _player.setX(new_x); }
+void SceneManager::setPlayerY(int new_y) { _player.setY(new_y); }
 Player &SceneManager::getPlayerRef() { return _player; }
 
 // Other

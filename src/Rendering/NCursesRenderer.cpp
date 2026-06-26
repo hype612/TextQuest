@@ -46,8 +46,8 @@ void NCursesRenderer::PrintBuffer() { refresh(); }
 void NCursesRenderer::PrintDebugInfo(const Player &player, float delta) {
   int debugY = 0;
   int debugX = 0;
-  mvprintw(debugY, debugX, "Player x: %.2f y: %.2f angle: %.2f", player.get_x(),
-           player.get_y(), player.get_angle());
+  mvprintw(debugY, debugX, "Player x: %.2f y: %.2f angle: %.2f", player.getX(),
+           player.getY(), player.getAngle());
   debugY = 1;
   mvprintw(debugY, debugX, "fps: %.2f", 1.f / delta);
 }

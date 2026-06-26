@@ -109,35 +109,35 @@ void GameEngine::RayCastingProcess() {
   const float max_raylength = 50.f;
   Logger::GetInstance()->log("NEWFRAME", LogType::CORE, LogLevel::INFO);
   for (int x = 0; x < _screenWidth; x++) {
-    // float ray_angle = (_player.get_angle() - _player.get_fov_rad() / 2.0f) +
+    // float ray_angle = (_player.getAngle() - _player.getFovInRad() / 2.0f) +
     //                   ((float)x / (float)_screenWidth) *
-    //                   _player.get_fov_rad();
+    //                   _player.getFovInRad();
     bool hitwall = false;
 
     // init for DDA
     float cameraX = 2.f * x / (float)_screenWidth - 1.f;
-    float playerDirX = std::sinf(_player.get_angle());
-    float playerDirY = std::cosf(_player.get_angle());
+    float playerDirX = std::sinf(_player.getAngle());
+    float playerDirY = std::cosf(_player.getAngle());
 
     float planeX =
-        std::cosf(_player.get_angle()) * std::tanf(_player.get_fov_rad() / 2.f);
-    float planeY = -std::sinf(_player.get_angle()) *
-                   std::tanf(_player.get_fov_rad() / 2.f);
+        std::cosf(_player.getAngle()) * std::tanf(_player.getFovInRad() / 2.f);
+    float planeY = -std::sinf(_player.getAngle()) *
+                   std::tanf(_player.getFovInRad() / 2.f);
     float rayDirX = playerDirX + planeX * cameraX;
     float rayDirY = playerDirY + planeY * cameraX;
     float deltaDistX = (rayDirX == 0.f) ? 1e30f : std::fabs(1.f / rayDirX);
     float deltaDistY = (rayDirY == 0.f) ? 1e30f : std::fabs(1.f / rayDirY);
     int stepX = (rayDirX >= 0.f) ? 1 : -1;
     int stepY = (rayDirY >= 0.f) ? 1 : -1;
-    int mapX = std::floorf(_player.get_x());
-    int mapY = std::floorf(_player.get_y());
+    int mapX = std::floorf(_player.getX());
+    int mapY = std::floorf(_player.getY());
     float sideDistX =
-        (stepX == 1) ? mapX + 1.f - _player.get_x() : _player.get_x() - mapX;
+        (stepX == 1) ? mapX + 1.f - _player.getX() : _player.getX() - mapX;
     if (sideDistX < 0.0001f)
       sideDistX = 1.f;
     sideDistX = sideDistX * deltaDistX;
     float sideDistY =
-        (stepY == 1) ? mapY + 1.f - _player.get_y() : _player.get_y() - mapY;
+        (stepY == 1) ? mapY + 1.f - _player.getY() : _player.getY() - mapY;
 
     if (sideDistY < 0.0001f)
       sideDistY = 1.f;
@@ -174,8 +174,8 @@ void GameEngine::RayCastingProcess() {
         int height = (int)(_screenHeight / dist);
         int wallTop = (_screenHeight / 2) - (height / 2);
         float hitp = (side == WallSide::HORIZONTAL)
-                         ? _player.get_y() + dist * rayDirY
-                         : _player.get_x() + dist * rayDirX;
+                         ? _player.getY() + dist * rayDirY
+                         : _player.getX() + dist * rayDirX;
         hitp -= std::floorf(hitp);
         _texRequestQueue.push(
             {mapX, mapY, Tile::WALL, height, wallTop, hitp, dist});
@@ -191,8 +191,8 @@ void GameEngine::RayCastingProcess() {
         int height = (int)(_screenHeight / dist);
         int wallTop = (_screenHeight / 2) - (height / 2);
         float hitp = (side == WallSide::HORIZONTAL)
-                         ? _player.get_y() + dist * rayDirY
-                         : _player.get_x() + dist * rayDirX;
+                         ? _player.getY() + dist * rayDirY
+                         : _player.getX() + dist * rayDirX;
         hitp -= std::floorf(hitp);
         _texRequestQueue.push(
             {mapX, mapY, Tile::ENTITY, height, wallTop, hitp, dist});
@@ -214,8 +214,8 @@ void GameEngine::RayCastingProcess() {
                                  ? sideDistX - deltaDistX
                                  : sideDistY - deltaDistY;
     float hitpoint = (side == WallSide::HORIZONTAL)
-                         ? _player.get_y() + distance_to_wall * rayDirY
-                         : _player.get_x() + distance_to_wall * rayDirX;
+                         ? _player.getY() + distance_to_wall * rayDirY
+                         : _player.getX() + distance_to_wall * rayDirX;
     if (!hitwall) {
       side = WallSide::NOHIT;
       distance_to_wall = max_raylength;
