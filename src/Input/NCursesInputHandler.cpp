@@ -14,18 +14,6 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
   std::unordered_set<int> keysPressed;
 
   int key = getch();
-  /*if (key == 'a' || key == 'A') {
-    _player.turnLeft(delta);
-  }
-  if (key == 'w' || key == 'W') {
-    _player.moveForward(delta);
-  }
-  if (key == 's' || key == 'S') {
-    _player.moveBackward(delta);
-  }
-  if (key == 'd' || key == 'D') {
-    _player.turnRight(delta);
-  }*/
   while (key != ERR) {
     keysPressed.insert(key);
     key = getch();
