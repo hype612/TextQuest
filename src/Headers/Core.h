@@ -14,6 +14,8 @@
 #include "TextureMapper.h"
 #include "TextureRequest.h"
 #include "TextureRequestQueue.h"
+#include "Vec2f.h"
+#include "Vec2i.h"
 #include "WallSide.h"
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"

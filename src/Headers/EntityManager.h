@@ -14,7 +14,7 @@ public:
 
   std::optional<std::reference_wrapper<Entity>> getEntityAtPos(int coord_x,
                                                                int coord_y);
-  int getEntityIdAtPos(int coord_x, int coord_y) const;
+  int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
   void process();
 
@@ -30,11 +30,11 @@ public:
   const std::vector<int> &getCurrentEntityTexMask(int EntityId);
   const std::vector<int> &getCurrentEntityTexMask(const Entity &entity);
 
-  std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint,
-                                int wallTop);
-  std::string getEntityTexColAt(int mapX, int mapY, int height, float hitpoint,
-                                int wallTop, int shadingidx);
-  std::vector<int> getEntityMaskColAt(int mapX, int mapY, int height,
+  std::string getEntityTexColAt(int coordX, int coordY, int height,
+                                float hitpoint, int wallTop);
+  std::string getEntityTexColAt(int coordX, int coordY, int height,
+                                float hitpoint, int wallTop, int shadingidx);
+  std::vector<int> getEntityMaskColAt(int coordX, int coordY, int height,
                                       float hitpoint);
 
 private:

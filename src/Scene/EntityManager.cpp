@@ -69,21 +69,21 @@ EntityManager::getCurrentEntityTexMask(const Entity &entity) {
   return entity.getTexMask();
 }
 
-std::string EntityManager::getEntityTexColAt(int mapX, int mapY, int height,
+std::string EntityManager::getEntityTexColAt(int coordX, int coordY, int height,
                                              float hitpoint, int wallTop) {
-  return getEntityTexColAt(mapX, mapY, height, hitpoint, wallTop, 0);
+  return getEntityTexColAt(coordX, coordY, height, hitpoint, wallTop, 0);
 }
 
-std::string EntityManager::getEntityTexColAt(int mapX, int mapY, int height,
+std::string EntityManager::getEntityTexColAt(int coordX, int coordY, int height,
                                              float hitpoint, int wallTop,
                                              int shadingidx) {
-  int id = getEntityIdAtPos(mapX, mapY);
+  int id = getEntityIdAtPos(coordX, coordY);
   return _entityContainer[id].getTexColumnAt(height, hitpoint, wallTop,
                                              shadingidx);
 }
 
-std::vector<int> EntityManager::getEntityMaskColAt(int mapX, int mapY,
+std::vector<int> EntityManager::getEntityMaskColAt(int coordX, int coordY,
                                                    int height, float hitpoint) {
-  int id = getEntityIdAtPos(mapX, mapY);
+  int id = getEntityIdAtPos(coordX, coordY);
   return _entityContainer[id].getMaskColumnAt(height, hitpoint);
 }
