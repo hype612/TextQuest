@@ -65,15 +65,10 @@ private:
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
-  // std::thread _textureSetterT;
-
-  // for multithreading
-  int _max_thread_num = -1;
-  // std::thread textureSetterT;
 
   // dont want anyone to call this
   // fallback map for testing
-  bool initTestMap(); // for now initializes a static test map
+  bool initTestMap();
 };
 
 #endif // ASCIIVERSE_H

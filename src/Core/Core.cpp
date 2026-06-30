@@ -172,10 +172,6 @@ void GameEngine::RayCastingProcess() {
         hitp -= std::floorf(hitp);
         _texRequestQueue.push(
             {mapPos.x, mapPos.y, Tile::WALL, height, wallTop, hitp, dist});
-        Logger::GetInstance()->log("pushed WALL request dist=" +
-                                       std::to_string(dist),
-                                   LogType::CORE, LogLevel::INFO);
-        Logger::GetInstance()->forceFlush();
       }
       if (_sceneManager.isOccupied(mapPos.x, mapPos.y) == Tile::ENTITY) {
 

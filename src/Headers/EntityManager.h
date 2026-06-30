@@ -11,24 +11,34 @@
 class EntityManager {
 public:
   EntityManager();
+  void process();
+
+  // ================================
+  // ways to access items in container
+  // ================================
 
   std::optional<std::reference_wrapper<Entity>> getEntityAtPos(int coord_x,
                                                                int coord_y);
   int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
-  void process();
 
-  // ways to access the container
+  // ================================
+  // ways to modulate container
+  // ================================
+
   void addEntity(Entity &entity);
   void removeEntity(int id);
   void removeEntity(int coord_x, int coord_y);
   void removeAllEntities();
 
+  // ================================
   // for renderer
-  std::string getCurrentEntityTexture(int EntityId);
-  std::string getCurrentEntityTexture(const Entity &entity);
-  const std::vector<int> &getCurrentEntityTexMask(int EntityId);
-  const std::vector<int> &getCurrentEntityTexMask(const Entity &entity);
+  // ================================
+
+  std::string getCurrentEntityTexture(int EntityId) const;
+  std::string getCurrentEntityTexture(const Entity &entity) const;
+  const std::vector<int> &getCurrentEntityTexMask(int EntityId) const;
+  const std::vector<int> &getCurrentEntityTexMask(const Entity &entity) const;
 
   std::string getEntityTexColAt(int coordX, int coordY, int height,
                                 float hitpoint, int wallTop);

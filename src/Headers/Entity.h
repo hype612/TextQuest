@@ -11,12 +11,22 @@ enum EntityState { IDLE, WALKING, FIGHT };
 
 class Entity {
 public:
-  // constructors
+  // =============
+  // Constructors
+  // =============
+
   Entity(int x, int y, std::string *tex, int initHP, EntityState initState);
+
+  // =============
+  // Process
+  // =============
 
   virtual void process();
 
-  // getters
+  // =============
+  // Getters
+  // =============
+
   int ID() const;
   float X() const;
   float Y() const;
@@ -35,7 +45,10 @@ public:
 
   int getHP();
 
-  // setters
+  // =============
+  // Setters
+  // =============
+
   void setX(int x);
   void setY(int y);
   void setID(int id);

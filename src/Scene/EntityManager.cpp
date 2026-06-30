@@ -2,6 +2,16 @@
 
 EntityManager::EntityManager() {}
 
+void EntityManager::process() {
+  for (Entity &e : _entityContainer) {
+    e.process();
+  }
+}
+
+// ================================
+// ways to access items in container
+// ================================
+
 // naive searches, later add something to speed it up if neccessary
 std::optional<std::reference_wrapper<Entity>>
 EntityManager::getEntityAtPos(int coord_x, int coord_y) {
@@ -22,13 +32,10 @@ int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
 
 int EntityManager::getEntityCount() const { return _entityContainer.size(); }
 
-void EntityManager::process() {
-  for (Entity &e : _entityContainer) {
-    e.process();
-  }
-}
+// ================================
+// ways to modulate container
+// ================================
 
-// ways to access the container
 void EntityManager::addEntity(Entity &entity) {
   if (entity.ID() != -1) {
     std::cerr << "id has been altered. Please do not touch id" << std::endl;
@@ -52,20 +59,25 @@ void EntityManager::removeAllEntities() {
   _entityContainer.shrink_to_fit();
 }
 
-std::string EntityManager::getCurrentEntityTexture(int EntityId) {
+// ================================
+// for renderer
+// ================================
+
+std::string EntityManager::getCurrentEntityTexture(int EntityId) const {
   return _entityContainer[EntityId].getTexture();
 }
 
-std::string EntityManager::getCurrentEntityTexture(const Entity &entity) {
+std::string EntityManager::getCurrentEntityTexture(const Entity &entity) const {
   return entity.getTexture();
 }
 
-const std::vector<int> &EntityManager::getCurrentEntityTexMask(int EntityId) {
+const std::vector<int> &
+EntityManager::getCurrentEntityTexMask(int EntityId) const {
   return _entityContainer[EntityId].getTexMask();
 }
 
 const std::vector<int> &
-EntityManager::getCurrentEntityTexMask(const Entity &entity) {
+EntityManager::getCurrentEntityTexMask(const Entity &entity) const {
   return entity.getTexMask();
 }
 
