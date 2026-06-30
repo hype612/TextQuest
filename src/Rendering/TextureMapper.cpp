@@ -102,7 +102,7 @@ const std::vector<int> &TextureMapper::getMask() const { return _textureMask; }
 //  interpolation scaling
 // =======================
 
-char TextureMapper::sampleNN(float u, float v, int shadingIdx) {
+char TextureMapper::sampleNN(float u, float v, int shadingIdx) const {
   shadingIdx = std::clamp(shadingIdx, 0, (int)_textureMipMaps.size() - 1);
   if (_texWidth <= 0 || _texHeight <= 0 || _textureMipMaps[shadingIdx].empty())
     return ' ';
@@ -137,11 +137,11 @@ void TextureMapper::nxyInterpolationScale(unsigned int width,
 }
 
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          int wallTop) {
+                                          int wallTop) const {
   return getTexColumnAt(height, hitpoint, wallTop, 0);
 }
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          int wallTop, int shadingIdx) {
+                                          int wallTop, int shadingIdx) const {
   std::string ret = "";
   int scHeight = EngineState::screenHeight;
   int visibleTop = std::max(0, -wallTop);
@@ -156,7 +156,7 @@ std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
 }
 
 std::vector<int> TextureMapper::getMaskColumnAt(unsigned int height,
-                                                float hitpoint) {
+                                                float hitpoint) const {
   std::vector<int> ret;
   ret.reserve(height);
   unsigned int x = static_cast<unsigned int>(hitpoint * (_texWidth - 1) + 0.5f);

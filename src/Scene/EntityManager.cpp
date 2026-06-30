@@ -9,7 +9,7 @@ void EntityManager::process() {
 }
 
 // ================================
-// ways to access items in container
+// Container Getters
 // ================================
 
 // naive searches, later add something to speed it up if neccessary
@@ -21,6 +21,7 @@ EntityManager::getEntityAtPos(int coord_x, int coord_y) {
   }
   return std::nullopt;
 }
+
 int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
   for (const Entity &e : _entityContainer) {
     if (e.X() == coord_x && e.Y() == coord_y)
@@ -33,7 +34,7 @@ int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
 int EntityManager::getEntityCount() const { return _entityContainer.size(); }
 
 // ================================
-// ways to modulate container
+// Container Setters
 // ================================
 
 void EntityManager::addEntity(Entity &entity) {

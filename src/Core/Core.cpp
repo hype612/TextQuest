@@ -11,7 +11,6 @@ GameEngine::GameEngine(int sc_width, int sc_height)
       _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
-  _max_thread_num = std::thread::hardware_concurrency();
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
   _inputHandler = new NCursesInputHandler(_player);
@@ -31,7 +30,6 @@ GameEngine::GameEngine()
       _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
-  //_max_thread_num = std::thread::hardware_concurrency();
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
   _inputHandler = new NCursesInputHandler(_player);
