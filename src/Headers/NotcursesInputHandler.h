@@ -3,6 +3,7 @@
 
 #if (defined(LINUX) || defined(__linux__))
 #include "./IInputHandler.h"
+#include "./Logger.h"
 #include "./MoveDirection.h"
 #include "./player.h"
 #include <memory>

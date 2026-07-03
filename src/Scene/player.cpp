@@ -154,23 +154,23 @@ void Player::move(float delta, MoveDirection dir) {
                delta);
     break;
   }
+}
 
-  //====================
-  // Getters
-  //====================
+//====================
+// Getters
+//====================
 
-  float Player::getX() const { return _posX; }
-  float Player::getY() const { return _posY; }
-  float Player::getAngle() const { return _angle; }
-  float Player::getFov() const { return _fov; }
-  float Player::getFovInRad() const { return (_fov * 3.14159f) / 180; }
-  float Player::getMoveSpeedOnDirection(MoveDirection direction) const {
-    return _directionalSpeeds[static_cast<int>(direction)];
-  }
-  const std::array<float, moveDirectionCount> &Player::getMoveSpeedArray()
-      const {
-    return _directionalSpeeds;
-  }
-  std::tuple<float, float> Player::getAngleUnitVector() const {
-    return std::tuple<float, float>(std::cos(_angle), -std::sin(_angle));
-  }
+float Player::getX() const { return _posX; }
+float Player::getY() const { return _posY; }
+float Player::getAngle() const { return _angle; }
+float Player::getFov() const { return _fov; }
+float Player::getFovInRad() const { return (_fov * 3.14159f) / 180; }
+float Player::getMoveSpeedOnDirection(MoveDirection direction) const {
+  return _directionalSpeeds[static_cast<int>(direction)];
+}
+const std::array<float, moveDirectionCount> &Player::getMoveSpeedArray() const {
+  return _directionalSpeeds;
+}
+std::tuple<float, float> Player::getAngleUnitVector() const {
+  return std::tuple<float, float>(std::cos(_angle), -std::sin(_angle));
+}

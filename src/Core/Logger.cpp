@@ -43,6 +43,12 @@ void Logger::forceFlush() {
 }
 
 Logger::~Logger() {
+  _commonLog.flush();
+  _coreLog.flush();
+  _inputLog.flush();
+  _renderLog.flush();
+  _texprepLog.flush();
+
   _commonLog.close();
   _coreLog.close();
   _inputLog.close();

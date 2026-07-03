@@ -9,6 +9,7 @@
 #include "MapManager.h"
 #include "NCursesInputHandler.h"
 #include "NCursesRenderer.h"
+#include "NotcursesInputHandler.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
 #include "TextureMapper.h"

@@ -10,7 +10,7 @@ NOTCURSES_LIBS := $(shell pkg-config --libs notcurses-core)
 
 CXXFLAGS := -Wall -Wextra -std=c++23 -g -O1 -fsanitize=address -fsanitize=undefined -Isrc/Headers $(NOTCURSES_CFLAGS)
 LDFLAGS := -fsanitize=address -fsanitize=undefined
-LDLIBS := $(NOTCURSES_LIBS)
+LDLIBS := $(NOTCURSES_LIBS) -lncursesw
 
 SRC_DIR := src
 BUILD_DIR := build

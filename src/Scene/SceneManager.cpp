@@ -35,9 +35,10 @@ void SceneManager::uploadTextureVecForWall(const char &mapChar,
   _mapManager.uploadWallTextureVecFor(mapChar, wallTexV);
 }
 
-const std::string &SceneManager::getWallTextureForMapChar(const char &mapChar) {
-  return _mapManager.getWallTexForMapChar(mapChar);
-}
+// const std::string &SceneManager::getWallTextureForMapChar(const char
+// &mapChar) {
+//   return _mapManager.getWallTexForMapChar(mapChar);
+// }
 
 // Entity Related functions
 void SceneManager::AddEntity(Entity &entity) {

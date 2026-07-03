@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <ncurses.h>
+#include <notcurses/notcurses.h>
 #include <string>
 
 GameEngine::GameEngine(int sc_width, int sc_height)
@@ -13,7 +14,12 @@ GameEngine::GameEngine(int sc_width, int sc_height)
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
-  _inputHandler = new NCursesInputHandler(_player);
+  //_inputHandler = new NCursesInputHandler(_player);
+  notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
+                           NCOPTION_CLI_MODE};
+  std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
+                                notcurses_stop);
+  _inputHandler = new NotcursesInputHandler(_player, nc);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();
@@ -32,7 +38,12 @@ GameEngine::GameEngine()
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
   _renderer = new NCursesRenderer();
-  _inputHandler = new NCursesInputHandler(_player);
+  //_inputHandler = new NCursesInputHandler(_player);
+  notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
+                           NCOPTION_CLI_MODE};
+  std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
+                                notcurses_stop);
+  _inputHandler = new NotcursesInputHandler(_player, nc);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();

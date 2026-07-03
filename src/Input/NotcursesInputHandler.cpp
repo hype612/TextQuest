@@ -3,14 +3,19 @@
 
 NotcursesInputHandler::NotcursesInputHandler(Player &player,
                                              std::shared_ptr<notcurses> nc)
-    : IInputHandler(player), _nc(nc) {}
+    : IInputHandler(player), _nc(nc) {
+  Logger::setLogLevel(LogLevel::INFO);
+}
 
 void NotcursesInputHandler::Init() {}
 void NotcursesInputHandler::ReceiveMovementInput(float delta) {
+  Logger::GetInstance()->log("ReceiveMovementInput called", LogType::INPUT,
+                             LogLevel::INFO);
+
   ncinput in_char;
   timespec ts{0, 0};
-  uint32_t rc = notcurses_get(_nc.get(), &ts, &in_char);
-  if (rc > 0)
+  uint32_t rc;
+  while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0)
     KeyEvent(in_char.utf8, in_char.evtype);
 
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] == true)
@@ -30,16 +35,24 @@ void NotcursesInputHandler::ReceiveMovementInput(float delta) {
 void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   switch (*in) {
   case 'w':
-    if (evtype == NCTYPE_PRESS)
+    if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = true;
-    if (evtype == NCTYPE_RELEASE)
+      Logger::GetInstance()->log("W pressed", LogType::INPUT, LogLevel::INFO);
+    }
+    if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = false;
+      Logger::GetInstance()->log("W released", LogType::INPUT, LogLevel::INFO);
+    }
     break;
   case 'a':
-    if (evtype == NCTYPE_PRESS)
+    if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = true;
-    if (evtype == NCTYPE_RELEASE)
+      Logger::GetInstance()->log("A pressed", LogType::INPUT, LogLevel::INFO);
+    }
+    if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = false;
+      Logger::GetInstance()->log("A released", LogType::INPUT, LogLevel::INFO);
+    }
     break;
   case 's':
     if (evtype == NCTYPE_PRESS)
@@ -48,10 +61,14 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = false;
     break;
   case 'd':
-    if (evtype == NCTYPE_PRESS)
+    if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = true;
-    if (evtype == NCTYPE_RELEASE)
+      Logger::GetInstance()->log("D pressed", LogType::INPUT, LogLevel::INFO);
+    }
+    if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = false;
+      Logger::GetInstance()->log("D released", LogType::INPUT, LogLevel::INFO);
+    }
     break;
   case 'q':
     if (evtype == NCTYPE_PRESS)

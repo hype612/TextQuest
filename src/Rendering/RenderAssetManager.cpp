@@ -14,7 +14,7 @@ RenderAssetManager::RenderAssetManager(EntityManager &entityMan,
 
 std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
   if (_mapManager.isWall(pos_x, pos_y) == true) {
-    return _mapManager.getWallTextureAt(pos_x, pos_y);
+    // return _mapManager.getWallTextureAt(pos_x, pos_y);
   }
   int e_id = _entityManager.getEntityIdAtPos(pos_x, pos_y);
   if (e_id != -1) {
