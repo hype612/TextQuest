@@ -1,0 +1,26 @@
+#ifndef NOTCURSESRENDERER_H
+#define NOTCURSESRENDERER_H
+
+#if (defined(LINUX) || defined(__linux__))
+
+#include "IRenderer.h"
+#include "player.h"
+#include <memory>
+#include <notcurses/notcurses.h>
+
+class NotcursesRenderer : public IRenderer {
+public:
+  NotcursesRenderer(notcurses *nc);
+  void Init() override;
+  void OverwriteBuffer(char *newBuffer) override;
+  void PrintBuffer() override;
+  void PrintDebugInfo(const Player &player, float delta) override;
+  std::tuple<int, int> GetScreenSize() override;
+  ~NotcursesRenderer();
+
+private:
+  std::shared_ptr<notcurses> _nc;
+};
+
+#endif // OS check end
+#endif // NOTCURSESRENDERER_H

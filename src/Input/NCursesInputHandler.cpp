@@ -19,22 +19,22 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
     key = getch();
   }
   if (keysPressed.count('a') || keysPressed.count('A')) {
-    _player.turnLeft(delta);
+    _player.move(delta, MoveDirection::STRAFE_LEFT);
   }
   if (keysPressed.count('d') || keysPressed.count('D')) {
-    _player.turnRight(delta);
+    _player.move(delta, MoveDirection::STRAFE_RIGHT);
   }
   if (keysPressed.count('w') || keysPressed.count('W')) {
-    _player.moveForward(delta);
+    _player.move(delta, MoveDirection::FORWARD);
   }
   if (keysPressed.count('s') || keysPressed.count('S')) {
-    _player.moveBackward(delta);
+    _player.move(delta, MoveDirection::BACKWARD);
   }
   if (keysPressed.count('q') || keysPressed.count('Q')) {
-    _player.moveLeft(delta);
+    _player.move(delta, MoveDirection::TURN_LEFT);
   }
   if (keysPressed.count('e') || keysPressed.count('E')) {
-    _player.moveRight(delta);
+    _player.move(delta, MoveDirection::TURN_RIGHT);
   }
   if (keysPressed.count('x') || keysPressed.count('X')) {
     EngineState::GetInstance()->gameRunningf = false;

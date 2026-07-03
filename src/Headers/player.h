@@ -36,12 +36,14 @@ public:
   void addToMoveSpeedAllDirections(float new_speed);
   void addToTurnSpeedAlldirections(float new_speed);
 
-  void moveForward(float delta);
-  void moveBackward(float delta);
-  void moveRight(float delta);
-  void moveLeft(float delta);
-  void turnRight(float delta);
-  void turnLeft(float delta);
+  // ???????????????????????,
+  // void moveForward(float delta);
+  // void moveBackward(float delta);
+  // void moveRight(float delta);
+  // void moveLeft(float delta);
+  // void turnRight(float delta);
+  // void turnLeft(float delta);
+  void move(float delta, MoveDirection dir);
 
   //====================
   // Getters

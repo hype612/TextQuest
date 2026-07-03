@@ -19,7 +19,6 @@ public:
 
 protected:
   IRenderer() {}
-  char *_screenBuffer;
   int &_screenHeight = EngineState::GetInstance()->screenHeight;
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
 };

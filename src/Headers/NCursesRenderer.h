@@ -19,6 +19,9 @@ public:
   void SetScreenSize(int x, int y) override;
 
   ~NCursesRenderer();
+
+private:
+  char *_screenBuffer;
 };
 
 #endif // OS check end
