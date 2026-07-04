@@ -19,6 +19,7 @@ public:
 
 private:
   void KeyEvent(char in[], ncintype_e evtype);
+  void MouseEvent(const ncinput &in);
 
   std::shared_ptr<notcurses> _nc;
   std::array<bool, moveDirectionCount> _mvmtKeyStates;

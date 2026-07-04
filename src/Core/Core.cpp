@@ -13,12 +13,19 @@ GameEngine::GameEngine(int sc_width, int sc_height)
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
-  _renderer = new NCursesRenderer();
   //_inputHandler = new NCursesInputHandler(_player);
-  notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
-                           NCOPTION_CLI_MODE};
+  //_renderer = new NCursesRenderer();
+  notcurses_options ncopts{getenv("TERM"),
+                           NCLOGLEVEL_SILENT,
+                           0,
+                           0,
+                           0,
+                           0,
+                           NCOPTION_NO_ALTERNATE_SCREEN |
+                               NCOPTION_NO_CLEAR_BITMAPS};
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
+  _renderer = new NotcursesRenderer(nc);
   _inputHandler = new NotcursesInputHandler(_player, nc);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
@@ -37,22 +44,23 @@ GameEngine::GameEngine()
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
-  _renderer = new NCursesRenderer();
   //_inputHandler = new NCursesInputHandler(_player);
+  //_renderer = new NCursesRenderer();
   notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
                            NCOPTION_CLI_MODE};
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
+  _renderer = new NotcursesRenderer(nc);
   _inputHandler = new NotcursesInputHandler(_player, nc);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
-  _renderer->Init();
-  int row, col;
-  getmaxyx(stdscr, row, col);
-  _renderer->SetScreenSize(col, row);
+  //_renderer->Init();
+  // int row, col;
+  // getmaxyx(stdscr, row, col);
+  //_renderer->SetScreenSize(col, row);
 }
 
 void GameEngine::enableDistanceShading(bool enabled) {

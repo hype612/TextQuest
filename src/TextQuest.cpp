@@ -41,7 +41,7 @@ int main() {
   p.setX(2.f);
   p.setY(2.f);
   p.setAngle(.0f);
-  p.setMoveSpeedAllDirectons(15.f);
+  p.setMoveSpeedAllDirectons(10.f);
   p.setTurnSpeedAlldirections(5.f);
   ge_ptr->enableDistanceShading(true);
   std::vector<float> shadingThresholds;

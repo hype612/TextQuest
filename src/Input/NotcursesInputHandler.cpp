@@ -5,6 +5,9 @@ NotcursesInputHandler::NotcursesInputHandler(Player &player,
                                              std::shared_ptr<notcurses> nc)
     : IInputHandler(player), _nc(nc) {
   Logger::setLogLevel(LogLevel::INFO);
+  for (size_t i = 0; i < _mvmtKeyStates.size(); i++) {
+    _mvmtKeyStates[i] = false;
+  }
 }
 
 void NotcursesInputHandler::Init() {}
@@ -15,8 +18,9 @@ void NotcursesInputHandler::ReceiveMovementInput(float delta) {
   ncinput in_char;
   timespec ts{0, 0};
   uint32_t rc;
-  while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0)
+  while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0) {
     KeyEvent(in_char.utf8, in_char.evtype);
+  }
 
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] == true)
     _player.move(delta, MoveDirection::FORWARD);

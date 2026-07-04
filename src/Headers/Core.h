@@ -10,6 +10,7 @@
 #include "NCursesInputHandler.h"
 #include "NCursesRenderer.h"
 #include "NotcursesInputHandler.h"
+#include "NotcursesRenderer.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
 #include "TextureMapper.h"

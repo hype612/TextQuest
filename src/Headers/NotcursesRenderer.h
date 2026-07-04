@@ -10,15 +10,17 @@
 
 class NotcursesRenderer : public IRenderer {
 public:
-  NotcursesRenderer(notcurses *nc);
+  NotcursesRenderer(std::shared_ptr<notcurses> nc);
   void Init() override;
   void OverwriteBuffer(char *newBuffer) override;
   void PrintBuffer() override;
   void PrintDebugInfo(const Player &player, float delta) override;
   std::tuple<int, int> GetScreenSize() override;
+  void SetScreenSize(int x, int y) override;
   ~NotcursesRenderer();
 
 private:
+  char *_screenBuffer;
   std::shared_ptr<notcurses> _nc;
 };
 
