@@ -16,7 +16,7 @@ public:
   void PrintBuffer() override;
   void PrintDebugInfo(const Player &player, float delta) override;
   std::tuple<int, int> GetScreenSize() override;
-  void SetScreenSize(int x, int y) override;
+  // void SetScreenSize(int x, int y) override;
 
   ~NCursesRenderer();
 

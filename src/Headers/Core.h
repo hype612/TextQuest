@@ -53,12 +53,6 @@ private:
 
   Player &_player;
 
-  // DONT FORGET TO REMOVE
-  // DONT FORGET TO REMOVE
-  // DONT FORGET TO REMOVE
-  // DONT FORGET TO REMOVE
-  int _steps;
-
   // rendering vars and consts
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
@@ -67,10 +61,6 @@ private:
   int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
-
-  // dont want anyone to call this
-  // fallback map for testing
-  bool initTestMap();
 };
 
 #endif // ASCIIVERSE_H

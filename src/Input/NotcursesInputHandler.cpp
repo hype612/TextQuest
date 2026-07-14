@@ -12,8 +12,6 @@ NotcursesInputHandler::NotcursesInputHandler(Player &player,
 
 void NotcursesInputHandler::Init() {}
 void NotcursesInputHandler::ReceiveMovementInput(float delta) {
-  Logger::GetInstance()->log("ReceiveMovementInput called", LogType::INPUT,
-                             LogLevel::INFO);
 
   ncinput in_char;
   timespec ts{0, 0};
@@ -41,21 +39,17 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   case 'w':
     if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = true;
-      Logger::GetInstance()->log("W pressed", LogType::INPUT, LogLevel::INFO);
     }
     if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = false;
-      Logger::GetInstance()->log("W released", LogType::INPUT, LogLevel::INFO);
     }
     break;
   case 'a':
     if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = true;
-      Logger::GetInstance()->log("A pressed", LogType::INPUT, LogLevel::INFO);
     }
     if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = false;
-      Logger::GetInstance()->log("A released", LogType::INPUT, LogLevel::INFO);
     }
     break;
   case 's':
@@ -67,11 +61,9 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   case 'd':
     if (evtype == NCTYPE_PRESS) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = true;
-      Logger::GetInstance()->log("D pressed", LogType::INPUT, LogLevel::INFO);
     }
     if (evtype == NCTYPE_RELEASE) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = false;
-      Logger::GetInstance()->log("D released", LogType::INPUT, LogLevel::INFO);
     }
     break;
   case 'q':
@@ -85,6 +77,12 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
     if (evtype == NCTYPE_RELEASE)
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+    break;
+  case 'j':
+    if (evtype == NCTYPE_PRESS) {
+      EngineState::GetInstance()->renderDebugInfo =
+          !EngineState::GetInstance()->renderDebugInfo;
+    }
     break;
   default:
     break;

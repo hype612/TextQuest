@@ -2,6 +2,7 @@
 #define NOTCURSESCURSESINPUTHANDLER_H_
 
 #if (defined(LINUX) || defined(__linux__))
+#include "./EngineState.h"
 #include "./IInputHandler.h"
 #include "./Logger.h"
 #include "./MoveDirection.h"

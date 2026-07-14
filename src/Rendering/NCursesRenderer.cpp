@@ -56,6 +56,7 @@ std::tuple<int, int> NCursesRenderer::GetScreenSize() {
   return std::make_tuple(_screenWidth, _screenHeight);
 }
 
+/*
 void NCursesRenderer::SetScreenSize(int x, int y) {
   _screenWidth = x;
   _screenHeight = y;
@@ -68,7 +69,7 @@ void NCursesRenderer::SetScreenSize(int x, int y) {
   EngineState::GetInstance()->screenHeight = _screenHeight;
   EngineState::GetInstance()->screenWidth = _screenWidth;
 }
-
+*/
 NCursesRenderer::~NCursesRenderer() {
   endwin();
   delete[] _screenBuffer;

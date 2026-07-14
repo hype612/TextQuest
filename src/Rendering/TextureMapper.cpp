@@ -18,15 +18,9 @@ TextureMapper::TextureMapper(std::string initTexture)
 // and the last one to be the faintest
 TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
     : _textureMipMaps(initTextureVec) {
-  Logger::GetInstance()->log("Starting TexMask generation...", LogType::TEXPREP,
-                             LogLevel::INFO);
-  Logger::forceFlush();
   _texWidth = initTextureVec[0].find('\n');
   _texHeight = _texWidth;
   GenerateTextureMask();
-  Logger::GetInstance()->log("TexMask generation COMPLETE", LogType::TEXPREP,
-                             LogLevel::INFO);
-  Logger::forceFlush();
 }
 
 void TextureMapper::GenerateTextureMask() {

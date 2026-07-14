@@ -6,6 +6,9 @@
 #include <notcurses/notcurses.h>
 #include <string>
 
+// SetScreenSize is basically DEPRECATED.
+// keeping it here if i change my mind
+/*
 GameEngine::GameEngine(int sc_width, int sc_height)
     : _sceneManager(_entityManager, _mapManager),
       _player(_sceneManager.getPlayerRef()),
@@ -33,9 +36,9 @@ GameEngine::GameEngine(int sc_width, int sc_height)
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
   _renderer->Init();
-  _renderer->SetScreenSize(sc_width, sc_height);
+  //_renderer->SetScreenSize(sc_width, sc_height);
   _renderAssetManager.setDistanceShading(true);
-}
+}*/
 
 GameEngine::GameEngine()
     : _sceneManager(_entityManager, _mapManager),
@@ -44,8 +47,6 @@ GameEngine::GameEngine()
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
-  //_inputHandler = new NCursesInputHandler(_player);
-  //_renderer = new NCursesRenderer();
   notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
                            NCOPTION_CLI_MODE};
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
@@ -57,10 +58,6 @@ GameEngine::GameEngine()
   _renderer = new WindowsRenderer();
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
-  //_renderer->Init();
-  // int row, col;
-  // getmaxyx(stdscr, row, col);
-  //_renderer->SetScreenSize(col, row);
 }
 
 void GameEngine::enableDistanceShading(bool enabled) {
@@ -71,38 +68,14 @@ void GameEngine::setDistanceShadingThresholds(
   _renderAssetManager.setDistanceShadingThresholds(thresholds);
 }
 
-bool GameEngine::initTestMap() {
-  std::string map;
-  map += "###############################";
-  map += "#.............................#";
-  map += "#..............###........#####";
-  map += "#..............#............#.#";
-  map += "#..............#..............#";
-  map += "#..............#..............#";
-  map += "#..............#..............#";
-  map += "#..............#..............#";
-  map += "#..............#..............#";
-  map += "#..............#..............#";
-  map += "#.............................#";
-  map += "#..............#..............#";
-  map += "###############################";
-
-  int map_w = map.find("\n");
-  int map_h = map.size() / map_w;
-
-  _sceneManager.initializeNewMap(map, map_w, map_h);
-
-  return true;
-}
-
 void GameEngine::run_game() {
-  Logger::GetInstance()->log("main loop running", LogType::CORE,
-                             LogLevel::INFO);
-  Logger::forceFlush();
   EngineState::GetInstance()->gameRunningf = true;
   screen = new char[_screenWidth * _screenHeight];
-  if (!_sceneManager.isMapAvailable())
-    initTestMap();
+  if (!_sceneManager.isMapAvailable()) {
+    Logger::GetInstance()->log("Map was never uploaded. Shutting down GameLoop",
+                               LogType::CORE, LogLevel::ERROR);
+    return;
+  }
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
   while (EngineState::GetInstance()->gameRunningf == true) {
@@ -130,7 +103,6 @@ void GameEngine::RayCastingProcess() {
     // init for DDA
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
-    _steps = 0;
 
     vec2f playerDir{std::sin(_player.getAngle()), std::cos(_player.getAngle())};
     float cameraX = 2.f * x / (float)_screenWidth - 1.f;
@@ -156,7 +128,6 @@ void GameEngine::RayCastingProcess() {
     sideDist.x = sideDist.x * deltaDist.x;
     sideDist.y = sideDist.y * deltaDist.y;
     while (!hitwall && rayLength < max_raylength) {
-      _steps++;
       if (sideDist.x < sideDist.y) {
         sideDist.x += deltaDist.x;
         mapPos.x += stepDir.x;
@@ -266,7 +237,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
       if (b < 0.25)
         floorShade = '#';
       else if (b < 0.5)
-        floorShade = 'X';
+        floorShade = 'x';
       else if (b < 0.75)
         floorShade = '.';
       else if (b < 0.9)

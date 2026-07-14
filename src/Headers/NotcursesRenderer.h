@@ -16,12 +16,13 @@ public:
   void PrintBuffer() override;
   void PrintDebugInfo(const Player &player, float delta) override;
   std::tuple<int, int> GetScreenSize() override;
-  void SetScreenSize(int x, int y) override;
+  // void SetScreenSize(int x, int y) override;
   ~NotcursesRenderer();
 
 private:
   char *_screenBuffer;
   std::shared_ptr<notcurses> _nc;
+  ncplane *_debugPln;
 };
 
 #endif // OS check end

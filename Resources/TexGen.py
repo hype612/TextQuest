@@ -1,6 +1,7 @@
 from PIL import Image, ImageOps
 from pathlib import Path
 
+
 ascii_texture = " .:coPO?@#"
 # ascii_texture = " :P?#"
 # ascii_texture = " :P#"
@@ -35,6 +36,8 @@ step = 256 // len(ascii_texture)
 shadow_levels = 8
 
 for texSource in tex_files:
+    output_dir = Path("Textures/" + texSource.stem)
+    output_dir.mkdir(exist_ok=True, parents=True)
     img_in = Image.open(texSource).convert("RGBA")
     bg = Image.new("RGB", img_in.size, (0, 0, 0))
     bg.paste(img_in, mask=img_in.split()[-1])
@@ -47,12 +50,11 @@ for texSource in tex_files:
     tex = ImageOps.autocontrast(tex, cutoff=2)
     texData = tex.load()
     for lv in range(shadow_levels):
-        tex_name = "./Textures/" + \
-            str(texSource.stem) + "lv" + str(lv) + ".txt"
+        tex_name = output_dir / f"{texSource.stem}lv{lv}.txt"
         with open(tex_name, "w", encoding="utf-8") as file:
             for i in range(new_size[1]):
                 for j in range(new_size[0]):
                     out = max(0, texData[j, i] - lv * step)
                     file.write(create_char(out))
                 file.write("\n")
-        img_in.close()
+    img_in.close()

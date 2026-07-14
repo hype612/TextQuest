@@ -84,7 +84,7 @@ bool MapManager::isWall(int test_x, int test_y) const {
   if (isOutOfBounds(test_x, test_y)) {
     return false;
   }
-  if (_map[test_y * _mapWidth + test_x] == '#')
+  if (_map[test_y * _mapWidth + test_x] != '.')
     return true;
   else
     return false;

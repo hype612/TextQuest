@@ -26,10 +26,6 @@ std::string RenderAssetManager::getTextureAt(int pos_x, int pos_y) {
 }
 
 std::string RenderAssetManager::getNextCharColumn(int height) {
-  Logger::GetInstance()->log("getNextCharColumn called, queue empty=" +
-                                 std::to_string(_texRequestQ.isEmpty()),
-                             LogType::RENDER, LogLevel::INFO);
-  Logger::GetInstance()->forceFlush();
   std::string col;
   col.reserve(height);
   while (!_texRequestQ.isEmpty()) {

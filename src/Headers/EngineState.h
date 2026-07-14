@@ -23,6 +23,7 @@ public:
   static RenderAssetManager *globalRenderAssetManager;
   static SceneManager *globalSceneManager;
   static bool gameRunningf;
+  static bool renderDebugInfo;
 
 private:
   EngineState() {}
