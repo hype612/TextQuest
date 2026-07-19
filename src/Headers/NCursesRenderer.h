@@ -13,9 +13,9 @@ public:
   NCursesRenderer();
   void Init() override;
   void OverwriteBuffer(char *newBuffer) override;
-  void PrintBuffer() override;
-  void PrintDebugInfo(const Player &player, float delta) override;
-  std::tuple<int, int> GetScreenSize() override;
+  void PrintBuffer() const override;
+  void PrintDebugInfo(const std::vector<std::string> &nfo) override;
+  std::tuple<int, int> GetScreenSize() const override;
   // void SetScreenSize(int x, int y) override;
 
   ~NCursesRenderer();

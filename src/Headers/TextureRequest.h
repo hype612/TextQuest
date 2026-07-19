@@ -7,7 +7,6 @@ struct TextureRequest {
 public:
   int mapX;
   int mapY;
-  Tile tileType;
   int height;
   int wallTop;
   float hitPoint;

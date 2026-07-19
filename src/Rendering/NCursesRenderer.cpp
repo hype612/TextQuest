@@ -41,35 +41,18 @@ void NCursesRenderer::OverwriteBuffer(char *newBuffer) {
   }
 }
 
-void NCursesRenderer::PrintBuffer() { refresh(); }
+void NCursesRenderer::PrintBuffer() const { refresh(); }
 
-void NCursesRenderer::PrintDebugInfo(const Player &player, float delta) {
-  int debugY = 0;
-  int debugX = 0;
-  mvprintw(debugY, debugX, "Player x: %.2f y: %.2f angle: %.2f", player.getX(),
-           player.getY(), player.getAngle());
-  debugY = 1;
-  mvprintw(debugY, debugX, "fps: %.2f", 1.f / delta);
+void NCursesRenderer::PrintDebugInfo(const std::vector<std::string> &nfo) {
+  for (size_t i = 0; i < nfo.size(); i++) {
+    mvprintw(i, 0, "%s", nfo[i].c_str());
+  }
 }
 
-std::tuple<int, int> NCursesRenderer::GetScreenSize() {
+std::tuple<int, int> NCursesRenderer::GetScreenSize() const {
   return std::make_tuple(_screenWidth, _screenHeight);
 }
 
-/*
-void NCursesRenderer::SetScreenSize(int x, int y) {
-  _screenWidth = x;
-  _screenHeight = y;
-  if (_screenBuffer) {
-    delete[] _screenBuffer;
-    _screenBuffer = nullptr;
-  }
-  _screenBuffer = new char[_screenWidth * _screenHeight];
-
-  EngineState::GetInstance()->screenHeight = _screenHeight;
-  EngineState::GetInstance()->screenWidth = _screenWidth;
-}
-*/
 NCursesRenderer::~NCursesRenderer() {
   endwin();
   delete[] _screenBuffer;

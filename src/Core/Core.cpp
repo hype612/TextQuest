@@ -90,7 +90,12 @@ void GameEngine::run_game() {
     RayCastingProcess();
 
     _renderer->OverwriteBuffer(screen);
-    _renderer->PrintDebugInfo(_player, f_elapsed_time);
+    std::vector<std::string> dbgNfo = {
+        "P.x: " + std::to_string(_player.getX()) +
+            " P.y: " + std::to_string(_player.getY()) +
+            " angle: " + std::to_string(_player.getAngle()),
+        "fps: " + std::to_string(1.f / f_elapsed_time)};
+    _renderer->PrintDebugInfo(dbgNfo);
     _renderer->PrintBuffer();
   }
 }
@@ -147,32 +152,8 @@ void GameEngine::RayCastingProcess() {
         break;
       }
 
-      if (_sceneManager.isOccupied(mapPos.x, mapPos.y) == Tile::WALL) {
+      if (_mapManager.isWall(mapPos.x, mapPos.y)) {
         hitwall = true;
-        float dist = (side == WallSide::HORIZONTAL) ? sideDist.x - deltaDist.x
-                                                    : sideDist.y - deltaDist.y;
-
-        int height = (int)(_screenHeight / dist);
-        int wallTop = (_screenHeight / 2) - (height / 2);
-        float hitp = (side == WallSide::HORIZONTAL)
-                         ? _player.getY() + dist * rayDir.y
-                         : _player.getX() + dist * rayDir.x;
-        hitp -= std::floorf(hitp);
-        _texRequestQueue.push(
-            {mapPos.x, mapPos.y, Tile::WALL, height, wallTop, hitp, dist});
-      }
-      if (_sceneManager.isOccupied(mapPos.x, mapPos.y) == Tile::ENTITY) {
-
-        float dist = (side == WallSide::HORIZONTAL) ? sideDist.x - deltaDist.x
-                                                    : sideDist.y - deltaDist.y;
-        int height = (int)(_screenHeight / dist);
-        int wallTop = (_screenHeight / 2) - (height / 2);
-        float hitp = (side == WallSide::HORIZONTAL)
-                         ? _player.getY() + dist * rayDir.y
-                         : _player.getX() + dist * rayDir.x;
-        hitp -= std::floorf(hitp);
-        _texRequestQueue.push(
-            {mapPos.x, mapPos.y, Tile::ENTITY, height, wallTop, hitp, dist});
       }
       std::string sideStr;
       switch (side) {
@@ -193,22 +174,28 @@ void GameEngine::RayCastingProcess() {
     float hitpoint = (side == WallSide::HORIZONTAL)
                          ? _player.getY() + distance_to_wall * rayDir.y
                          : _player.getX() + distance_to_wall * rayDir.x;
-    if (!hitwall) {
-      side = WallSide::NOHIT;
-      distance_to_wall = max_raylength;
-      hitpoint = 0.f;
-    }
 
     hitpoint -= std::floorf(hitpoint);
     if (distance_to_wall < 0.0001f)
       distance_to_wall = 0.0001f;
 
     int wallHeight = (int)(_screenHeight / distance_to_wall);
+
     int ceiling = (_screenHeight / 2) - (wallHeight / 2);
     int floor = ceiling + wallHeight;
-
     ceiling = std::max(0, ceiling);
     floor = std::min(_screenHeight - 1, floor);
+    if (!hitwall) {
+      side = WallSide::NOHIT;
+      distance_to_wall = max_raylength;
+      hitpoint = 0.f;
+      ceiling = _screenHeight / 2;
+      floor = _screenHeight / 2;
+    } else {
+      int wallTop = (_screenHeight / 2) - (wallHeight / 2);
+      _texRequestQueue.push({mapPos.x, mapPos.y, wallHeight, wallTop, hitpoint,
+                             distance_to_wall});
+    }
     RenderScreen(ceiling, floor, x);
   }
 }

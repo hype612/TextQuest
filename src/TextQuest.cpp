@@ -77,7 +77,7 @@ int main() {
   Player &p = sceneMan.getPlayerRef();
   p.setX(2.f);
   p.setY(2.f);
-  p.setAngle(.0f);
+  p.setAngle(0.f);
   p.setMoveSpeedAllDirectons(5.f);
   p.setTurnSpeedAlldirections(5.f);
   ge_ptr->enableDistanceShading(true);

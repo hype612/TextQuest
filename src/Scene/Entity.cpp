@@ -4,9 +4,14 @@
 // Constructors
 // =============
 
-Entity::Entity(int x, int y, std::string *tex, int initHP,
+Entity::Entity(float x, float y, float angle, std::string *tex, int initHP,
                EntityState initState)
-    : _id(-1), _x(x), _y(y), _texMapper(*tex), _health(initHP),
+    : _id(-1), _transform{vec2f{x, y}, angle}, _texMapper(*tex),
+      _health(initHP), _state(initState) {}
+
+Entity::Entity(Transform pos, std::string *tex, int initHP,
+               EntityState initState)
+    : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
       _state(initState) {}
 
 // =============
@@ -18,15 +23,11 @@ void Entity::process() {}
 // Getters
 // =============
 int Entity::ID() const { return _id; }
-float Entity::X() const { return _x; }
-float Entity::Y() const { return _y; }
+float Entity::X() const { return _transform.position.x; }
+float Entity::Y() const { return _transform.position.y; }
+float Entity::Angle() const { return _transform.angle; }
 
-int Entity::discreteX() const { return (int)_x; }
-int Entity::discreteY() const { return (int)_y; }
-
-std::tuple<int, int> Entity::getCoordinates() {
-  return std::tuple<int, int>(_x, _y);
-}
+vec2f Entity::getCoordinates() { return _transform.position; }
 
 std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 
@@ -54,8 +55,8 @@ int Entity::getHP() { return _health; }
 // Setters
 // =============
 
-void Entity::setX(int x) { _x = x; }
-void Entity::setY(int y) { _y = y; }
+void Entity::setX(int x) { _transform.position.x = x; }
+void Entity::setY(int y) { _transform.position.y = y; }
 
 void Entity::setID(int id) {
   if (_id == -1)

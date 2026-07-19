@@ -2,6 +2,7 @@
 #include <memory>
 #include <notcurses/notcurses.h>
 #include <string>
+#include <vector>
 
 NotcursesRenderer::NotcursesRenderer(std::shared_ptr<notcurses> nc) : _nc(nc) {
   _screenHeight = ncplane_dim_y(notcurses_stdplane(_nc.get()));
@@ -38,21 +39,20 @@ void NotcursesRenderer::OverwriteBuffer(char *newBuffer) {
     ncplane_putstr(notcurses_stdplane(_nc.get()), l.c_str());
   }
 }
-void NotcursesRenderer::PrintBuffer() { notcurses_render(_nc.get()); }
-void NotcursesRenderer::PrintDebugInfo(const Player &player, float delta) {
+void NotcursesRenderer::PrintBuffer() const { notcurses_render(_nc.get()); }
+void NotcursesRenderer::PrintDebugInfo(const std::vector<std::string> &nfo) {
   if (EngineState::GetInstance()->renderDebugInfo) {
-    ncplane_cursor_move_yx(_debugPln, 0, 0);
-    ncplane_putstr(_debugPln, ("P.x:" + std::to_string(player.getX()) +
-                               " P.y: " + std::to_string(player.getY()) +
-                               " angle: " + std::to_string(player.getAngle()))
-                                  .c_str());
-    ncplane_cursor_move_yx(_debugPln, 1, 0);
-    ncplane_putstr(_debugPln, ("fps: " + std::to_string(1.f / delta)).c_str());
+    ncplane_erase(_debugPln);
+    for (size_t i = 0; i < nfo.size(); i++) {
+      ncplane_cursor_move_yx(_debugPln, i, 0);
+      ncplane_putstr(_debugPln, nfo[i].c_str());
+    }
   } else {
     ncplane_erase(_debugPln);
   }
 }
-std::tuple<int, int> NotcursesRenderer::GetScreenSize() {
+
+std::tuple<int, int> NotcursesRenderer::GetScreenSize() const {
   return std::tuple<int, int>(_screenWidth, _screenHeight);
 }
 NotcursesRenderer::~NotcursesRenderer() { delete[] _screenBuffer; }

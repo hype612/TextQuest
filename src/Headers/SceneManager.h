@@ -24,7 +24,6 @@ public:
   SceneManager(EntityManager &entityMan, MapManager &mapMan);
 
   void process();
-  Tile isOccupied(int x, int y) const;
 
   // Map Related functions
   void initializeNewMap(std::string &map, int mapWidth, int mapHeight);
@@ -34,7 +33,6 @@ public:
   void uploadTextureForWall(const char &mapChar, std::string &wallTex);
   void uploadTextureVecForWall(const char &mapChar,
                                std::vector<std::string> &wallTexV);
-  const std::string &getWallTextureForMapChar(const char &mapChar);
 
   // Entity Related functions
   void AddEntity(Entity &entity);

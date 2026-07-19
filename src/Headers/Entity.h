@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "TextureMapper.h"
+#include "Transform.h"
+#include "Vec2f.h"
 
 enum EntityState { IDLE, WALKING, FIGHT };
 
@@ -15,7 +17,9 @@ public:
   // Constructors
   // =============
 
-  Entity(int x, int y, std::string *tex, int initHP, EntityState initState);
+  Entity(float x, float y, float angle, std::string *tex, int initHP,
+         EntityState initState);
+  Entity(Transform pos, std::string *tex, int initHP, EntityState initState);
 
   // =============
   // Process
@@ -30,10 +34,9 @@ public:
   int ID() const;
   float X() const;
   float Y() const;
-  int discreteX() const;
-  int discreteY() const;
+  float Angle() const;
 
-  std::tuple<int, int> getCoordinates();
+  vec2f getCoordinates();
   std::string getTexture() const;
   std::string getTexColumnAt(int height, float hitpoint, int wallTop) const;
   std::string getTexColumnAt(int height, float hitpoint, int wallTop,
@@ -54,8 +57,7 @@ public:
 
 private:
   int _id;
-  float _x;
-  float _y;
+  Transform _transform;
   TextureMapper _texMapper;
   int _health;
   EntityState _state;

@@ -35,11 +35,6 @@ void SceneManager::uploadTextureVecForWall(const char &mapChar,
   _mapManager.uploadWallTextureVecFor(mapChar, wallTexV);
 }
 
-// const std::string &SceneManager::getWallTextureForMapChar(const char
-// &mapChar) {
-//   return _mapManager.getWallTexForMapChar(mapChar);
-// }
-
 // Entity Related functions
 void SceneManager::AddEntity(Entity &entity) {
   _entityManager.addEntity(entity);
@@ -51,16 +46,6 @@ void SceneManager::removeEntity(int entityId) {
   _entityManager.removeEntity(entityId);
 }
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
-
-Tile SceneManager::isOccupied(int x, int y) const {
-
-  if (_entityManager.getEntityIdAtPos(x, y) != -1)
-    return Tile::ENTITY;
-  if (_mapManager.isWall(x, y) == true)
-    return Tile::WALL;
-
-  return Tile::NONE;
-}
 
 // Player related functions
 void SceneManager::setPlayerX(int new_x) { _player.setX(new_x); }

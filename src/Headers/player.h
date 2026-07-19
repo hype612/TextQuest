@@ -3,6 +3,7 @@
 
 #include "./MapManager.h"
 #include "./MoveDirection.h"
+#include "Transform.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -21,7 +22,7 @@ public:
   void setX(float new_x);
   void setY(float new_y);
   void setAngle(float new_a);
-  void setPos(float new_x, float new_y);
+  void setPos(const vec2f &new_pos);
   void setMoveSpeedOnDirection(float new_speed, MoveDirection direction);
   void setMoveSpeedAllDirectons(float new_speed);
   void setTurnSpeedAlldirections(float new_speed);
@@ -36,13 +37,6 @@ public:
   void addToMoveSpeedAllDirections(float new_speed);
   void addToTurnSpeedAlldirections(float new_speed);
 
-  // ???????????????????????,
-  // void moveForward(float delta);
-  // void moveBackward(float delta);
-  // void moveRight(float delta);
-  // void moveLeft(float delta);
-  // void turnRight(float delta);
-  // void turnLeft(float delta);
   void move(float delta, MoveDirection dir);
 
   //====================
@@ -62,6 +56,7 @@ private:
   float _posX;
   float _posY;
   float _angle;
+  Transform _transform;
   float _fov;
 
   std::array<float, moveDirectionCount> _directionalSpeeds;
