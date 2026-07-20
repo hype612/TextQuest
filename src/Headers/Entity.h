@@ -25,7 +25,7 @@ public:
   // Process
   // =============
 
-  virtual void process();
+  void process();
 
   // =============
   // Getters
@@ -36,7 +36,9 @@ public:
   float Y() const;
   float Angle() const;
 
-  vec2f getCoordinates();
+  vec2f coordinates();
+  const Transform &transform() const;
+
   std::string getTexture() const;
   std::string getTexColumnAt(int height, float hitpoint, int wallTop) const;
   std::string getTexColumnAt(int height, float hitpoint, int wallTop,

@@ -12,9 +12,9 @@
 
 class Player {
 public:
-  Player(float x_pos, float y_pos, float angle, float fov,
-         MapManager &mapManager);
+  Player(float x_pos, float y_pos, float angle, MapManager &mapManager);
 
+  Player(const Transform &pos, MapManager &mapManager);
   //====================
   // Absolute setters
   //====================
@@ -46,18 +46,13 @@ public:
   float getX() const;
   float getY() const;
   float getAngle() const;
-  float getFov() const;
-  float getFovInRad() const;
   float getMoveSpeedOnDirection(MoveDirection direction) const;
   const std::array<float, moveDirectionCount> &getMoveSpeedArray() const;
   std::tuple<float, float> getAngleUnitVector() const;
+  const Transform &transform() const;
 
 private:
-  float _posX;
-  float _posY;
-  float _angle;
   Transform _transform;
-  float _fov;
 
   std::array<float, moveDirectionCount> _directionalSpeeds;
   MapManager &_mapManager;

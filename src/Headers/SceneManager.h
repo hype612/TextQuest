@@ -1,22 +1,13 @@
 #ifndef SCENEMANAGER_H
 #define SCENEMANAGER_H
 
-#include "./EngineState.h"
+#include "./Camera.h"
 #include "./Entity.h"
 #include "./EntityManager.h"
-#include "./Logger.h"
-#include "./MapManager.h"
-#include "./Tile.h"
 #include "./player.h"
-#include <codecvt>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#include "Transform.h"
 #include <string>
-#include <tuple>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 class SceneManager {
@@ -47,6 +38,12 @@ public:
   void setPlayerY(int new_y);
   Player &getPlayerRef();
 
+  // Camera
+  const Camera &camera() const;
+  const Camera *cameraPtr() const;
+  const Transform &cameraFollow() const;
+  void setCameraFollow(const Transform &new_follow);
+
   // Other
   void loadResources(const std::string &filePath,
                      std::unordered_map<std::string, std::string> &outTextures);
@@ -55,6 +52,7 @@ private:
   EntityManager &_entityManager;
   MapManager &_mapManager;
   Player _player;
+  Camera _camera;
 };
 
 #endif // SCENEMANAGER_H

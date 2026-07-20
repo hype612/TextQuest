@@ -30,7 +30,6 @@
 
 class GameEngine {
 public:
-  GameEngine(int sc_width, int sc_height);
   GameEngine();
   void run_game();
   void RayCastingProcess();
@@ -50,8 +49,7 @@ private:
   MapManager _mapManager;
   EntityManager _entityManager;
   SceneManager _sceneManager;
-
-  Player &_player;
+  const Camera *_camera;
 
   // rendering vars and consts
   IRenderer *_renderer;

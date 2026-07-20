@@ -1,4 +1,6 @@
 #include "../Headers/Core.h"
+#include "../Headers/Camera.h"
+#include "../Headers/Transform.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -6,44 +8,11 @@
 #include <notcurses/notcurses.h>
 #include <string>
 
-// SetScreenSize is basically DEPRECATED.
-// keeping it here if i change my mind
-/*
-GameEngine::GameEngine(int sc_width, int sc_height)
-    : _sceneManager(_entityManager, _mapManager),
-      _player(_sceneManager.getPlayerRef()),
-      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
-  EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
-  EngineState::GetInstance()->globalSceneManager = &_sceneManager;
-#if (defined(LINUX) || defined(__linux__))
-  //_inputHandler = new NCursesInputHandler(_player);
-  //_renderer = new NCursesRenderer();
-  notcurses_options ncopts{getenv("TERM"),
-                           NCLOGLEVEL_SILENT,
-                           0,
-                           0,
-                           0,
-                           0,
-                           NCOPTION_NO_ALTERNATE_SCREEN |
-                               NCOPTION_NO_CLEAR_BITMAPS};
-  std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
-                                notcurses_stop);
-  _renderer = new NotcursesRenderer(nc);
-  _inputHandler = new NotcursesInputHandler(_player, nc);
-#endif
-#if (defined(_WIN32) || defined(_WIN64))
-  _renderer = new WindowsRenderer();
-  _inputHandler = new WindowsInputHanlder(_player);
-#endif
-  _renderer->Init();
-  //_renderer->SetScreenSize(sc_width, sc_height);
-  _renderAssetManager.setDistanceShading(true);
-}*/
-
 GameEngine::GameEngine()
     : _sceneManager(_entityManager, _mapManager),
-      _player(_sceneManager.getPlayerRef()),
+      _camera(_sceneManager.cameraPtr()),
       _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
+
   EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
   EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
@@ -52,7 +21,7 @@ GameEngine::GameEngine()
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
   _renderer = new NotcursesRenderer(nc);
-  _inputHandler = new NotcursesInputHandler(_player, nc);
+  _inputHandler = new NotcursesInputHandler(_sceneManager.getPlayerRef(), nc);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();
@@ -91,9 +60,9 @@ void GameEngine::run_game() {
 
     _renderer->OverwriteBuffer(screen);
     std::vector<std::string> dbgNfo = {
-        "P.x: " + std::to_string(_player.getX()) +
-            " P.y: " + std::to_string(_player.getY()) +
-            " angle: " + std::to_string(_player.getAngle()),
+        "C.x: " + std::to_string(_camera->follow().position.x) +
+            " C.y: " + std::to_string(_camera->follow().position.y) +
+            " angle: " + std::to_string(_camera->follow().angle),
         "fps: " + std::to_string(1.f / f_elapsed_time)};
     _renderer->PrintDebugInfo(dbgNfo);
     _renderer->PrintBuffer();
@@ -102,6 +71,11 @@ void GameEngine::run_game() {
 
 void GameEngine::RayCastingProcess() {
   const float max_raylength = 50.f;
+  vec2f playerDir{std::sin(_camera->follow().angle),
+                  std::cos(_camera->follow().angle)};
+  vec2f planeV{
+      std::cos(_camera->follow().angle) * std::tan(_camera->fov() / 2.f),
+      -std::sin(_camera->follow().angle) * std::tan(_camera->fov() / 2.f)};
   for (int x = 0; x < _screenWidth; x++) {
     bool hitwall = false;
 
@@ -109,23 +83,19 @@ void GameEngine::RayCastingProcess() {
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
 
-    vec2f playerDir{std::sin(_player.getAngle()), std::cos(_player.getAngle())};
     float cameraX = 2.f * x / (float)_screenWidth - 1.f;
-    vec2f planeV{
-        std::cos(_player.getAngle()) * std::tan(_player.getFovInRad() / 2.f),
-        -std::sin(_player.getAngle()) * std::tan(_player.getFovInRad() / 2.f)};
-
     vec2f rayDir{playerDir + planeV * cameraX};
     vec2f deltaDist{(rayDir.x == 0.f) ? 1e30f : std::abs(1.f / rayDir.x),
                     (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
 
     vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
-    vec2i mapPos{static_cast<int>(std::floor(_player.getX())),
-                 static_cast<int>(std::floor(_player.getY()))};
-    vec2f sideDist{(stepDir.x == 1) ? mapPos.x + 1.f - _player.getX()
-                                    : _player.getX() - mapPos.x,
-                   (stepDir.y == 1) ? mapPos.y + 1.f - _player.getY()
-                                    : _player.getY() - mapPos.y};
+    vec2i mapPos{static_cast<int>(std::floor(_camera->follow().position.x)),
+                 static_cast<int>(std::floor(_camera->follow().position.y))};
+    vec2f sideDist{
+        (stepDir.x == 1) ? mapPos.x + 1.f - _camera->follow().position.x
+                         : _camera->follow().position.x - mapPos.x,
+        (stepDir.y == 1) ? mapPos.y + 1.f - _camera->follow().position.y
+                         : _camera->follow().position.y - mapPos.y};
     if (sideDist.x <= 0.0001f)
       sideDist.x = 1.f;
     if (sideDist.y <= 0.0001f)
@@ -145,8 +115,7 @@ void GameEngine::RayCastingProcess() {
         side = WallSide::VERTICAL;
       }
 
-      if (mapPos.x < 0 || mapPos.y < 0 || mapPos.x >= _mapManager.mapWidth() ||
-          mapPos.y >= _mapManager.mapHeight()) {
+      if (_mapManager.isOutOfBounds(mapPos.x, mapPos.y)) {
         sideDist.x = max_raylength;
         sideDist.y = max_raylength;
         break;
@@ -171,9 +140,10 @@ void GameEngine::RayCastingProcess() {
     float distance_to_wall = (side == WallSide::HORIZONTAL)
                                  ? sideDist.x - deltaDist.x
                                  : sideDist.y - deltaDist.y;
-    float hitpoint = (side == WallSide::HORIZONTAL)
-                         ? _player.getY() + distance_to_wall * rayDir.y
-                         : _player.getX() + distance_to_wall * rayDir.x;
+    float hitpoint =
+        (side == WallSide::HORIZONTAL)
+            ? _camera->follow().position.y + distance_to_wall * rayDir.y
+            : _camera->follow().position.x + distance_to_wall * rayDir.x;
 
     hitpoint -= std::floorf(hitpoint);
     if (distance_to_wall < 0.0001f)
@@ -237,6 +207,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
 }
 
 GameEngine::~GameEngine() {
+  delete _camera;
   delete _renderer;
   delete _inputHandler;
   delete[] screen;

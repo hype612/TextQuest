@@ -1,10 +1,18 @@
 #include "../Headers/SceneManager.h"
+#include "../Headers/EngineState.h"
+#include "./Camera.h"
+#include "./MapManager.h"
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
     : _entityManager(entityMan), _mapManager(mapMan),
-      _player(-1, -1, 0.f, 90.f, mapMan) {
+      _player(-1, -1, 0.f, mapMan), _camera(_player.transform()) {
   EngineState::globalSceneManager = this;
+  _camera.setFovDegrees(90);
 }
 // 1.0472
 void SceneManager::process() {
@@ -51,6 +59,14 @@ void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
 void SceneManager::setPlayerX(int new_x) { _player.setX(new_x); }
 void SceneManager::setPlayerY(int new_y) { _player.setY(new_y); }
 Player &SceneManager::getPlayerRef() { return _player; }
+
+// Camera
+const Camera &SceneManager::camera() const { return _camera; }
+const Camera *SceneManager::cameraPtr() const { return &_camera; }
+const Transform &SceneManager::cameraFollow() const { return _camera.follow(); }
+void SceneManager::setCameraFollow(const Transform &new_follow) {
+  _camera.setFollow(new_follow);
+}
 
 // Other
 void SceneManager::loadResources(

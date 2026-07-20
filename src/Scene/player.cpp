@@ -2,10 +2,12 @@
 #include <cmath>
 #include <tuple>
 
-Player::Player(float x_pos, float y_pos, float angle, float fov,
-               MapManager &mapManager)
-    : _transform{{x_pos, y_pos}, angle}, _fov(fov), _directionalSpeeds{},
+Player::Player(float x_pos, float y_pos, float angle, MapManager &mapManager)
+    : _transform{{x_pos, y_pos}, angle}, _directionalSpeeds{},
       _mapManager(mapManager) {}
+
+Player::Player(const Transform &pos, MapManager &mapManager)
+    : _transform(pos), _directionalSpeeds{}, _mapManager(mapManager) {}
 
 //====================
 // Absolute setters
@@ -54,7 +56,7 @@ void Player::addToY(float rval_y) {
     _transform.position.y -= rval_y;
 }
 
-void Player::addToAngle(float rval_a) { _angle += rval_a; }
+void Player::addToAngle(float rval_a) { _transform.angle += rval_a; }
 
 void Player::addToMoveSpeedOnDirection(float new_speed,
                                        MoveDirection direction) {
@@ -75,34 +77,34 @@ void Player::addToTurnSpeedAlldirections(float new_speed) {
 void Player::move(float delta, MoveDirection dir) {
   switch (dir) {
   case MoveDirection::FORWARD:
-    addToX(sinf(_angle) *
+    addToX(sinf(_transform.angle) *
            _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] *
            delta);
-    addToY(cosf(_angle) *
+    addToY(cosf(_transform.angle) *
            _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] *
            delta);
     break;
   case MoveDirection::BACKWARD:
-    addToX(-1 * sinf(_angle) *
+    addToX(-1 * sinf(_transform.angle) *
            _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] *
            delta);
-    addToY(-1 * cosf(_angle) *
+    addToY(-1 * cosf(_transform.angle) *
            _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] *
            delta);
     break;
   case MoveDirection::STRAFE_LEFT:
-    addToX(sinf(_angle - (3.14159f / 2.0f)) *
+    addToX(sinf(_transform.angle - (3.14159f / 2.0f)) *
            _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] *
            delta);
-    addToY(cosf(_angle - (3.14159f / 2.0f)) *
+    addToY(cosf(_transform.angle - (3.14159f / 2.0f)) *
            _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] *
            delta);
     break;
   case MoveDirection::STRAFE_RIGHT:
-    addToX(sinf(_angle + (3.14159f / 2.0f)) *
+    addToX(sinf(_transform.angle + (3.14159f / 2.0f)) *
            _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] *
            delta);
-    addToY(cosf(_angle + (3.14159f / 2.0f)) *
+    addToY(cosf(_transform.angle + (3.14159f / 2.0f)) *
            _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] *
            delta);
     break;
@@ -124,9 +126,7 @@ void Player::move(float delta, MoveDirection dir) {
 
 float Player::getX() const { return _transform.position.x; }
 float Player::getY() const { return _transform.position.y; }
-float Player::getAngle() const { return _angle; }
-float Player::getFov() const { return _fov; }
-float Player::getFovInRad() const { return (_fov * 3.14159f) / 180; }
+float Player::getAngle() const { return _transform.angle; }
 float Player::getMoveSpeedOnDirection(MoveDirection direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];
 }
@@ -134,5 +134,7 @@ const std::array<float, moveDirectionCount> &Player::getMoveSpeedArray() const {
   return _directionalSpeeds;
 }
 std::tuple<float, float> Player::getAngleUnitVector() const {
-  return std::tuple<float, float>(std::cos(_angle), -std::sin(_angle));
+  return std::tuple<float, float>(std::cos(_transform.angle),
+                                  -std::sin(_transform.angle));
 }
+const Transform &Player::transform() const { return _transform; }

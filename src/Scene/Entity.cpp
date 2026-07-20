@@ -27,8 +27,9 @@ float Entity::X() const { return _transform.position.x; }
 float Entity::Y() const { return _transform.position.y; }
 float Entity::Angle() const { return _transform.angle; }
 
-vec2f Entity::getCoordinates() { return _transform.position; }
+vec2f Entity::coordinates() { return _transform.position; }
 
+const Transform &Entity::transform() const { return _transform; }
 std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 
 const std::vector<int> &Entity::getTexMask() const {
