@@ -3,7 +3,6 @@
 
 #include "Vec2i.h"
 #include <string>
-#include <tuple>
 #include <vector>
 
 class IRenderer {

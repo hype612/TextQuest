@@ -2,7 +2,6 @@
 #define IINPUTHANDLER_H
 
 #include "./player.h"
-#include <cmath>
 
 class IInputHandler {
 public:

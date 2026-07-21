@@ -1,13 +1,10 @@
 #ifndef RENDERASSETMANAGER_H
 #define RENDERASSETMANAGER_H
 
+#include "EntityManager.h"
 #include "MapManager.h"
-#include "SceneManager.h"
-#include "TextureRequest.h"
 #include "TextureRequestQueue.h"
-#include <deque>
 #include <string>
-#include <tuple>
 
 class RenderAssetManager {
 public:

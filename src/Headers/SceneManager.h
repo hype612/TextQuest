@@ -4,6 +4,7 @@
 #include "./Camera.h"
 #include "./Entity.h"
 #include "./EntityManager.h"
+#include "./MapManager.h"
 #include "./player.h"
 #include "Transform.h"
 #include <string>

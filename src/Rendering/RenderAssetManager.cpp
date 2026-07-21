@@ -1,5 +1,6 @@
 #include "../Headers/RenderAssetManager.h"
 #include "../Headers/Logger.h"
+#include "TextureRequest.h"
 #include <iostream>
 #include <string>
 #include <vector>

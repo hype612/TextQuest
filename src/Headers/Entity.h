@@ -2,7 +2,6 @@
 #define ENTITY_H
 
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include "TextureMapper.h"
