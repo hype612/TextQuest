@@ -25,19 +25,14 @@ void WindowsInputHandler::ReceiveMovementInput(float delta) {
     _player.subtractFromY(cosf(_player.getAngle()) * 5.0f * delta);
   }
   if (GetAsyncKeyState((unsigned short)'Q') & 0x8000) {
-    _player.addToX(sinf(_player.getAngle() - (3.14159f / 2.0f)) * 5.0f *
-                    delta);
-    _player.addToY(cosf(_player.getAngle() - (3.14159f / 2.0f)) * 5.0f *
-                    delta);
+    _player.addToX(sinf(_player.getAngle() - (3.14159f / 2.0f)) * 5.0f * delta);
+    _player.addToY(cosf(_player.getAngle() - (3.14159f / 2.0f)) * 5.0f * delta);
   }
   if (GetAsyncKeyState((unsigned short)'E') & 0x8000) {
-    _player.addToX(sinf(_player.getAngle() + (3.14159f / 2.0f)) * 5.0f *
-                    delta);
-    _player.addToY(cosf(_player.getAngle() + (3.14159f / 2.0f)) * 5.0f *
-                    delta);
+    _player.addToX(sinf(_player.getAngle() + (3.14159f / 2.0f)) * 5.0f * delta);
+    _player.addToY(cosf(_player.getAngle() + (3.14159f / 2.0f)) * 5.0f * delta);
   }
   if (GetAsyncKeyState((unsigned short)'X') & 0x8000) {
-    EngineState::Getinstance()->gameRunningf = false;
   }
 }
 

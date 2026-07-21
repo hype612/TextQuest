@@ -4,7 +4,6 @@
 #if (defined(LINUX) || defined(__linux__))
 #include "./IInputHandler.h"
 #include <ncurses.h>
-#include <unordered_set>
 
 class NCursesInputHandler : public IInputHandler {
 public:

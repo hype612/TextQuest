@@ -1,7 +1,6 @@
 #ifndef ENTITYMANAGER_H
 #define ENTITYMANAGER_H
 
-#include "../Headers/CoordHash.h"
 #include "../Headers/Entity.h"
 #include <functional>
 #include <optional>

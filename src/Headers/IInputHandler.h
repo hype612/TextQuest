@@ -1,7 +1,6 @@
 #ifndef IINPUTHANDLER_H
 #define IINPUTHANDLER_H
 
-#include "./EngineState.h"
 #include "./player.h"
 #include <cmath>
 

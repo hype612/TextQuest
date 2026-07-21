@@ -1,12 +1,10 @@
 #ifndef RENDERASSETMANAGER_H
 #define RENDERASSETMANAGER_H
 
-#include "EngineState.h"
 #include "MapManager.h"
 #include "SceneManager.h"
 #include "TextureRequest.h"
 #include "TextureRequestQueue.h"
-#include "Tile.h"
 #include <deque>
 #include <string>
 #include <tuple>
