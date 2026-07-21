@@ -3,9 +3,8 @@
 
 #if (defined(LINUX) || defined(__linux__))
 
-#include "./IRenderer.h"
-#include "./player.h"
-#include <iostream>
+#include "IRenderer.h"
+#include "Vec2i.h"
 #include <ncurses.h>
 
 class NCursesRenderer : public IRenderer {
@@ -15,7 +14,9 @@ public:
   void OverwriteBuffer(char *newBuffer) override;
   void PrintBuffer() const override;
   void PrintDebugInfo(const std::vector<std::string> &nfo) override;
-  std::tuple<int, int> GetScreenSize() const override;
+  vec2i screenSize() const override;
+  int screenHeight() const override;
+  int screenWidth() const override;
   // void SetScreenSize(int x, int y) override;
 
   ~NCursesRenderer();

@@ -1,4 +1,5 @@
 #include "../Headers/NCursesInputHandler.h"
+#include <unordered_set>
 
 #if (defined(LINUX) || defined(__linux__))
 
@@ -35,9 +36,6 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
   }
   if (keysPressed.count('e') || keysPressed.count('E')) {
     _player.move(delta, MoveDirection::TURN_RIGHT);
-  }
-  if (keysPressed.count('x') || keysPressed.count('X')) {
-    EngineState::GetInstance()->gameRunningf = false;
   }
 }
 

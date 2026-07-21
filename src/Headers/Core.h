@@ -1,31 +1,15 @@
 #ifndef ASCIIVERSE_H
 #define ASCIIVERSE_H
 
-#include "EngineState.h"
-#include "Entity.h"
 #include "EntityManager.h"
 #include "IInputHandler.h"
 #include "IRenderer.h"
 #include "MapManager.h"
-#include "NCursesInputHandler.h"
-#include "NCursesRenderer.h"
-#include "NotcursesInputHandler.h"
-#include "NotcursesRenderer.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
-#include "TextureMapper.h"
-#include "TextureRequest.h"
 #include "TextureRequestQueue.h"
-#include "Vec2f.h"
-#include "Vec2i.h"
-#include "WallSide.h"
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
-#include "player.h"
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <thread>
 #include <vector>
 
 class GameEngine {
@@ -33,11 +17,15 @@ public:
   GameEngine();
   void run_game();
   void RayCastingProcess();
-  void RenderScreen(int ceiling, int floor, int col);
+  void RenderScreen(int ceiling, int floor, int col, int screenWidth,
+                    int screenHeight);
   ~GameEngine();
 
   void enableDistanceShading(bool enabled);
   void setDistanceShadingThresholds(const std::vector<float> &thresholds);
+  // TODO: Get rid of this ASAP
+  // only for testing purposes mid-refactor
+  SceneManager &sceneMan();
 
   GameEngine(const GameEngine &g) = delete;
   GameEngine &operator=(const GameEngine &) = delete;
@@ -50,13 +38,12 @@ private:
   EntityManager _entityManager;
   SceneManager _sceneManager;
   const Camera *_camera;
+  bool _sceneRunning = false;
 
   // rendering vars and consts
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
   char *screen;
-  int &_screenHeight = EngineState::GetInstance()->screenHeight;
-  int &_screenWidth = EngineState::GetInstance()->screenWidth;
   TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
 };

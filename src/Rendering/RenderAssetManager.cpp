@@ -1,4 +1,6 @@
 #include "../Headers/RenderAssetManager.h"
+#include "../Headers/Logger.h"
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -43,10 +45,11 @@ std::string RenderAssetManager::getNextCharColumn(int height) {
     int shadingIdx = (int)t.distance;
     if (_distanceShadingEnabled)
       col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height, t.hitPoint,
-                                           t.wallTop, shadingIdx);
+                                           t.visibleTop, t.visibleBot,
+                                           shadingIdx);
     else
       col = _mapManager.getWallTexColumnAt(t.mapX, t.mapY, t.height, t.hitPoint,
-                                           t.wallTop);
+                                           t.visibleTop, t.visibleBot);
   }
 
   return col;

@@ -2,14 +2,11 @@
 #define NOTCURSESCURSESINPUTHANDLER_H_
 
 #if (defined(LINUX) || defined(__linux__))
-#include "./EngineState.h"
 #include "./IInputHandler.h"
-#include "./Logger.h"
 #include "./MoveDirection.h"
 #include "./player.h"
 #include <memory>
 #include <notcurses/notcurses.h>
-#include <unordered_set>
 
 class NotcursesInputHandler : public IInputHandler {
 public:

@@ -6,6 +6,8 @@ class RenderAssetManager;
 
 enum class RunningOS { WINDOWS, LINUX };
 
+/*
+
 class EngineState {
 public:
   EngineState(const EngineState &obj) = delete;
@@ -30,5 +32,5 @@ private:
 
   static EngineState *instancePtr;
 };
-
+*/
 #endif // ENGINESTATEVARS_H_

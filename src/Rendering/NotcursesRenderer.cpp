@@ -1,4 +1,5 @@
 #include "../Headers/NotcursesRenderer.h"
+#include <iostream>
 #include <memory>
 #include <notcurses/notcurses.h>
 #include <string>
@@ -41,18 +42,17 @@ void NotcursesRenderer::OverwriteBuffer(char *newBuffer) {
 }
 void NotcursesRenderer::PrintBuffer() const { notcurses_render(_nc.get()); }
 void NotcursesRenderer::PrintDebugInfo(const std::vector<std::string> &nfo) {
-  if (EngineState::GetInstance()->renderDebugInfo) {
-    ncplane_erase(_debugPln);
-    for (size_t i = 0; i < nfo.size(); i++) {
-      ncplane_cursor_move_yx(_debugPln, i, 0);
-      ncplane_putstr(_debugPln, nfo[i].c_str());
-    }
-  } else {
-    ncplane_erase(_debugPln);
+  ncplane_erase(_debugPln);
+  for (size_t i = 0; i < nfo.size(); i++) {
+    ncplane_cursor_move_yx(_debugPln, i, 0);
+    ncplane_putstr(_debugPln, nfo[i].c_str());
   }
 }
 
-std::tuple<int, int> NotcursesRenderer::GetScreenSize() const {
-  return std::tuple<int, int>(_screenWidth, _screenHeight);
+vec2i NotcursesRenderer::screenSize() const {
+  return {_screenWidth, _screenHeight};
 }
+int NotcursesRenderer::screenHeight() const { return _screenHeight; }
+int NotcursesRenderer::screenWidth() const { return _screenWidth; }
+
 NotcursesRenderer::~NotcursesRenderer() { delete[] _screenBuffer; }

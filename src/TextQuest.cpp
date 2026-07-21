@@ -1,5 +1,4 @@
 #include "Headers/Core.h"
-#include "Headers/EngineState.h"
 #include "Headers/Logger.h"
 #include "Headers/MoveDirection.h"
 #include "Headers/SceneManager.h"
@@ -10,18 +9,8 @@
 
 int main() {
   auto ge_ptr = std::make_unique<GameEngine>();
-  SceneManager &sceneMan = *(EngineState::GetInstance()->globalSceneManager);
+  SceneManager &sceneMan = ge_ptr->sceneMan();
   std::string map = "";
-  /*
-  map += "##################";
-  map += "#................#";
-  map += "#................#";
-  map += "#........##......#";
-  map += "#.......##.......#";
-  map += "#................#";
-  map += "#................#";
-  map += "##################";
-  */
   map += "################################";
   map += "#..............................#";
   map += "#...####..............####.....#";

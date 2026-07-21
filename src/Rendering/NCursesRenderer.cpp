@@ -1,4 +1,5 @@
 #include "../Headers/NCursesRenderer.h"
+#include <iostream>
 #include <ncurses.h>
 
 #if (defined(LINUX) || defined(__linux__))
@@ -12,8 +13,6 @@ void NCursesRenderer::Init() {
   noecho();
   nodelay(stdscr, TRUE);
   curs_set(0);
-  _screenHeight = EngineState::GetInstance()->screenHeight;
-  _screenWidth = EngineState::GetInstance()->screenWidth;
   _screenBuffer = nullptr;
 }
 
@@ -49,9 +48,11 @@ void NCursesRenderer::PrintDebugInfo(const std::vector<std::string> &nfo) {
   }
 }
 
-std::tuple<int, int> NCursesRenderer::GetScreenSize() const {
-  return std::make_tuple(_screenWidth, _screenHeight);
+vec2i NCursesRenderer::screenSize() const {
+  return {_screenWidth, _screenHeight};
 }
+int NCursesRenderer::screenHeight() const { return _screenHeight; }
+int NCursesRenderer::screenWidth() const { return _screenWidth; }
 
 NCursesRenderer::~NCursesRenderer() {
   endwin();

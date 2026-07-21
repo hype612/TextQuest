@@ -1,14 +1,8 @@
 #ifndef TEXTUREREQUESTQUEUE_H
 #define TEXTUREREQUESTQUEUE_H
 
-#include "./Tile.h"
 #include "TextureRequest.h"
-#include <algorithm>
-#include <condition_variable>
 #include <deque>
-#include <mutex>
-#include <shared_mutex>
-#include <tuple>
 
 class TextureRequestQueue {
 public:

@@ -44,19 +44,21 @@ MapManager::getWallTexForMapChar(const char &mapChar) const {
 }
 
 std::string MapManager::getWallTexColumnAt(int x, int y, int height,
-                                           float hitpoint, int wallTop) const {
-  return getWallTexColumnAt(x, y, height, hitpoint, wallTop, 0);
+                                           float hitpoint, int visibleTop,
+                                           int visibleBot) const {
+  return getWallTexColumnAt(x, y, height, hitpoint, visibleTop, visibleBot, 0);
 }
 
 std::string MapManager::getWallTexColumnAt(int x, int y, int height,
-                                           float hitpoint, int wallTop,
+                                           float hitpoint, int visibleTop,
+                                           int visibleBot,
                                            int shadingIdx) const {
   if (isOutOfBounds(x, y)) {
     return std::string();
   }
   char mapChar = _map[y * _mapWidth + x];
-  return _wallTexMappers.at(mapChar).getTexColumnAt(height, hitpoint, wallTop,
-                                                    shadingIdx);
+  return _wallTexMappers.at(mapChar).getTexColumnAt(
+      height, hitpoint, visibleTop, visibleBot, shadingIdx);
 }
 
 // =======================

@@ -1,5 +1,4 @@
 #include "../Headers/SceneManager.h"
-#include "../Headers/EngineState.h"
 #include "./Camera.h"
 #include "./MapManager.h"
 #include <filesystem>
@@ -11,7 +10,6 @@
 SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
     : _entityManager(entityMan), _mapManager(mapMan),
       _player(-1, -1, 0.f, mapMan), _camera(_player.transform()) {
-  EngineState::globalSceneManager = this;
   _camera.setFovDegrees(90);
 }
 // 1.0472

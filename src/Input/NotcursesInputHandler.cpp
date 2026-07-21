@@ -1,4 +1,5 @@
 #include "../Headers/NotcursesInputHandler.h"
+#include "./Logger.h"
 #include <notcurses/notcurses.h>
 
 NotcursesInputHandler::NotcursesInputHandler(Player &player,
@@ -80,8 +81,7 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
     break;
   case 'j':
     if (evtype == NCTYPE_PRESS) {
-      EngineState::GetInstance()->renderDebugInfo =
-          !EngineState::GetInstance()->renderDebugInfo;
+      // figure out new way to swtich debug plane rendering on/off
     }
     break;
   default:

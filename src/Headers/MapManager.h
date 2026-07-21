@@ -34,9 +34,10 @@ public:
   // Main rendering functional
   // ShadingIdx version for distance based shading
   std::string getWallTexColumnAt(int x, int y, int height, float hitpoint,
-                                 int wallTop) const;
+                                 int visibleTop, int visibleBot) const;
   std::string getWallTexColumnAt(int x, int y, int height, float hitpoint,
-                                 int wallTop, int shadingIdx) const;
+                                 int visibleTop, int visibleBot,
+                                 int shadingIdx) const;
 
   // =======================
   // Map setters

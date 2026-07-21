@@ -1,6 +1,14 @@
 #include "../Headers/Core.h"
 #include "../Headers/Camera.h"
+#include "../Headers/Logger.h"
 #include "../Headers/Transform.h"
+#include "NotcursesInputHandler.h"
+#include "NotcursesRenderer.h"
+#include "Vec2f.h"
+#include "Vec2i.h"
+#include "WallSide.h"
+#include "WindowsInputHandler.h"
+#include "WindowsRenderer.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -13,8 +21,6 @@ GameEngine::GameEngine()
       _camera(_sceneManager.cameraPtr()),
       _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
 
-  EngineState::GetInstance()->globalRenderAssetManager = &_renderAssetManager;
-  EngineState::GetInstance()->globalSceneManager = &_sceneManager;
 #if (defined(LINUX) || defined(__linux__))
   notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
                            NCOPTION_CLI_MODE};
@@ -37,9 +43,11 @@ void GameEngine::setDistanceShadingThresholds(
   _renderAssetManager.setDistanceShadingThresholds(thresholds);
 }
 
+SceneManager &GameEngine::sceneMan() { return _sceneManager; }
+
 void GameEngine::run_game() {
-  EngineState::GetInstance()->gameRunningf = true;
-  screen = new char[_screenWidth * _screenHeight];
+  _sceneRunning = true;
+  screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
   if (!_sceneManager.isMapAvailable()) {
     Logger::GetInstance()->log("Map was never uploaded. Shutting down GameLoop",
                                LogType::CORE, LogLevel::ERROR);
@@ -47,7 +55,7 @@ void GameEngine::run_game() {
   }
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
-  while (EngineState::GetInstance()->gameRunningf == true) {
+  while (_sceneRunning) {
 
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
@@ -71,19 +79,21 @@ void GameEngine::run_game() {
 
 void GameEngine::RayCastingProcess() {
   const float max_raylength = 50.f;
+  int screenHeight = _renderer->screenHeight();
+  int screenWidth = _renderer->screenWidth();
   vec2f playerDir{std::sin(_camera->follow().angle),
                   std::cos(_camera->follow().angle)};
   vec2f planeV{
       std::cos(_camera->follow().angle) * std::tan(_camera->fov() / 2.f),
       -std::sin(_camera->follow().angle) * std::tan(_camera->fov() / 2.f)};
-  for (int x = 0; x < _screenWidth; x++) {
+  for (int x = 0; x < screenWidth; x++) {
     bool hitwall = false;
 
     // init for DDA
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
 
-    float cameraX = 2.f * x / (float)_screenWidth - 1.f;
+    float cameraX = 2.f * x / (float)screenWidth - 1.f;
     vec2f rayDir{playerDir + planeV * cameraX};
     vec2f deltaDist{(rayDir.x == 0.f) ? 1e30f : std::abs(1.f / rayDir.x),
                     (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
@@ -149,28 +159,31 @@ void GameEngine::RayCastingProcess() {
     if (distance_to_wall < 0.0001f)
       distance_to_wall = 0.0001f;
 
-    int wallHeight = (int)(_screenHeight / distance_to_wall);
+    int wallHeight = (int)(screenHeight / distance_to_wall);
 
-    int ceiling = (_screenHeight / 2) - (wallHeight / 2);
+    int ceiling = (screenHeight / 2) - (wallHeight / 2);
     int floor = ceiling + wallHeight;
     ceiling = std::max(0, ceiling);
-    floor = std::min(_screenHeight - 1, floor);
+    floor = std::min(screenHeight - 1, floor);
     if (!hitwall) {
       side = WallSide::NOHIT;
       distance_to_wall = max_raylength;
       hitpoint = 0.f;
-      ceiling = _screenHeight / 2;
-      floor = _screenHeight / 2;
+      ceiling = screenHeight / 2;
+      floor = screenHeight / 2;
     } else {
-      int wallTop = (_screenHeight / 2) - (wallHeight / 2);
-      _texRequestQueue.push({mapPos.x, mapPos.y, wallHeight, wallTop, hitpoint,
-                             distance_to_wall});
+      int wallTop = (screenHeight / 2) - (wallHeight / 2);
+      int visibleTop = std::max(0, -wallTop);
+      int visibleBot = std::min(screenHeight - wallTop, (int)wallHeight);
+      _texRequestQueue.push({mapPos.x, mapPos.y, wallHeight, visibleTop,
+                             visibleBot, hitpoint, distance_to_wall});
     }
-    RenderScreen(ceiling, floor, x);
+    RenderScreen(ceiling, floor, x, screenWidth, screenHeight);
   }
 }
 
-void GameEngine::RenderScreen(int ceiling, int floor, int col) {
+void GameEngine::RenderScreen(int ceiling, int floor, int col, int screenWidth,
+                              int screenHeight) {
   wchar_t floorShade;
   int x = col;
   std::string toRender =
@@ -178,19 +191,19 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
   int toRenderIt = 0;
   int colHeight =
       std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
-  for (int y = 0; y < _screenHeight; y++) {
+  for (int y = 0; y < screenHeight; y++) {
     if (y < ceiling) {
-      screen[y * _screenWidth + x] = ' ';
+      screen[y * screenWidth + x] = ' ';
     } else if (y >= ceiling && y <= floor) {
       if (toRenderIt < colHeight) {
-        screen[y * _screenWidth + x] = toRender[toRenderIt];
+        screen[y * screenWidth + x] = toRender[toRenderIt];
         toRenderIt++;
       } else {
-        screen[y * _screenWidth + x] = ' ';
+        screen[y * screenWidth + x] = ' ';
       }
     } else {
-      float b = 1 - (((float)y - _screenHeight / 2.0f) /
-                     ((float)_screenHeight / 2.0f));
+      float b =
+          1 - (((float)y - screenHeight / 2.0f) / ((float)screenHeight / 2.0f));
       if (b < 0.25)
         floorShade = '#';
       else if (b < 0.5)
@@ -201,7 +214,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col) {
         floorShade = '-';
       else
         floorShade = ' ';
-      screen[y * _screenWidth + x] = floorShade;
+      screen[y * screenWidth + x] = floorShade;
     }
   }
 }

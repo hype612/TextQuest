@@ -1,14 +1,13 @@
 #ifndef TEXTUREREQUEST_H
 #define TEXTUREREQUEST_H
 
-#include "Tile.h"
-
 struct TextureRequest {
 public:
   int mapX;
   int mapY;
   int height;
-  int wallTop;
+  int visibleTop;
+  int visibleBot;
   float hitPoint;
   float distance;
 };

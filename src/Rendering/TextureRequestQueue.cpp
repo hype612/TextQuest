@@ -6,7 +6,7 @@ void TextureRequestQueue::push(TextureRequest input) {
 
 TextureRequest TextureRequestQueue::pop() {
   if (_texQueue.empty()) {
-    return TextureRequest{-1, -1, -1, -1, -1.f, -1.f};
+    return TextureRequest{-1, -1, -1, -1, -1, -1.f, -1.f};
   }
   TextureRequest topEl = _texQueue.back();
   _texQueue.pop_back();

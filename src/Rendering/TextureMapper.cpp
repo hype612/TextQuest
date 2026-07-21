@@ -1,5 +1,4 @@
 #include "../Headers/TextureMapper.h"
-#include "../Headers/EngineState.h"
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -131,15 +130,14 @@ void TextureMapper::nxyInterpolationScale(unsigned int width,
 }
 
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          int wallTop) const {
-  return getTexColumnAt(height, hitpoint, wallTop, 0);
+                                          int visibleTop,
+                                          int visibleBot) const {
+  return getTexColumnAt(height, hitpoint, visibleTop, visibleBot, 0);
 }
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,
-                                          int wallTop, int shadingIdx) const {
+                                          int visibleTop, int visibleBot,
+                                          int shadingIdx) const {
   std::string ret = "";
-  int scHeight = EngineState::screenHeight;
-  int visibleTop = std::max(0, -wallTop);
-  int visibleBot = std::min(scHeight - wallTop, (int)height);
   ret.reserve(height);
   for (int y = visibleTop; y < visibleBot; y++) {
     float y_pos = (float)y / (float)height;

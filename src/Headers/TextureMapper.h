@@ -1,10 +1,7 @@
 #ifndef TEXTUREMAPPER_H
 #define TEXTUREMAPPER_H
 
-#include "./Logger.h"
-#include <iostream>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 class TextureMapper {
@@ -34,14 +31,19 @@ public:
   //   return of textures
   // =========================
   std::string getTexColumnAt(unsigned int height, float hitpoint,
-                             int wallTop) const;
-  std::string getTexColumnAt(unsigned int height, float hitpoint, int wallTop,
+                             int visibleTop, int visibleBot) const;
+  std::string getTexColumnAt(unsigned int height, float hitpoint,
+                             int visibleTop, int visibleBot,
                              int shadingIdx) const;
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint) const;
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
 
   TextureMapper(std::string initTexture);
+  // Expects all textures of the same kind
+  // to be the same size, which is a reasonable constraint
+  // ALSO expects the first one to be the brightest,
+  // and the last one to be the faintest
   TextureMapper(std::vector<std::string> initTexture);
   TextureMapper() = default;
 

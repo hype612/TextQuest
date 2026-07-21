@@ -1,4 +1,5 @@
 #include "../Headers/EntityManager.h"
+#include <iostream>
 
 EntityManager::EntityManager() {}
 
