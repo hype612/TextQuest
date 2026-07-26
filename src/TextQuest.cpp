@@ -1,7 +1,10 @@
+#include "Entity.h"
+#include "GameSpecific/Headers/PlayerBehaviorController.h"
 #include "Headers/Core.h"
 #include "Headers/Logger.h"
 #include "Headers/MoveDirection.h"
 #include "Headers/SceneManager.h"
+#include "player.h"
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -10,6 +13,8 @@
 int main() {
   auto ge_ptr = std::make_unique<GameEngine>();
   SceneManager &sceneMan = ge_ptr->sceneMan();
+  Logger::GetInstance()->log("ge_ptr good, sceneman returned", LogType::CORE,
+                             LogLevel::INFO);
   std::string map = "";
   map += "################################";
   map += "#..............................#";
@@ -30,6 +35,7 @@ int main() {
 
   sceneMan.initializeNewMap(map, 32, 16);
   std::unordered_map<std::string, std::string> wtexs;
+  Logger::GetInstance()->log("map inited", LogType::CORE, LogLevel::INFO);
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
   sceneMan.loadResources(
       "/home/attila/Kitchen/TextQuest/Resources/Textures/wall/", wtexs);
@@ -44,6 +50,9 @@ int main() {
     walltexV.push_back(wtexs[key]);
   }
   // sceneMan.uploadTextureForWall('#', texs["wall"]);
+  Logger::GetInstance()->log("walltexV size: " +
+                                 std::to_string(walltexV.size()),
+                             LogType::TEXPREP, LogLevel::INFO);
   sceneMan.uploadTextureVecForWall('#', walltexV);
 
   std::unordered_map<std::string, std::string> ttexs;
@@ -61,18 +70,37 @@ int main() {
     tnttexV.push_back(ttexs[key]);
   }
   // sceneMan.uploadTextureForWall('#', texs["wall"]);
+  Logger::GetInstance()->log("tnttexV size: " + std::to_string(tnttexV.size()),
+                             LogType::TEXPREP, LogLevel::INFO);
   sceneMan.uploadTextureVecForWall('T', tnttexV);
 
-  Player &p = sceneMan.getPlayerRef();
-  p.setX(2.f);
-  p.setY(2.f);
-  p.setAngle(0.f);
-  p.setMoveSpeedAllDirectons(5.f);
-  p.setTurnSpeedAlldirections(5.f);
   ge_ptr->enableDistanceShading(true);
   std::vector<float> shadingThresholds;
   for (int i = 1; i < 8; i++)
     shadingThresholds.push_back(i * 2);
   ge_ptr->setDistanceShadingThresholds(shadingThresholds);
+  Logger::GetInstance()->log("uploaded all textures", LogType::CORE,
+                             LogLevel::INFO);
+
+  std::string intex = " \n";
+  Transform init{{2.f, 2.f}, 0.f};
+  Logger::GetInstance()->log("before player construction", LogType::CORE,
+                             LogLevel::INFO);
+  Entity p(std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler()),
+           init, &intex, 100);
+  Logger::GetInstance()->log("player created", LogType::CORE, LogLevel::INFO);
+  p.setMoveSpeedAllDirectons(5.f);
+  p.setTurnSpeedAlldirections(5.f);
+  Logger::GetInstance()->log("movement speeds set", LogType::CORE,
+                             LogLevel::INFO);
+  sceneMan.AddEntity(p);
+  Logger::GetInstance()->log("player added to entities", LogType::CORE,
+                             LogLevel::INFO);
+  Logger::GetInstance()->log("all prep is done, now running game..",
+                             LogType::CORE, LogLevel::INFO);
+  sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
+  sceneMan.setCameraFovDegrees(90);
+  Logger::GetInstance()->log("camera follow set", LogType::CORE,
+                             LogLevel::INFO);
   ge_ptr->run_game();
 }

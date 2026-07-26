@@ -1,10 +1,10 @@
 #include "../Headers/NotcursesInputHandler.h"
 #include "./Logger.h"
 #include <notcurses/notcurses.h>
+#include <string>
 
-NotcursesInputHandler::NotcursesInputHandler(Player &player,
-                                             std::shared_ptr<notcurses> nc)
-    : IInputHandler(player), _nc(nc) {
+NotcursesInputHandler::NotcursesInputHandler(std::shared_ptr<notcurses> nc)
+    : _nc(nc) {
   Logger::setLogLevel(LogLevel::INFO);
   for (size_t i = 0; i < _mvmtKeyStates.size(); i++) {
     _mvmtKeyStates[i] = false;
@@ -12,15 +12,23 @@ NotcursesInputHandler::NotcursesInputHandler(Player &player,
 }
 
 void NotcursesInputHandler::Init() {}
-void NotcursesInputHandler::ReceiveMovementInput(float delta) {
-
+void NotcursesInputHandler::ReceiveInput() {
+  Logger::GetInstance()->log(
+      "polling on nc at: " +
+          std::to_string(reinterpret_cast<uintptr_t>(_nc.get())),
+      LogType::INPUT, LogLevel::INFO);
   ncinput in_char;
-  timespec ts{0, 0};
+  timespec ts{0, 1000000};
   uint32_t rc;
+  Logger::GetInstance()->log("input as follows: ", LogType::INPUT,
+                             LogLevel::INFO);
   while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0) {
+    Logger::GetInstance()->log("got input", LogType::INPUT, LogLevel::INFO);
+    Logger::GetInstance()->log(std::to_string(rc), LogType::INPUT,
+                               LogLevel::INFO);
     KeyEvent(in_char.utf8, in_char.evtype);
   }
-
+  /*
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] == true)
     _player.move(delta, MoveDirection::FORWARD);
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] == true)
@@ -32,10 +40,20 @@ void NotcursesInputHandler::ReceiveMovementInput(float delta) {
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] == true)
     _player.move(delta, MoveDirection::TURN_LEFT);
   if (_mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] == true)
-    _player.move(delta, MoveDirection::TURN_RIGHT);
+    _player.move(delta, MoveDirection::TURN_RIGHT); */
+}
+
+bool NotcursesInputHandler::keyDown(MoveDirection dir) const {
+  Logger::GetInstance()->log("checking keydown on dir: " +
+                                 std::to_string(static_cast<int>(dir)),
+                             LogType::INPUT, LogLevel::INFO);
+  return _mvmtKeyStates[static_cast<int>(dir)];
 }
 
 void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
+  std::string dbg = "KeyEvent received: ";
+  dbg += *in;
+  Logger::GetInstance()->log(dbg, LogType::INPUT, LogLevel::INFO);
   switch (*in) {
   case 'w':
     if (evtype == NCTYPE_PRESS) {

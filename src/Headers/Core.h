@@ -1,10 +1,8 @@
 #ifndef ASCIIVERSE_H
 #define ASCIIVERSE_H
 
-#include "EntityManager.h"
 #include "IInputHandler.h"
 #include "IRenderer.h"
-#include "MapManager.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
 #include "TextureRequestQueue.h"
@@ -16,16 +14,19 @@ class GameEngine {
 public:
   GameEngine();
   void run_game();
-  void RayCastingProcess();
+  void RayCastingProcess(const Camera *cam);
   void RenderScreen(int ceiling, int floor, int col, int screenWidth,
                     int screenHeight);
   ~GameEngine();
 
   void enableDistanceShading(bool enabled);
   void setDistanceShadingThresholds(const std::vector<float> &thresholds);
-  // TODO: Get rid of this ASAP
+
+  // TODO: Get rid of these ASAP
   // only for testing purposes mid-refactor
+  // implement a real API for game programmers
   SceneManager &sceneMan();
+  IInputHandler &inputHandler();
 
   GameEngine(const GameEngine &g) = delete;
   GameEngine &operator=(const GameEngine &) = delete;
@@ -34,10 +35,7 @@ public:
 
 private:
   // scene
-  MapManager _mapManager;
-  EntityManager _entityManager;
   SceneManager _sceneManager;
-  const Camera *_camera;
   bool _sceneRunning = false;
 
   // rendering vars and consts

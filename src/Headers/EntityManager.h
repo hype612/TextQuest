@@ -2,6 +2,7 @@
 #define ENTITYMANAGER_H
 
 #include "../Headers/Entity.h"
+#include "../Headers/IEntitySceneChannel.h"
 #include <functional>
 #include <optional>
 #include <string>
@@ -9,8 +10,8 @@
 
 class EntityManager {
 public:
-  EntityManager();
-  void process();
+  EntityManager(IEntitySceneChannel &channel);
+  void process(float delta);
 
   // ================================
   // ways to access items in container
@@ -29,6 +30,7 @@ public:
   void removeEntity(int id);
   void removeEntity(int coord_x, int coord_y);
   void removeAllEntities();
+  Entity &entityAtId(int id);
 
   // ================================
   // for renderer
@@ -48,6 +50,7 @@ public:
 
 private:
   std::vector<Entity> _entityContainer;
+  IEntitySceneChannel &_sceneChannel;
 };
 
 #endif // ENTITYMANAGER_H

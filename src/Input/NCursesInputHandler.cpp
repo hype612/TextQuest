@@ -1,3 +1,5 @@
+
+/*
 #include "../Headers/NCursesInputHandler.h"
 #include <unordered_set>
 
@@ -40,3 +42,4 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
 }
 
 #endif // OS Check end
+*/

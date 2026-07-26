@@ -1,20 +1,16 @@
 #include "../Headers/SceneManager.h"
 #include "./Camera.h"
 #include "./MapManager.h"
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
 
-SceneManager::SceneManager(EntityManager &entityMan, MapManager &mapMan)
-    : _entityManager(entityMan), _mapManager(mapMan),
-      _player(-1, -1, 0.f, mapMan), _camera(_player.transform()) {
-  _camera.setFovDegrees(90);
-}
-// 1.0472
-void SceneManager::process() {
-  _entityManager.process();
+SceneManager::SceneManager() : _entityManager(*this), _mapManager() {}
+void SceneManager::process(float delta) {
+  _entityManager.process(delta);
   //_eventManager.process();
 }
 
@@ -41,7 +37,39 @@ void SceneManager::uploadTextureVecForWall(const char &mapChar,
   _mapManager.uploadWallTextureVecFor(mapChar, wallTexV);
 }
 
+bool SceneManager::canMoveTo(const vec2f &dest) const {
+  return !_mapManager.isWall(static_cast<int>(dest.x),
+                             static_cast<int>(dest.y)) &&
+         !_mapManager.isOutOfBounds(static_cast<int>(dest.x),
+                                    static_cast<int>(dest.y));
+}
+
+bool SceneManager::isOutOfBounds(int test_x, int test_y) const {
+  return _mapManager.isOutOfBounds(test_x, test_y);
+}
+bool SceneManager::isWall(int test_x, int test_y) const {
+  return _mapManager.isWall(test_x, test_y);
+}
+
+std::string SceneManager::getWallTexColumnAt(int x, int y, int height,
+                                             float hitpoint, int visibleTop,
+                                             int visibleBot) const {
+  return _mapManager.getWallTexColumnAt(x, y, height, hitpoint, visibleTop,
+                                        visibleBot);
+}
+
+std::string SceneManager::getWallTexColumnAt(int x, int y, int height,
+                                             float hitpoint, int visibleTop,
+                                             int visibleBot,
+                                             int shadingIdx) const {
+  return _mapManager.getWallTexColumnAt(x, y, height, hitpoint, visibleTop,
+                                        visibleBot, shadingIdx);
+}
+
 // Entity Related functions
+Entity &SceneManager::entityAtId(int id) {
+  return _entityManager.entityAtId(id);
+}
 void SceneManager::AddEntity(Entity &entity) {
   _entityManager.addEntity(entity);
 }
@@ -53,17 +81,38 @@ void SceneManager::removeEntity(int entityId) {
 }
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
 
-// Player related functions
-void SceneManager::setPlayerX(int new_x) { _player.setX(new_x); }
-void SceneManager::setPlayerY(int new_y) { _player.setY(new_y); }
-Player &SceneManager::getPlayerRef() { return _player; }
-
 // Camera
-const Camera &SceneManager::camera() const { return _camera; }
-const Camera *SceneManager::cameraPtr() const { return &_camera; }
-const Transform &SceneManager::cameraFollow() const { return _camera.follow(); }
+const Camera &SceneManager::camera() const {
+  if (_camera.has_value()) {
+    std::cerr << "Camera accessed before SetCameraFollow was ever called"
+              << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+  return *_camera;
+}
+
+const Camera *SceneManager::cameraPtr() const {
+  return _camera.has_value() ? &(*_camera) : nullptr;
+}
+
+const Transform &SceneManager::cameraFollow() const {
+  if (_camera.has_value()) {
+    std::cerr << "Camera accessed before SetCameraFollow was ever called"
+              << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+  return _camera->follow();
+}
+
 void SceneManager::setCameraFollow(const Transform &new_follow) {
-  _camera.setFollow(new_follow);
+  if (!_camera.has_value())
+    _camera.emplace(new_follow);
+  else
+    _camera->setFollow(new_follow);
+}
+
+void SceneManager::setCameraFovDegrees(float newfov) {
+  _camera->setFovDegrees(newfov);
 }
 
 // Other

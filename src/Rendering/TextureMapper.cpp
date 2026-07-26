@@ -1,4 +1,5 @@
 #include "../Headers/TextureMapper.h"
+#include "../Headers/Logger.h"
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -7,6 +8,8 @@
 TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMaps{initTexture} {
   _texWidth = initTexture.find('\n');
+  Logger::GetInstance()->log(".find: " + std::to_string(_texWidth),
+                             LogType::TEXPREP, LogLevel::INFO);
   _texHeight = _texWidth;
   GenerateTextureMask();
 }
@@ -18,6 +21,8 @@ TextureMapper::TextureMapper(std::string initTexture)
 TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
     : _textureMipMaps(initTextureVec) {
   _texWidth = initTextureVec[0].find('\n');
+  Logger::GetInstance()->log(".find: " + std::to_string(_texWidth),
+                             LogType::TEXPREP, LogLevel::INFO);
   _texHeight = _texWidth;
   GenerateTextureMask();
 }

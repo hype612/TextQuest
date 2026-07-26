@@ -4,20 +4,20 @@
 #if (defined(LINUX) || defined(__linux__))
 #include "./IInputHandler.h"
 #include "./MoveDirection.h"
-#include "./player.h"
+#include <array>
 #include <memory>
 #include <notcurses/notcurses.h>
 
 class NotcursesInputHandler : public IInputHandler {
 public:
-  NotcursesInputHandler(Player &player, std::shared_ptr<notcurses> nc);
+  NotcursesInputHandler(std::shared_ptr<notcurses> nc);
   void Init() override;
-  void ReceiveMovementInput(float delta) override;
+  void ReceiveInput() override;
+  bool keyDown(MoveDirection dir) const override;
   ~NotcursesInputHandler() = default;
 
 private:
   void KeyEvent(char in[], ncintype_e evtype);
-  void MouseEvent(const ncinput &in);
 
   std::shared_ptr<notcurses> _nc;
   std::array<bool, moveDirectionCount> _mvmtKeyStates;

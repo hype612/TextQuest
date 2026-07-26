@@ -1,4 +1,5 @@
 #include "../Headers/MapManager.h"
+#include "Logger.h"
 #include <execinfo.h>
 #include <optional>
 #include <string>
@@ -54,9 +55,14 @@ std::string MapManager::getWallTexColumnAt(int x, int y, int height,
                                            int visibleBot,
                                            int shadingIdx) const {
   if (isOutOfBounds(x, y)) {
+    Logger::GetInstance()->log(std::to_string(x) + "," + std::to_string(y) +
+                                   " was OOB. returning empty string.",
+                               LogType::TEXPREP, LogLevel::WARNING);
     return std::string();
   }
   char mapChar = _map[y * _mapWidth + x];
+  Logger::GetInstance()->log(std::string("mapChar: ") + mapChar,
+                             LogType::TEXPREP, LogLevel::INFO);
   return _wallTexMappers.at(mapChar).getTexColumnAt(
       height, hitpoint, visibleTop, visibleBot, shadingIdx);
 }

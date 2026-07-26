@@ -17,17 +17,25 @@
 #include <string>
 
 GameEngine::GameEngine()
-    : _sceneManager(_entityManager, _mapManager),
-      _camera(_sceneManager.cameraPtr()),
-      _renderAssetManager(_entityManager, _mapManager, _texRequestQueue) {
+    : _sceneManager(), _renderAssetManager(_sceneManager, _texRequestQueue) {
 
 #if (defined(LINUX) || defined(__linux__))
-  notcurses_options ncopts{getenv("TERM"),   NCLOGLEVEL_SILENT, 0, 0, 0, 0,
-                           NCOPTION_CLI_MODE};
+  notcurses_options ncopts{getenv("TERM"),
+                           NCLOGLEVEL_SILENT,
+                           0,
+                           0,
+                           0,
+                           0,
+                           NCOPTION_NO_ALTERNATE_SCREEN |
+                               NCOPTION_NO_CLEAR_BITMAPS};
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
   _renderer = new NotcursesRenderer(nc);
-  _inputHandler = new NotcursesInputHandler(_sceneManager.getPlayerRef(), nc);
+  _inputHandler = new NotcursesInputHandler(nc);
+  Logger::GetInstance()->log(
+      "nc constructed at: " +
+          std::to_string(reinterpret_cast<uintptr_t>(nc.get())),
+      LogType::CORE, LogLevel::INFO);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();
@@ -44,6 +52,7 @@ void GameEngine::setDistanceShadingThresholds(
 }
 
 SceneManager &GameEngine::sceneMan() { return _sceneManager; }
+IInputHandler &GameEngine::inputHandler() { return *_inputHandler; }
 
 void GameEngine::run_game() {
   _sceneRunning = true;
@@ -56,36 +65,34 @@ void GameEngine::run_game() {
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
   while (_sceneRunning) {
-
+    const Camera *cam = _sceneManager.cameraPtr();
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
     float f_elapsed_time = elapsed_time.count();
 
-    _inputHandler->ReceiveMovementInput(f_elapsed_time);
-    _sceneManager.process();
-    RayCastingProcess();
+    _inputHandler->ReceiveInput();
+    _sceneManager.process(f_elapsed_time);
+    RayCastingProcess(cam);
 
     _renderer->OverwriteBuffer(screen);
     std::vector<std::string> dbgNfo = {
-        "C.x: " + std::to_string(_camera->follow().position.x) +
-            " C.y: " + std::to_string(_camera->follow().position.y) +
-            " angle: " + std::to_string(_camera->follow().angle),
+        "C.x: " + std::to_string(cam->follow().position.x) +
+            " C.y: " + std::to_string(cam->follow().position.y) +
+            " angle: " + std::to_string(cam->follow().angle),
         "fps: " + std::to_string(1.f / f_elapsed_time)};
     _renderer->PrintDebugInfo(dbgNfo);
     _renderer->PrintBuffer();
   }
 }
 
-void GameEngine::RayCastingProcess() {
+void GameEngine::RayCastingProcess(const Camera *cam) {
   const float max_raylength = 50.f;
   int screenHeight = _renderer->screenHeight();
   int screenWidth = _renderer->screenWidth();
-  vec2f playerDir{std::sin(_camera->follow().angle),
-                  std::cos(_camera->follow().angle)};
-  vec2f planeV{
-      std::cos(_camera->follow().angle) * std::tan(_camera->fov() / 2.f),
-      -std::sin(_camera->follow().angle) * std::tan(_camera->fov() / 2.f)};
+  vec2f playerDir{std::sin(cam->follow().angle), std::cos(cam->follow().angle)};
+  vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
+               -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
   for (int x = 0; x < screenWidth; x++) {
     bool hitwall = false;
 
@@ -99,13 +106,12 @@ void GameEngine::RayCastingProcess() {
                     (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
 
     vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
-    vec2i mapPos{static_cast<int>(std::floor(_camera->follow().position.x)),
-                 static_cast<int>(std::floor(_camera->follow().position.y))};
-    vec2f sideDist{
-        (stepDir.x == 1) ? mapPos.x + 1.f - _camera->follow().position.x
-                         : _camera->follow().position.x - mapPos.x,
-        (stepDir.y == 1) ? mapPos.y + 1.f - _camera->follow().position.y
-                         : _camera->follow().position.y - mapPos.y};
+    vec2i mapPos{static_cast<int>(std::floor(cam->follow().position.x)),
+                 static_cast<int>(std::floor(cam->follow().position.y))};
+    vec2f sideDist{(stepDir.x == 1) ? mapPos.x + 1.f - cam->follow().position.x
+                                    : cam->follow().position.x - mapPos.x,
+                   (stepDir.y == 1) ? mapPos.y + 1.f - cam->follow().position.y
+                                    : cam->follow().position.y - mapPos.y};
     if (sideDist.x <= 0.0001f)
       sideDist.x = 1.f;
     if (sideDist.y <= 0.0001f)
@@ -125,13 +131,13 @@ void GameEngine::RayCastingProcess() {
         side = WallSide::VERTICAL;
       }
 
-      if (_mapManager.isOutOfBounds(mapPos.x, mapPos.y)) {
+      if (_sceneManager.isOutOfBounds(mapPos.x, mapPos.y)) {
         sideDist.x = max_raylength;
         sideDist.y = max_raylength;
         break;
       }
 
-      if (_mapManager.isWall(mapPos.x, mapPos.y)) {
+      if (_sceneManager.isWall(mapPos.x, mapPos.y)) {
         hitwall = true;
       }
       std::string sideStr;
@@ -152,8 +158,8 @@ void GameEngine::RayCastingProcess() {
                                  : sideDist.y - deltaDist.y;
     float hitpoint =
         (side == WallSide::HORIZONTAL)
-            ? _camera->follow().position.y + distance_to_wall * rayDir.y
-            : _camera->follow().position.x + distance_to_wall * rayDir.x;
+            ? cam->follow().position.y + distance_to_wall * rayDir.y
+            : cam->follow().position.x + distance_to_wall * rayDir.x;
 
     hitpoint -= std::floorf(hitpoint);
     if (distance_to_wall < 0.0001f)
@@ -189,6 +195,7 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col, int screenWidth,
   std::string toRender =
       _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
   int toRenderIt = 0;
+
   int colHeight =
       std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
   for (int y = 0; y < screenHeight; y++) {
@@ -220,7 +227,6 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col, int screenWidth,
 }
 
 GameEngine::~GameEngine() {
-  delete _camera;
   delete _renderer;
   delete _inputHandler;
   delete[] screen;

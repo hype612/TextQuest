@@ -1,11 +1,18 @@
 #include "../Headers/EntityManager.h"
+#include "../Headers/IEntitySceneChannel.h"
 #include <iostream>
+#include <vector>
 
-EntityManager::EntityManager() {}
+EntityManager::EntityManager(IEntitySceneChannel &channel)
+    : _sceneChannel(channel) {}
 
-void EntityManager::process() {
+void EntityManager::process(float delta) {
+  vec2f dest;
   for (Entity &e : _entityContainer) {
-    e.process();
+    dest = e.process(delta);
+    if (dest != e.transform().position && _sceneChannel.canMoveTo(dest)) {
+      e.setTransform({{dest.x, dest.y}, e.transform().angle});
+    }
   }
 }
 
@@ -17,7 +24,8 @@ void EntityManager::process() {
 std::optional<std::reference_wrapper<Entity>>
 EntityManager::getEntityAtPos(int coord_x, int coord_y) {
   for (Entity &e : _entityContainer) {
-    if (e.X() == coord_x && e.Y() == coord_y)
+    if (e.transform().position.x == coord_x &&
+        e.transform().position.y == coord_y)
       return e;
   }
   return std::nullopt;
@@ -25,7 +33,8 @@ EntityManager::getEntityAtPos(int coord_x, int coord_y) {
 
 int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
   for (const Entity &e : _entityContainer) {
-    if (e.X() == coord_x && e.Y() == coord_y)
+    if (e.transform().position.x == coord_x &&
+        e.transform().position.y == coord_y)
       return e.ID();
   }
 
@@ -44,17 +53,18 @@ void EntityManager::addEntity(Entity &entity) {
     return;
   }
   entity.setID(_entityContainer.size());
-  _entityContainer.push_back(entity);
+  _entityContainer.push_back(std::move(entity));
 }
 void EntityManager::removeEntity(int id) {
-  _entityContainer[id].setX(-1);
-  _entityContainer[id].setY(-1);
+  _entityContainer[id].setTransform({{-1, -1}, 0.f});
 }
 
 void EntityManager::removeEntity(int coord_x, int coord_y) {
   int id = getEntityIdAtPos(coord_x, coord_y);
   removeEntity(id);
 }
+
+Entity &EntityManager::entityAtId(int id) { return _entityContainer[id]; }
 
 void EntityManager::removeAllEntities() {
   _entityContainer.clear();

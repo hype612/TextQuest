@@ -4,10 +4,7 @@
 #include "./MapManager.h"
 #include "./MoveDirection.h"
 #include "Transform.h"
-#include <algorithm>
 #include <array>
-#include <cmath>
-#include <string>
 #include <tuple>
 
 class Player {
