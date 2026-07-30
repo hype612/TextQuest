@@ -12,6 +12,10 @@ Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
       _behaviourCtrl(std::move(behaviourCtrl)) {}
 
+Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
+               Transform pos, std::vector<std::string> texVec, int initHP)
+    : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),
+      _behaviourCtrl(std::move(behaviourCtrl)) {}
 // =============
 // Process
 // =============

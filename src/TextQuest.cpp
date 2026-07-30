@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include "GameSpecific/Headers/IstvanBehaviorController.h"
 #include "GameSpecific/Headers/PlayerBehaviorController.h"
 #include "Headers/Core.h"
 #include "Headers/Logger.h"
@@ -23,6 +24,9 @@ int main() {
   map += "#...####....##..##....####.....#";
   map += "#...........##..##.............#";
   map += "#..............................#";
+  map += "#............T.................#";
+  map += "#.............T................#";
+  map += "#..............................#";
   map += "#.......#..............#.......#";
   map += "#.......#......##......#.......#";
   map += "#.......########.......#.......#";
@@ -33,7 +37,7 @@ int main() {
   map += "#....#####.......#.#...........#";
   map += "################################";
 
-  sceneMan.initializeNewMap(map, 32, 16);
+  sceneMan.initializeNewMap(map, 32, 19);
   std::unordered_map<std::string, std::string> wtexs;
   l->log("map inited", LogType::CORE, LogLevel::INFO);
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
@@ -60,7 +64,7 @@ int main() {
       "/home/attila/Kitchen/TextQuest/Resources/Textures/tnt/", ttexs);
   std::vector<std::string> tnttexV;
   std::vector<std::string> tkeys;
-  tkeys.reserve(wtexs.size());
+  tkeys.reserve(ttexs.size());
   for (const auto &[key, value] : ttexs)
     tkeys.push_back(key);
   std::sort(tkeys.begin(), tkeys.end());
@@ -85,12 +89,57 @@ int main() {
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   Entity p(std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler()),
            init, &intex, 100);
-  l->log("player created", LogType::CORE, LogLevel::INFO);
   p.setMoveSpeedAllDirectons(5.f);
   p.setTurnSpeedAlldirections(5.f);
-  l->log("movement speeds set", LogType::CORE, LogLevel::INFO);
   sceneMan.AddEntity(p);
   l->log("player added to entities", LogType::CORE, LogLevel::INFO);
+
+  // ==================
+  // Istvan upload
+  // ==================
+
+  std::unordered_map<std::string, std::string> Istvantexs;
+  sceneMan.loadResources(
+      "/home/attila/Kitchen/TextQuest/Resources/Textures/FeralGhoul/",
+      Istvantexs);
+  std::vector<std::string> IstvantexV;
+  std::vector<std::string> Istvankeys;
+  Istvankeys.reserve(Istvantexs.size());
+  for (const auto &[key, value] : Istvantexs)
+    Istvankeys.push_back(key);
+  std::sort(Istvankeys.begin(), Istvankeys.end());
+  IstvantexV.reserve(Istvantexs.size());
+  for (const auto &key : Istvankeys) {
+    IstvantexV.push_back(Istvantexs[key]);
+  }
+  Transform IstvanInit{{1.5f, 1.5f}, 0.f};
+  Entity Istvan(std::make_unique<IstvanBehaviorController>(), IstvanInit,
+                IstvantexV, 100);
+  sceneMan.AddEntity(Istvan);
+
+  // ==================
+  // Bela upload
+  // ==================
+
+  std::unordered_map<std::string, std::string> Belatexs;
+  sceneMan.loadResources(
+      "/home/attila/Kitchen/TextQuest/Resources/Textures/Cyberdemon/",
+      Belatexs);
+  std::vector<std::string> BelatexV;
+  std::vector<std::string> Belakeys;
+  Belakeys.reserve(Belatexs.size());
+  for (const auto &[key, value] : Belatexs)
+    Belakeys.push_back(key);
+  std::sort(Belakeys.begin(), Belakeys.end());
+  BelatexV.reserve(Belatexs.size());
+  for (const auto &key : Belakeys) {
+    BelatexV.push_back(Belatexs[key]);
+  }
+  Transform BelaInit{{3.f, 3.f}, 0.f};
+  Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
+              100);
+  sceneMan.AddEntity(Bela);
+
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);

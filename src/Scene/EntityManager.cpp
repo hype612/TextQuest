@@ -13,8 +13,15 @@ void EntityManager::process(float delta) {
   vec2f dest;
   for (Entity &e : _entityContainer) {
     dest = e.process(delta);
-    if (dest != e.transform().position && _sceneChannel.canMoveTo(dest)) {
-      e.setTransform({{dest.x, dest.y}, e.transform().angle});
+    if (dest != e.transform().position) {
+      if (_sceneChannel.canMoveTo({dest.x, e.transform().position.y})) {
+        e.setTransform(
+            {{dest.x, e.transform().position.y}, e.transform().angle});
+      }
+      if (_sceneChannel.canMoveTo({e.transform().position.x, dest.y})) {
+        e.setTransform(
+            {{e.transform().position.x, dest.y}, e.transform().angle});
+      }
     }
   }
 }

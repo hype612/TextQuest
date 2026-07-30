@@ -7,14 +7,14 @@
 TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMaps{initTexture} {
   _texWidth = initTexture.find('\n');
-  _texHeight = _texWidth;
+  _texHeight = initTexture.size() / (_texWidth + 1);
   GenerateTextureMask();
 }
 
 TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
     : _textureMipMaps(initTextureVec) {
   _texWidth = initTextureVec[0].find('\n');
-  _texHeight = _texWidth;
+  _texHeight = initTextureVec[0].size() / (_texWidth + 1);
   GenerateTextureMask();
 }
 

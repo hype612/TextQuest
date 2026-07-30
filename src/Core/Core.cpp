@@ -71,8 +71,10 @@ void GameEngine::run_game() {
 
     _inputHandler->ReceiveInput();
     _sceneManager.process(f_elapsed_time);
+    _zBuffer.clear();
     RayCastingProcess(cam);
     std::string printzbuff;
+    EntityProjectionProcess(cam);
     _renderer->OverwriteBuffer(screen);
     std::vector<std::string> dbgNfo = {
         "C.x: " + std::to_string(cam->follow().position.x) +
@@ -228,7 +230,11 @@ void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
 }
 
 void GameEngine::EntityProjectionProcess(const Camera *cam) {
-  std::vector<EntityDistance> entities;
+  std::vector<EntityDistance> entities =
+      _sceneManager.entitiesSortedByDistanceTo(cam->follow().position);
+  Logger::GetInstance()->log("entites count: " +
+                                 std::to_string(entities.size()),
+                             LogType::CORE, LogLevel::INFO);
   vec2f camDir{std::sin(cam->follow().angle), std::cos(cam->follow().angle)};
   vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
                -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
@@ -238,10 +244,12 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
   int scHeight = _renderer->screenHeight();
   ic1 *= s;
   ic2 *= s;
+  float fakeEyeHeight = 1.f;
   for (const EntityDistance &e : entities | std::views::reverse) {
-    vec2f entityRelPos = cam->follow().position -
-                         _sceneManager.entityAtId(e.id).transform().position;
-    if (entityRelPos.y <= 0.001f) {
+    vec2f entityRelPos = _sceneManager.entityAtId(e.id).transform().position -
+                         cam->follow().position;
+    entityRelPos = ic1 * entityRelPos.x + ic2 * entityRelPos.y;
+    if (entityRelPos.y <= 0.1f) {
       continue; // e either is the cam, or too close to it.
     }
     int height = static_cast<int>(scHeight / entityRelPos.y);
@@ -249,14 +257,31 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
     std::string eTex = _renderAssetManager.scaledEntityTex(e.id, width, height,
                                                            entityRelPos.y);
     int colwidth = eTex.find('\n');
-    int texStart = static_cast<int>(entityRelPos.x - colwidth / 2.f);
+    int screenX = static_cast<int>((scWidth / 2.f) *
+                                   (1 + entityRelPos.x / entityRelPos.y));
+    int texStart = static_cast<int>(screenX - colwidth / 2.f);
     int texEnd = texStart + colwidth;
-    int texTop = static_cast<int>(scHeight - height / 2.f);
-    int texBot = texTop + eTex.size() / (colwidth + 1);
-    for (int x = texStart; x <= texEnd; x++) {
-      for (int y = texTop; y <= texBot; y++) {
-        if (eTex[y * (colwidth + 1) + x] != ' ')
-          screen[y * scWidth + x] = eTex[y * (colwidth + 1) + x];
+
+    int texBot = static_cast<int>(
+        scHeight / 2.f + (scHeight / 2.f) * (fakeEyeHeight / entityRelPos.y));
+    int texTop = texBot - height;
+    int texX = 0;
+    for (int x = texStart; x <= texEnd; x++, texX++) {
+      if (x < 0 || x >= scWidth)
+        continue;
+      if (texX < 0 || texX >= colwidth)
+        continue;
+      if (entityRelPos.y >= _zBuffer[x])
+        continue;
+      int texY = 0;
+      for (int y = texTop; y <= texBot; y++, texY++) {
+        if (y < 0 || y >= scHeight)
+          continue;
+        if (texY < 0 || texY >= height)
+          continue;
+        char c = eTex[texY * (colwidth + 1) + texX];
+        if (c != ' ')
+          screen[y * scWidth + x] = c;
       }
     }
   }

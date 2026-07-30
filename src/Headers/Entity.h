@@ -22,6 +22,8 @@ public:
 
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
          std::string *tex, int initHP);
+  Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
+         std::vector<std::string> texVec, int initHP);
   Entity() = delete;
 
   // =============
