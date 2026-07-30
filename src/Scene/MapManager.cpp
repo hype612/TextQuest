@@ -61,8 +61,6 @@ std::string MapManager::getWallTexColumnAt(int x, int y, int height,
     return std::string();
   }
   char mapChar = _map[y * _mapWidth + x];
-  Logger::GetInstance()->log(std::string("mapChar: ") + mapChar,
-                             LogType::TEXPREP, LogLevel::INFO);
   return _wallTexMappers.at(mapChar).getTexColumnAt(
       height, hitpoint, visibleTop, visibleBot, shadingIdx);
 }

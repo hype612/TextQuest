@@ -1,5 +1,8 @@
 #include "../Headers/EntityManager.h"
 #include "../Headers/IEntitySceneChannel.h"
+#include "../Headers/Logger.h"
+#include "Entity.h"
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -92,22 +95,39 @@ const std::vector<int> &
 EntityManager::getCurrentEntityTexMask(const Entity &entity) const {
   return entity.getTexMask();
 }
-
-std::string EntityManager::getEntityTexColAt(int coordX, int coordY, int height,
-                                             float hitpoint, int wallTop) {
-  return getEntityTexColAt(coordX, coordY, height, hitpoint, wallTop, 0);
+std::string EntityManager::scaledTexOfEntity(int entityId, unsigned int width,
+                                             unsigned int height,
+                                             int shadingIdx) const {
+  if (entityId < 0 ||
+      static_cast<unsigned int>(entityId) > _entityContainer.size()) {
+    Logger::GetInstance()->log("Entity outside of container size.",
+                               LogType::RENDER, LogLevel::ERROR);
+    return std::string();
+  }
+  return _entityContainer[entityId].scaledTex(width, height, shadingIdx);
 }
-
-std::string EntityManager::getEntityTexColAt(int coordX, int coordY, int height,
-                                             float hitpoint, int wallTop,
-                                             int shadingidx) {
-  int id = getEntityIdAtPos(coordX, coordY);
-  return _entityContainer[id].getTexColumnAt(height, hitpoint, wallTop,
-                                             shadingidx);
+std::vector<int> EntityManager::scaledMaskOfEntity(int entityId,
+                                                   unsigned int width,
+                                                   unsigned int height) const {
+  if (entityId < 0 ||
+      static_cast<unsigned int>(entityId) > _entityContainer.size()) {
+    Logger::GetInstance()->log("Entity outside of container size.",
+                               LogType::RENDER, LogLevel::ERROR);
+    return std::vector<int>();
+  }
+  return _entityContainer[entityId].scaledMask(width, height);
 }
-
-std::vector<int> EntityManager::getEntityMaskColAt(int coordX, int coordY,
-                                                   int height, float hitpoint) {
-  int id = getEntityIdAtPos(coordX, coordY);
-  return _entityContainer[id].getMaskColumnAt(height, hitpoint);
+std::vector<EntityDistance>
+EntityManager::entitiesSortedByDistanceTo(const vec2f &target) const {
+  std::vector<EntityDistance> r;
+  r.reserve(_entityContainer.size());
+  for (const Entity &e : _entityContainer) {
+    float dist = std::sqrt(((e.transform().position.x - target.x) *
+                            (e.transform().position.x - target.x)) +
+                           ((e.transform().position.y - target.y) *
+                            (e.transform().position.y - target.y)));
+    r.push_back({e.ID(), dist});
+  }
+  std::sort(r.begin(), r.end());
+  return r;
 }

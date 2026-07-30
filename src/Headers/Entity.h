@@ -44,6 +44,9 @@ public:
                              int shadingIdx) const;
   std::vector<int> getMaskColumnAt(int height, float hitpoint);
   const std::vector<int> &getTexMask() const;
+  std::string scaledTex(unsigned int width, unsigned int height,
+                        int shadingIdx) const;
+  std::vector<int> scaledMask(unsigned int width, unsigned int height) const;
 
   int getHP();
   float moveSpeedOnDir(MoveDirection direction) const;

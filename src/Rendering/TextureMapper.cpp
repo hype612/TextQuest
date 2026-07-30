@@ -1,5 +1,4 @@
 #include "../Headers/TextureMapper.h"
-#include "../Headers/Logger.h"
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -8,21 +7,13 @@
 TextureMapper::TextureMapper(std::string initTexture)
     : _textureMipMaps{initTexture} {
   _texWidth = initTexture.find('\n');
-  Logger::GetInstance()->log(".find: " + std::to_string(_texWidth),
-                             LogType::TEXPREP, LogLevel::INFO);
   _texHeight = _texWidth;
   GenerateTextureMask();
 }
 
-// Expects all textures of the same kind
-// to be the same size, which is a reasonable constraint
-// ALSO expects the first one to be the brightest,
-// and the last one to be the faintest
 TextureMapper::TextureMapper(std::vector<std::string> initTextureVec)
     : _textureMipMaps(initTextureVec) {
   _texWidth = initTextureVec[0].find('\n');
-  Logger::GetInstance()->log(".find: " + std::to_string(_texWidth),
-                             LogType::TEXPREP, LogLevel::INFO);
   _texHeight = _texWidth;
   GenerateTextureMask();
 }
@@ -117,21 +108,58 @@ char TextureMapper::sampleNN(float u, float v, int shadingIdx) const {
   return _textureMipMaps[shadingIdx][idx];
 }
 
-void TextureMapper::nxyInterpolationScale(unsigned int width,
-                                          unsigned int height, float distance) {
+int TextureMapper::samepleNNonMask(float u, float v) const {
+  if (_texWidth <= 0 || _texHeight <= 0)
+    return 0;
+  unsigned int x = static_cast<unsigned int>(u * (_texWidth - 1) + 0.5f);
+  unsigned int y = static_cast<unsigned int>(v * (_texHeight - 1) + 0.5f);
+
+  x = std::clamp(x, 0u, _texWidth - 1);
+  y = std::clamp(y, 0u, _texHeight - 1);
+  size_t idx = static_cast<size_t>(y) * static_cast<size_t>(_texWidth + 1) +
+               static_cast<size_t>(x);
+  if (idx >= _textureMask.size()) {
+    return 0;
+  }
+  return _textureMask[idx];
+}
+
+std::string TextureMapper::nxyInterpolationScale(unsigned int width,
+                                                 unsigned int height,
+                                                 int shadingIdx) const {
   std::string out;
+
   out.resize((width + 1) * height);
   for (size_t y = 0; y < height; y++) {
-    float v = (float)y / (float)(height - 1);
+    float v = (height > 1) ? (float)y / (float)(height - 1) : 0.f;
     for (size_t x = 0; x < width; x++) {
-      float u = (float)x / (float)(width - 1);
-      out[y * (width + 1) + x] = sampleNN(u, v, (int)(distance));
+      float u = (width > 1) ? (float)x / (float)(width - 1) : 0.f;
+      out[y * (width + 1) + x] = sampleNN(u, v, shadingIdx);
     }
     out[y * (width + 1) + width] = '\n';
   }
-  _texHeight = height;
-  _texWidth = width;
-  _textureMipMaps[0] = std::move(out);
+  return out;
+}
+
+std::string TextureMapper::scaledTex(unsigned int width, unsigned int height,
+                                     int shadingIdx) const {
+  return nxyInterpolationScale(width, height, shadingIdx);
+}
+
+std::vector<int> TextureMapper::scaledMask(unsigned int width,
+                                           unsigned int height) const {
+  std::vector<int> out;
+
+  out.resize((width + 1) * height);
+  for (size_t y = 0; y < height; y++) {
+    float v = (height > 1) ? (float)y / (float)(height - 1) : 0.f;
+    for (size_t x = 0; x < width; x++) {
+      float u = (width > 1) ? (float)x / (float)(width - 1) : 0.f;
+      out[y * (width + 1) + x] = samepleNNonMask(u, v);
+    }
+    out[y * (width + 1) + width] = '\n';
+  }
+  return out;
 }
 
 std::string TextureMapper::getTexColumnAt(unsigned int height, float hitpoint,

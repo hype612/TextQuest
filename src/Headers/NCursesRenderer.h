@@ -17,7 +17,6 @@ public:
   vec2i screenSize() const override;
   int screenHeight() const override;
   int screenWidth() const override;
-  // void SetScreenSize(int x, int y) override;
 
   ~NCursesRenderer();
 

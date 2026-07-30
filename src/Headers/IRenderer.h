@@ -14,7 +14,6 @@ public:
   virtual int screenHeight() const = 0;
   virtual int screenWidth() const = 0;
   virtual vec2i screenSize() const = 0;
-  // virtual void SetScreenSize(int x, int y) = 0; BASICALLY DEPRECATED
   virtual void PrintDebugInfo(const std::vector<std::string> &nfo) = 0;
   virtual ~IRenderer() = default;
 

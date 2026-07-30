@@ -2,6 +2,7 @@
 #define ENTITYMANAGER_H
 
 #include "../Headers/Entity.h"
+#include "../Headers/EntityDistance.h"
 #include "../Headers/IEntitySceneChannel.h"
 #include <functional>
 #include <optional>
@@ -22,10 +23,6 @@ public:
   int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
 
-  // ================================
-  // ways to modulate container
-  // ================================
-
   void addEntity(Entity &entity);
   void removeEntity(int id);
   void removeEntity(int coord_x, int coord_y);
@@ -41,12 +38,13 @@ public:
   const std::vector<int> &getCurrentEntityTexMask(int EntityId) const;
   const std::vector<int> &getCurrentEntityTexMask(const Entity &entity) const;
 
-  std::string getEntityTexColAt(int coordX, int coordY, int height,
-                                float hitpoint, int wallTop);
-  std::string getEntityTexColAt(int coordX, int coordY, int height,
-                                float hitpoint, int wallTop, int shadingidx);
-  std::vector<int> getEntityMaskColAt(int coordX, int coordY, int height,
-                                      float hitpoint);
+  std::string scaledTexOfEntity(int entityId, unsigned int width,
+                                unsigned int height, int shadingIdx) const;
+  std::vector<int> scaledMaskOfEntity(int entityId, unsigned int width,
+                                      unsigned int height) const;
+  // NOT descending
+  std::vector<EntityDistance>
+  entitiesSortedByDistanceTo(const vec2f &target) const;
 
 private:
   std::vector<Entity> _entityContainer;

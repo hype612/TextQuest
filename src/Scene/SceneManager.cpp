@@ -1,6 +1,7 @@
 #include "../Headers/SceneManager.h"
 #include "./Camera.h"
 #include "./MapManager.h"
+#include "Core.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -51,21 +52,6 @@ bool SceneManager::isWall(int test_x, int test_y) const {
   return _mapManager.isWall(test_x, test_y);
 }
 
-std::string SceneManager::getWallTexColumnAt(int x, int y, int height,
-                                             float hitpoint, int visibleTop,
-                                             int visibleBot) const {
-  return _mapManager.getWallTexColumnAt(x, y, height, hitpoint, visibleTop,
-                                        visibleBot);
-}
-
-std::string SceneManager::getWallTexColumnAt(int x, int y, int height,
-                                             float hitpoint, int visibleTop,
-                                             int visibleBot,
-                                             int shadingIdx) const {
-  return _mapManager.getWallTexColumnAt(x, y, height, hitpoint, visibleTop,
-                                        visibleBot, shadingIdx);
-}
-
 // Entity Related functions
 Entity &SceneManager::entityAtId(int id) {
   return _entityManager.entityAtId(id);
@@ -80,6 +66,11 @@ void SceneManager::removeEntity(int entityId) {
   _entityManager.removeEntity(entityId);
 }
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
+
+std::vector<EntityDistance>
+SceneManager::entitiesSortedByDistanceTo(const vec2f &target) const {
+  return _entityManager.entitiesSortedByDistanceTo(target);
+}
 
 // Camera
 const Camera &SceneManager::camera() const {

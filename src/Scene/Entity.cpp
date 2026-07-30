@@ -45,6 +45,14 @@ std::vector<int> Entity::getMaskColumnAt(int height, float hitpoint) {
   return _texMapper.getMaskColumnAt(height, hitpoint);
 }
 
+std::string Entity::scaledTex(unsigned int width, unsigned int height,
+                              int shadingIdx) const {
+  return _texMapper.scaledTex(width, height, shadingIdx);
+}
+std::vector<int> Entity::scaledMask(unsigned int width,
+                                    unsigned int height) const {
+  return _texMapper.scaledMask(width, height);
+}
 int Entity::getHP() { return _health; }
 float Entity::moveSpeedOnDir(MoveDirection direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];

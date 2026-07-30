@@ -1,5 +1,6 @@
 #include "../Headers/Core.h"
 #include "../Headers/Camera.h"
+#include "../Headers/EntityDistance.h"
 #include "../Headers/Logger.h"
 #include "../Headers/Transform.h"
 #include "NotcursesInputHandler.h"
@@ -14,10 +15,10 @@
 #include <cmath>
 #include <ncurses.h>
 #include <notcurses/notcurses.h>
+#include <ranges>
 #include <string>
 
-GameEngine::GameEngine()
-    : _sceneManager(), _renderAssetManager(_sceneManager, _texRequestQueue) {
+GameEngine::GameEngine() : _sceneManager(), _renderAssetManager(_sceneManager) {
 
 #if (defined(LINUX) || defined(__linux__))
   notcurses_options ncopts{getenv("TERM"),
@@ -32,10 +33,6 @@ GameEngine::GameEngine()
                                 notcurses_stop);
   _renderer = new NotcursesRenderer(nc);
   _inputHandler = new NotcursesInputHandler(nc);
-  Logger::GetInstance()->log(
-      "nc constructed at: " +
-          std::to_string(reinterpret_cast<uintptr_t>(nc.get())),
-      LogType::CORE, LogLevel::INFO);
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();
@@ -57,6 +54,7 @@ IInputHandler &GameEngine::inputHandler() { return *_inputHandler; }
 void GameEngine::run_game() {
   _sceneRunning = true;
   screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
+  _zBuffer.reserve(_renderer->screenWidth());
   if (!_sceneManager.isMapAvailable()) {
     Logger::GetInstance()->log("Map was never uploaded. Shutting down GameLoop",
                                LogType::CORE, LogLevel::ERROR);
@@ -74,7 +72,7 @@ void GameEngine::run_game() {
     _inputHandler->ReceiveInput();
     _sceneManager.process(f_elapsed_time);
     RayCastingProcess(cam);
-
+    std::string printzbuff;
     _renderer->OverwriteBuffer(screen);
     std::vector<std::string> dbgNfo = {
         "C.x: " + std::to_string(cam->follow().position.x) +
@@ -165,12 +163,13 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
     if (distance_to_wall < 0.0001f)
       distance_to_wall = 0.0001f;
 
-    int wallHeight = (int)(screenHeight / distance_to_wall);
+    int wallHeight = static_cast<int>(screenHeight / distance_to_wall);
 
     int ceiling = (screenHeight / 2) - (wallHeight / 2);
     int floor = ceiling + wallHeight;
     ceiling = std::max(0, ceiling);
     floor = std::min(screenHeight - 1, floor);
+    std::string toRender = std::string();
     if (!hitwall) {
       side = WallSide::NOHIT;
       distance_to_wall = max_raylength;
@@ -181,19 +180,21 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
       int wallTop = (screenHeight / 2) - (wallHeight / 2);
       int visibleTop = std::max(0, -wallTop);
       int visibleBot = std::min(screenHeight - wallTop, (int)wallHeight);
-      _texRequestQueue.push({mapPos.x, mapPos.y, wallHeight, visibleTop,
-                             visibleBot, hitpoint, distance_to_wall});
+      toRender = _renderAssetManager.charColumn({mapPos.x, mapPos.y, wallHeight,
+                                                 visibleTop, visibleBot,
+                                                 hitpoint, distance_to_wall});
     }
-    RenderScreen(ceiling, floor, x, screenWidth, screenHeight);
+    _zBuffer.push_back(distance_to_wall);
+    RenderCol(ceiling, floor, x, screenWidth, screenHeight, toRender);
   }
 }
 
-void GameEngine::RenderScreen(int ceiling, int floor, int col, int screenWidth,
-                              int screenHeight) {
+void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
+                           int screenHeight, const std::string &toRender) {
   wchar_t floorShade;
   int x = col;
-  std::string toRender =
-      _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
+  // std::string toRender =
+  //     _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
   int toRenderIt = 0;
 
   int colHeight =
@@ -222,6 +223,41 @@ void GameEngine::RenderScreen(int ceiling, int floor, int col, int screenWidth,
       else
         floorShade = ' ';
       screen[y * screenWidth + x] = floorShade;
+    }
+  }
+}
+
+void GameEngine::EntityProjectionProcess(const Camera *cam) {
+  std::vector<EntityDistance> entities;
+  vec2f camDir{std::sin(cam->follow().angle), std::cos(cam->follow().angle)};
+  vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
+               -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
+  vec2f ic1{camDir.y, -planeV.y}, ic2{-camDir.x, planeV.x};
+  float s = 1 / (planeV.x * camDir.y - camDir.x * planeV.y);
+  int scWidth = _renderer->screenWidth();
+  int scHeight = _renderer->screenHeight();
+  ic1 *= s;
+  ic2 *= s;
+  for (const EntityDistance &e : entities | std::views::reverse) {
+    vec2f entityRelPos = cam->follow().position -
+                         _sceneManager.entityAtId(e.id).transform().position;
+    if (entityRelPos.y <= 0.001f) {
+      continue; // e either is the cam, or too close to it.
+    }
+    int height = static_cast<int>(scHeight / entityRelPos.y);
+    int width = height;
+    std::string eTex = _renderAssetManager.scaledEntityTex(e.id, width, height,
+                                                           entityRelPos.y);
+    int colwidth = eTex.find('\n');
+    int texStart = static_cast<int>(entityRelPos.x - colwidth / 2.f);
+    int texEnd = texStart + colwidth;
+    int texTop = static_cast<int>(scHeight - height / 2.f);
+    int texBot = texTop + eTex.size() / (colwidth + 1);
+    for (int x = texStart; x <= texEnd; x++) {
+      for (int y = texTop; y <= texBot; y++) {
+        if (eTex[y * (colwidth + 1) + x] != ' ')
+          screen[y * scWidth + x] = eTex[y * (colwidth + 1) + x];
+      }
     }
   }
 }

@@ -24,8 +24,8 @@ public:
   //   interpolation scaling(nn)
   // =============================
 
-  void nxyInterpolationScale(unsigned int width, unsigned int height,
-                             float shadingIdx);
+  std::string nxyInterpolationScale(unsigned int width, unsigned int height,
+                                    int shadingIdx) const;
 
   // =========================
   //   return of textures
@@ -35,15 +35,16 @@ public:
   std::string getTexColumnAt(unsigned int height, float hitpoint,
                              int visibleTop, int visibleBot,
                              int shadingIdx) const;
+  std::string scaledTex(unsigned int width, unsigned int height,
+                        int shadingIdx) const;
+  std::vector<int> scaledMask(unsigned int width, unsigned int height) const;
   std::vector<int> getMaskColumnAt(unsigned int height, float hitpoint) const;
   const std::string &getTexture() const;
   const std::vector<int> &getMask() const;
 
   TextureMapper(std::string initTexture);
-  // Expects all textures of the same kind
-  // to be the same size, which is a reasonable constraint
-  // ALSO expects the first one to be the brightest,
-  // and the last one to be the faintest
+  // Expects all textures of the vec to be the same size
+  // and vec[0] == brightest => vec[size] dimmest
   TextureMapper(std::vector<std::string> initTexture);
   TextureMapper() = default;
 
@@ -55,6 +56,7 @@ private:
 
   void GenerateTextureMask();
   char sampleNN(float u, float v, int shadingIdx) const;
+  int samepleNNonMask(float u, float v) const;
 };
 
 #endif

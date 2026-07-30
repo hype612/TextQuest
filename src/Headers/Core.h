@@ -5,7 +5,6 @@
 #include "IRenderer.h"
 #include "RenderAssetManager.h"
 #include "SceneManager.h"
-#include "TextureRequestQueue.h"
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
 #include <vector>
@@ -14,9 +13,6 @@ class GameEngine {
 public:
   GameEngine();
   void run_game();
-  void RayCastingProcess(const Camera *cam);
-  void RenderScreen(int ceiling, int floor, int col, int screenWidth,
-                    int screenHeight);
   ~GameEngine();
 
   void enableDistanceShading(bool enabled);
@@ -34,6 +30,10 @@ public:
   GameEngine &operator=(GameEngine &&) = delete;
 
 private:
+  void RayCastingProcess(const Camera *cam);
+  void EntityProjectionProcess(const Camera *cam);
+  void RenderCol(int ceiling, int floor, int col, int screenWidth,
+                 int screenHeight, const std::string &toRender);
   // scene
   SceneManager _sceneManager;
   bool _sceneRunning = false;
@@ -42,8 +42,8 @@ private:
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
   char *screen;
-  TextureRequestQueue _texRequestQueue;
   RenderAssetManager _renderAssetManager;
+  std::vector<float> _zBuffer;
 };
 
 #endif // ASCIIVERSE_H

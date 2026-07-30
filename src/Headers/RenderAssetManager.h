@@ -3,25 +3,26 @@
 
 #include "EntityManager.h"
 #include "MapManager.h"
-#include "SceneManager.h"
-#include "TextureRequestQueue.h"
-#include <cinttypes>
+#include "TextureRequest.h"
 #include <string>
+
+class SceneManager;
 
 class RenderAssetManager {
 public:
-  RenderAssetManager(SceneManager &sceneMan, TextureRequestQueue &texReqQ);
+  RenderAssetManager(const SceneManager &sceneMan);
 
-  void TexturePreparator();
-  std::string getTextureAt(int pos_x, int pos_y);
-  std::string getNextCharColumn(int height);
+  // std::string getNextCharColumn(int height);
+  std::string charColumn(const TextureRequest &tRequest);
   void setDistanceShading(bool enabled);
   void setDistanceShadingThresholds(const std::vector<float> &thresholds);
+  std::string scaledEntityTex(int entityId, int width, int height,
+                              float distance) const;
 
 private:
   int getShadingIndex(float distance) const;
-  SceneManager &_sceneMan;
-  TextureRequestQueue &_texRequestQ;
+  const MapManager &_mapManager;
+  const EntityManager &_entityManager;
   bool _distanceShadingEnabled = false;
   std::vector<float> _shadingThresholds;
 };

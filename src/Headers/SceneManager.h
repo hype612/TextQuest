@@ -3,9 +3,11 @@
 
 #include "Camera.h"
 #include "Entity.h"
+#include "EntityDistance.h"
 #include "EntityManager.h"
 #include "IEntitySceneChannel.h"
 #include "MapManager.h"
+#include "RenderAssetManager.h"
 #include "Transform.h"
 #include <string>
 #include <unordered_map>
@@ -13,6 +15,8 @@
 
 class SceneManager : public IEntitySceneChannel {
 public:
+  friend RenderAssetManager::RenderAssetManager(const SceneManager &sceneMan);
+
   SceneManager();
 
   void process(float delta);
@@ -22,17 +26,13 @@ public:
   int getMapHeight() const;
   int getMapWidth() const;
   bool isMapAvailable() const;
+
   void uploadTextureForWall(const char &mapChar, std::string &wallTex);
   void uploadTextureVecForWall(const char &mapChar,
                                std::vector<std::string> &wallTexV);
   bool canMoveTo(const vec2f &dest) const override;
   bool isOutOfBounds(int test_x, int test_y) const;
   bool isWall(int test_x, int test_y) const;
-  std::string getWallTexColumnAt(int x, int y, int height, float hitpoint,
-                                 int visibleTop, int visibleBot) const;
-  std::string getWallTexColumnAt(int x, int y, int height, float hitpoint,
-                                 int visibleTop, int visibleBot,
-                                 int shadingIdx) const;
 
   // Entity Related functions
   Entity &entityAtId(int id);
@@ -40,8 +40,8 @@ public:
   void removeEntity(Entity &entity);
   void removeEntity(int entityId);
   void removeAllEntities();
-  void uploadTextureForEntity(std::string &entityTex);
-  void uploadTextureVecForEntity(std::vector<std::string> &entityTex);
+  std::vector<EntityDistance>
+  entitiesSortedByDistanceTo(const vec2f &target) const;
 
   // Camera
   const Camera &camera() const;
