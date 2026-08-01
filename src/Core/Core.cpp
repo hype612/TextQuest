@@ -195,8 +195,6 @@ void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
                            int screenHeight, const std::string &toRender) {
   wchar_t floorShade;
   int x = col;
-  // std::string toRender =
-  //     _renderAssetManager.getNextCharColumn(floor - ceiling + 1);
   int toRenderIt = 0;
 
   int colHeight =
@@ -239,11 +237,11 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
   vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
                -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
   vec2f ic1{camDir.y, -planeV.y}, ic2{-camDir.x, planeV.x};
-  float s = 1 / (planeV.x * camDir.y - camDir.x * planeV.y);
+  float ideterminant = 1 / (planeV.x * camDir.y - camDir.x * planeV.y);
   int scWidth = _renderer->screenWidth();
   int scHeight = _renderer->screenHeight();
-  ic1 *= s;
-  ic2 *= s;
+  ic1 *= ideterminant;
+  ic2 *= ideterminant;
   float fakeEyeHeight = 1.f;
   for (const EntityDistance &e : entities | std::views::reverse) {
     vec2f entityRelPos = _sceneManager.entityAtId(e.id).transform().position -

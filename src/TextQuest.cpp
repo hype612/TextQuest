@@ -135,7 +135,7 @@ int main() {
   for (const auto &key : Belakeys) {
     BelatexV.push_back(Belatexs[key]);
   }
-  Transform BelaInit{{3.f, 3.f}, 0.f};
+  Transform BelaInit{{12.f, 10.f}, 0.f};
   Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
               100);
   sceneMan.AddEntity(Bela);
