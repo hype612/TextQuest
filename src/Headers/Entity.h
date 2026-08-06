@@ -52,6 +52,7 @@ public:
 
   int getHP();
   float moveSpeedOnDir(MoveDirection direction) const;
+  float collisionRadius() const;
 
   // =============
   // Setters

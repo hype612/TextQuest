@@ -4,29 +4,97 @@
 #include "Entity.h"
 #include <cmath>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 EntityManager::EntityManager(IEntitySceneChannel &channel)
     : _sceneChannel(channel) {}
 
 void EntityManager::process(float delta) {
-  vec2f dest;
+  // vec2f dest;
+  std::vector<std::pair<EntityId, vec2f>> intents;
+  intents.reserve(_entityContainer.size());
+
   for (Entity &e : _entityContainer) {
-    dest = e.process(delta);
-    moveEntity(e, dest);
+    intents.emplace_back(e.ID(), e.process(delta));
+  }
+
+  // validate intents
+  for (auto &[id, dest] : intents) {
+
+    // Terrain check
+    if (dest != _entityContainer[id].transform().position) {
+      if (!_sceneChannel.canMoveTo(
+              {dest.x, _entityContainer[id].transform().position.y})) {
+        dest.x = _entityContainer[id].transform().position.x;
+      }
+      if (!_sceneChannel.canMoveTo(
+              {_entityContainer[id].transform().position.x, dest.y})) {
+        dest.y = _entityContainer[id].transform().position.y;
+      }
+    }
+    // its a wall pos --> quick exit
+    if (dest == _entityContainer[id].transform().position)
+      continue;
+
+    // Entity Check
+    // TODO: later we could just use orderedbydistance, and cut off
+    // anything that is to close to matter
+    for (Entity &e : _entityContainer) {
+      if (e.ID() == id)
+        continue; // against itself guard
+
+      float min_dist =
+          _entityContainer[id].collisionRadius() + e.collisionRadius();
+      float dist_newx =
+          std::sqrt(((e.transform().position.x - dest.x) *
+                     (e.transform().position.x - dest.x)) +
+                    ((e.transform().position.y -
+                      _entityContainer[id].transform().position.y) *
+                     (e.transform().position.y -
+                      _entityContainer[id].transform().position.y)));
+      float dist_newy =
+          std::sqrt(((e.transform().position.x -
+                      _entityContainer[id].transform().position.x) *
+                     (e.transform().position.x -
+                      _entityContainer[id].transform().position.x)) +
+                    ((e.transform().position.y - dest.y) *
+                     (e.transform().position.y - dest.y)));
+      if (dist_newx - min_dist < 0.f) {
+        dest.x = _entityContainer[id].transform().position.x;
+        // _entityContainer[id].OnCollision();
+        break;
+      }
+      if (dist_newy - min_dist < 0.f) {
+        dest.y = _entityContainer[id].transform().position.y;
+        // _entityContainer[id].OnCollision();
+        break;
+      }
+    }
+  }
+  // apply validated
+  for (auto &[id, dest] : intents) {
+    _entityContainer[id].setTransform(
+        {dest, _entityContainer[id].transform().angle});
   }
 }
 
-void EntityManager::moveEntity(Entity &e, const vec2f &dest) {
+bool EntityManager::notTerrain(Entity &e, const vec2f &dest) {
+  return _sceneChannel.canMoveTo({dest.x, e.transform().position.y});
+  /*
   if (dest != e.transform().position) {
     if (_sceneChannel.canMoveTo({dest.x, e.transform().position.y})) {
-      e.setTransform({{dest.x, e.transform().position.y}, e.transform().angle});
+      e.setTransform({{dest.x, e.transform().position.y},
+  e.transform().angle});
     }
     if (_sceneChannel.canMoveTo({e.transform().position.x, dest.y})) {
-      e.setTransform({{e.transform().position.x, dest.y}, e.transform().angle});
+      e.setTransform({{e.transform().position.x, dest.y},
+  e.transform().angle});
     }
   }
+  */
 }
+
 // ================================
 // Container Getters
 // ================================

@@ -12,7 +12,7 @@
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::string *tex, int initHP)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
-      _collisionRadius(.5f), _behaviourCtrl(std::move(behaviourCtrl)) {}
+      _collisionRadius(.4f), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::vector<std::string> texVec, int initHP)
@@ -63,6 +63,9 @@ int Entity::getHP() { return _health; }
 float Entity::moveSpeedOnDir(MoveDirection direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];
 }
+
+float Entity::collisionRadius() const { return _collisionRadius; }
+
 // =============
 // Setters
 // =============

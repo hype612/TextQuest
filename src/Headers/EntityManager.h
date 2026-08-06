@@ -46,8 +46,7 @@ public:
   entitiesSortedByDistanceTo(const vec2f &target) const;
 
 private:
-  void moveEntity(Entity &e, const vec2f &dest);
-
+  bool notTerrain(Entity &e, const vec2f &dest);
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };
