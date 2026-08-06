@@ -25,7 +25,6 @@ public:
 
   void addEntity(Entity &entity);
   void removeEntity(int id);
-  void removeEntity(int coord_x, int coord_y);
   void removeAllEntities();
   Entity &entityAtId(int id);
 
@@ -47,6 +46,8 @@ public:
   entitiesSortedByDistanceTo(const vec2f &target) const;
 
 private:
+  void moveEntity(Entity &e, const vec2f &dest);
+
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };

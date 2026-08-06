@@ -13,19 +13,20 @@ void EntityManager::process(float delta) {
   vec2f dest;
   for (Entity &e : _entityContainer) {
     dest = e.process(delta);
-    if (dest != e.transform().position) {
-      if (_sceneChannel.canMoveTo({dest.x, e.transform().position.y})) {
-        e.setTransform(
-            {{dest.x, e.transform().position.y}, e.transform().angle});
-      }
-      if (_sceneChannel.canMoveTo({e.transform().position.x, dest.y})) {
-        e.setTransform(
-            {{e.transform().position.x, dest.y}, e.transform().angle});
-      }
-    }
+    moveEntity(e, dest);
   }
 }
 
+void EntityManager::moveEntity(Entity &e, const vec2f &dest) {
+  if (dest != e.transform().position) {
+    if (_sceneChannel.canMoveTo({dest.x, e.transform().position.y})) {
+      e.setTransform({{dest.x, e.transform().position.y}, e.transform().angle});
+    }
+    if (_sceneChannel.canMoveTo({e.transform().position.x, dest.y})) {
+      e.setTransform({{e.transform().position.x, dest.y}, e.transform().angle});
+    }
+  }
+}
 // ================================
 // Container Getters
 // ================================
@@ -67,11 +68,6 @@ void EntityManager::addEntity(Entity &entity) {
 }
 void EntityManager::removeEntity(int id) {
   _entityContainer[id].setTransform({{-1, -1}, 0.f});
-}
-
-void EntityManager::removeEntity(int coord_x, int coord_y) {
-  int id = getEntityIdAtPos(coord_x, coord_y);
-  removeEntity(id);
 }
 
 Entity &EntityManager::entityAtId(int id) { return _entityContainer[id]; }

@@ -19,7 +19,7 @@ public:
   // =============
   // Constructors
   // =============
-
+  // TODO: throw out the testing number for _collisionRadius
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
          std::string *tex, int initHP);
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
@@ -79,6 +79,7 @@ private:
   TextureMapper _texMapper;
   int _health;
   EntityState _state;
+  float _collisionRadius;
   std::unique_ptr<IBehaviorController> _behaviourCtrl;
   std::array<float, moveDirectionCount> _directionalSpeeds;
 };

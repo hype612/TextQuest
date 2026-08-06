@@ -7,10 +7,12 @@
 // Constructors
 // =============
 
+// TODO: throw out the testing number for _collisionRadius
+
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::string *tex, int initHP)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
-      _behaviourCtrl(std::move(behaviourCtrl)) {}
+      _collisionRadius(.5f), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::vector<std::string> texVec, int initHP)
