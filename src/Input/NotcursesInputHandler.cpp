@@ -19,19 +19,6 @@ void NotcursesInputHandler::ReceiveInput() {
   while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0) {
     KeyEvent(in_char.utf8, in_char.evtype);
   }
-  /*
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] == true)
-    _player.move(delta, MoveDirection::FORWARD);
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] == true)
-    _player.move(delta, MoveDirection::BACKWARD);
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] == true)
-    _player.move(delta, MoveDirection::STRAFE_LEFT);
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] == true)
-    _player.move(delta, MoveDirection::STRAFE_RIGHT);
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] == true)
-    _player.move(delta, MoveDirection::TURN_LEFT);
-  if (_mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] == true)
-    _player.move(delta, MoveDirection::TURN_RIGHT); */
 }
 
 bool NotcursesInputHandler::keyDown(MoveDirection dir) const {

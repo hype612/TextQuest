@@ -1,6 +1,8 @@
 #include "../Headers/EntityManager.h"
+#include "../Headers/ICollidable.h"
 #include "../Headers/IEntitySceneChannel.h"
 #include "../Headers/Logger.h"
+#include "../Headers/TerrainCollidable.h"
 #include "Entity.h"
 #include <cmath>
 #include <iostream>
@@ -21,56 +23,58 @@ void EntityManager::process(float delta) {
 
   // validate intents
   for (auto &[id, dest] : intents) {
-
-    // Terrain check
-    if (dest != _entityContainer[id].transform().position) {
-      if (!_sceneChannel.canMoveTo(
-              {dest.x, _entityContainer[id].transform().position.y})) {
-        dest.x = _entityContainer[id].transform().position.x;
+    Transform current_trans = _entityContainer[id].transform();
+    if (dest != current_trans.position) {
+      if (!_sceneChannel.canMoveTo({dest.x, current_trans.position.y})) {
+        TerrainCollidable collided(
+            {static_cast<int>(dest.x),
+             static_cast<int>(current_trans.position.y)});
+        dest.x = current_trans.position.x;
+        _entityContainer[id].onCollision(collided);
       }
-      if (!_sceneChannel.canMoveTo(
-              {_entityContainer[id].transform().position.x, dest.y})) {
-        dest.y = _entityContainer[id].transform().position.y;
+      if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y})) {
+        TerrainCollidable collided({static_cast<int>(current_trans.position.y),
+                                    static_cast<int>(dest.y)});
+        dest.y = current_trans.position.y;
+        _entityContainer[id].onCollision(collided);
       }
     }
     // its a wall pos --> quick exit
-    if (dest == _entityContainer[id].transform().position)
+    if (dest == current_trans.position)
       continue;
 
     // Entity Check
-    // TODO: later we could just use orderedbydistance, and cut off
-    // anything that is to close to matter
     for (Entity &e : _entityContainer) {
       if (e.ID() == id)
         continue; // against itself guard
+      Transform other_trans = e.transform();
 
+      // do squared to save on std::sqrt time
       float min_dist =
           _entityContainer[id].collisionRadius() + e.collisionRadius();
-      float dist_newx =
-          std::sqrt(((e.transform().position.x - dest.x) *
-                     (e.transform().position.x - dest.x)) +
-                    ((e.transform().position.y -
-                      _entityContainer[id].transform().position.y) *
-                     (e.transform().position.y -
-                      _entityContainer[id].transform().position.y)));
-      float dist_newy =
-          std::sqrt(((e.transform().position.x -
-                      _entityContainer[id].transform().position.x) *
-                     (e.transform().position.x -
-                      _entityContainer[id].transform().position.x)) +
-                    ((e.transform().position.y - dest.y) *
-                     (e.transform().position.y - dest.y)));
-      if (dist_newx - min_dist < 0.f) {
-        dest.x = _entityContainer[id].transform().position.x;
-        // _entityContainer[id].OnCollision();
-        break;
+      float min_dist_sq = min_dist * min_dist;
+      float dist_newx = ((other_trans.position.x - dest.x) *
+                         (other_trans.position.x - dest.x)) +
+                        ((other_trans.position.y - current_trans.position.y) *
+                         (other_trans.position.y - current_trans.position.y));
+      float dist_newy = ((other_trans.position.x - current_trans.position.x) *
+                         (other_trans.position.x - current_trans.position.x)) +
+                        ((other_trans.position.y - dest.y) *
+                         (other_trans.position.y - dest.y));
+      if (dist_newx - min_dist_sq < 0.f) {
+        dest.x = current_trans.position.x;
+        _entityContainer[id].onCollision(e);
       }
-      if (dist_newy - min_dist < 0.f) {
-        dest.y = _entityContainer[id].transform().position.y;
-        // _entityContainer[id].OnCollision();
-        break;
+      if (dist_newy - min_dist_sq < 0.f) {
+        dest.y = current_trans.position.y;
+        _entityContainer[id].onCollision(e);
       }
     }
+  }
+  // apply validated
+  for (auto &[id, dest] : intents) {
+    _entityContainer[id].setTransform(
+        {dest, _entityContainer[id].transform().angle});
   }
   // apply validated
   for (auto &[id, dest] : intents) {

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "IBehaviorController.h"
+#include "ICollidable.h"
 #include "MoveDirection.h"
 #include "TextureMapper.h"
 #include "Transform.h"
@@ -14,16 +15,15 @@
 
 enum EntityState { IDLE, WALKING, FIGHT };
 
-class Entity {
+class Entity : public ICollidable {
 public:
   // =============
   // Constructors
   // =============
-  // TODO: throw out the testing number for _collisionRadius
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::string *tex, int initHP);
+         std::string *tex, int initHP, float collisionRadius);
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::vector<std::string> texVec, int initHP);
+         std::vector<std::string> texVec, int initHP, float collisionRadius);
   Entity() = delete;
 
   // =============
@@ -31,11 +31,13 @@ public:
   // =============
 
   vec2f process(float delta);
+  void onCollision(ICollidable &other);
 
   // =============
   // Getters
   // =============
 
+  Collidable collidableKind() const override;
   int ID() const;
 
   const Transform &transform() const;

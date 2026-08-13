@@ -250,19 +250,23 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
     if (entityRelPos.y <= 0.1f) {
       continue; // e either is the cam, or too close to it.
     }
-    int height = static_cast<int>(scHeight / entityRelPos.y);
+    float f_height = scHeight / entityRelPos.y;
+    float f_texBot =
+        scHeight / 2.f + (scHeight / 2.f) * (fakeEyeHeight / entityRelPos.y);
+    float f_texTop = f_texBot - f_height;
+    int texBot = static_cast<int>(f_texBot);
+    int texTop = static_cast<int>(f_texTop);
+    int height = texBot - texTop;
     int width = height;
+    int screenX = static_cast<int>((scWidth / 2.f) *
+                                   (1 + entityRelPos.x / entityRelPos.y));
+
     std::string eTex = _renderAssetManager.scaledEntityTex(e.id, width, height,
                                                            entityRelPos.y);
     int colwidth = eTex.find('\n');
-    int screenX = static_cast<int>((scWidth / 2.f) *
-                                   (1 + entityRelPos.x / entityRelPos.y));
     int texStart = static_cast<int>(screenX - colwidth / 2.f);
     int texEnd = texStart + colwidth;
 
-    int texBot = static_cast<int>(
-        scHeight / 2.f + (scHeight / 2.f) * (fakeEyeHeight / entityRelPos.y));
-    int texTop = texBot - height;
     int texX = 0;
     for (int x = texStart; x <= texEnd; x++, texX++) {
       if (x < 0 || x >= scWidth)

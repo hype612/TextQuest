@@ -1,5 +1,6 @@
 #include "../Headers/Entity.h"
 #include "../Headers/IBehaviorController.h"
+#include "../Headers/ICollidable.h"
 #include "../Headers/Vec2f.h"
 #include <cmath>
 
@@ -7,16 +8,18 @@
 // Constructors
 // =============
 
-// TODO: throw out the testing number for _collisionRadius
-
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
-               Transform pos, std::string *tex, int initHP)
+               Transform pos, std::string *tex, int initHP,
+               float collisionRadius)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
-      _collisionRadius(.4f), _behaviourCtrl(std::move(behaviourCtrl)) {}
+      _collisionRadius(collisionRadius),
+      _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
-               Transform pos, std::vector<std::string> texVec, int initHP)
+               Transform pos, std::vector<std::string> texVec, int initHP,
+               float collisionRadius)
     : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),
+      _collisionRadius(collisionRadius),
       _behaviourCtrl(std::move(behaviourCtrl)) {}
 // =============
 // Process
@@ -25,9 +28,16 @@ vec2f Entity::process(float delta) {
   return _behaviourCtrl->Tick(*this, delta);
 }
 
+void Entity::onCollision(ICollidable &other) {
+  _behaviourCtrl->onCollision(*this, other);
+}
+
 // =============
 // Getters
 // =============
+
+Collidable Entity::collidableKind() const { return Collidable::ENTITY; }
+
 int Entity::ID() const { return _id; }
 
 const Transform &Entity::transform() const { return _transform; }

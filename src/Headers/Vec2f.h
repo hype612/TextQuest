@@ -32,4 +32,4 @@ struct vec2f {
   }
 };
 
-#endif // VEc2F_H
+#endif // VEC2F_H

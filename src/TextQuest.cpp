@@ -5,7 +5,6 @@
 #include "Headers/Logger.h"
 #include "Headers/MoveDirection.h"
 #include "Headers/SceneManager.h"
-#include "player.h"
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -88,9 +87,9 @@ int main() {
   Transform init{{2.f, 2.f}, 0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   Entity p(std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler()),
-           init, &intex, 100);
-  p.setMoveSpeedAllDirectons(5.f);
-  p.setTurnSpeedAlldirections(5.f);
+           init, &intex, 100, .0f);
+  p.setMoveSpeedAllDirectons(3.5f);
+  p.setTurnSpeedAlldirections(2.5f);
   sceneMan.AddEntity(p);
   l->log("player added to entities", LogType::CORE, LogLevel::INFO);
 
@@ -112,9 +111,11 @@ int main() {
   for (const auto &key : Istvankeys) {
     IstvantexV.push_back(Istvantexs[key]);
   }
-  Transform IstvanInit{{1.5f, 1.5f}, 0.f};
+  Transform IstvanInit{{10.f, 9.f}, 0.f};
   Entity Istvan(std::make_unique<IstvanBehaviorController>(), IstvanInit,
-                IstvantexV, 100);
+                IstvantexV, 100, 0.2f);
+  Istvan.setMoveSpeedAllDirectons(.5f);
+  Istvan.setTurnSpeedAlldirections(.5f);
   sceneMan.AddEntity(Istvan);
 
   // ==================
@@ -137,7 +138,7 @@ int main() {
   }
   Transform BelaInit{{12.f, 10.f}, 0.f};
   Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
-              100);
+              100, .35f);
   sceneMan.AddEntity(Bela);
 
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
