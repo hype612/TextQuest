@@ -110,8 +110,8 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
                     (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
 
     vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
-    vec2i mapPos{static_cast<int>(std::floor(cam->follow().position.x)),
-                 static_cast<int>(std::floor(cam->follow().position.y))};
+    vec2i mapPos{static_cast<int>(cam->follow().position.x),
+                 static_cast<int>(cam->follow().position.y)};
     vec2f sideDist{(stepDir.x == 1) ? mapPos.x + 1.f - cam->follow().position.x
                                     : cam->follow().position.x - mapPos.x,
                    (stepDir.y == 1) ? mapPos.y + 1.f - cam->follow().position.y
@@ -234,9 +234,6 @@ void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
 void GameEngine::EntityProjectionProcess(const Camera *cam) {
   std::vector<EntityDistance> entities =
       _sceneManager.entitiesSortedByDistanceTo(cam->follow().position);
-  Logger::GetInstance()->log("entites count: " +
-                                 std::to_string(entities.size()),
-                             LogType::CORE, LogLevel::INFO);
   vec2f camDir{std::sin(cam->follow().angle), std::cos(cam->follow().angle)};
   vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
                -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};

@@ -2,6 +2,7 @@
 #define VEC2F_H
 
 #include <cmath>
+#include <iostream>
 
 struct vec2f {
   float x, y;
@@ -10,6 +11,7 @@ struct vec2f {
   vec2f operator-(const vec2f &rval) const { return {x - rval.x, y - rval.y}; }
   vec2f operator*(float rval) const { return {x * rval, y * rval}; }
   float dot(const vec2f &rval) const { return x * rval.x + y * rval.y; }
+  float cross(const vec2f &rval) const { return x * rval.y - y * rval.x; }
   bool operator==(const vec2f &rval) const {
     constexpr float epsilon = 1e-5f;
     return std::abs(x - rval.x) < epsilon && std::abs(y - rval.y) < epsilon;
@@ -29,6 +31,23 @@ struct vec2f {
     x *= rval;
     y *= rval;
     return *this;
+  }
+  void normalize() {
+    float len = std::sqrt(x * x + y * y);
+    if (len == 0) {
+      std::cerr << "normalize was called on a null-vec." << std::endl;
+      return;
+    }
+    x /= len;
+    y /= len;
+  }
+  vec2f normalized() {
+    float len = std::sqrt(x * x + y * y);
+    if (len == 0) {
+      std::cerr << "normalize was called on a null-vec." << std::endl;
+      return {-1.f, -1.f};
+    }
+    return {x /= len, y /= len};
   }
 };
 

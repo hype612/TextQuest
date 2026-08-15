@@ -13,17 +13,17 @@
 #include "Transform.h"
 #include "Vec2f.h"
 
-enum EntityState { IDLE, WALKING, FIGHT };
-
 class Entity : public ICollidable {
 public:
   // =============
   // Constructors
   // =============
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::string *tex, int initHP, float collisionRadius);
+         std::string *tex, int initHP, float collisionRadius, bool isPlayer,
+         float fov_in_deg, float viewDistance);
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::vector<std::string> texVec, int initHP, float collisionRadius);
+         std::vector<std::string> texVec, int initHP, float collisionRadius,
+         bool isPlayer, float fov_in_deg, float viewDistance);
   Entity() = delete;
 
   // =============
@@ -32,14 +32,16 @@ public:
 
   vec2f process(float delta);
   void onCollision(ICollidable &other);
-
+  void onVisible(Entity &other);
   // =============
   // Getters
   // =============
 
   Collidable collidableKind() const override;
   int ID() const;
-
+  bool isPlayer() const;
+  float viewDistance() const;
+  float fov() const;
   const Transform &transform() const;
 
   std::string getTexture() const;
@@ -81,8 +83,11 @@ private:
   Transform _transform;
   TextureMapper _texMapper;
   int _health;
-  EntityState _state;
   float _collisionRadius;
+  bool _isPlayer;
+  float _fov;
+  float _viewDistance;
+
   std::unique_ptr<IBehaviorController> _behaviourCtrl;
   std::array<float, moveDirectionCount> _directionalSpeeds;
 };

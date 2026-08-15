@@ -3,6 +3,8 @@
 #include "../Headers/Logger.h"
 #include "../Headers/TerrainCollidable.h"
 #include "Entity.h"
+#include "Transform.h"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -14,6 +16,7 @@ EntityManager::EntityManager(IEntitySceneChannel &channel)
 void EntityManager::process(float delta) {
   resolveStates();
   resolveMovement(delta);
+  resolveVisibility();
 }
 
 void EntityManager::resolveStates() {
@@ -46,10 +49,14 @@ void EntityManager::resolveMovement(float delta) {
         _entityContainer[id].onCollision(collided);
       }
       if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y})) {
-        TerrainCollidable collided({static_cast<int>(current_trans.position.y),
+        TerrainCollidable collided({static_cast<int>(current_trans.position.x),
                                     static_cast<int>(dest.y)});
         dest.y = current_trans.position.y;
         _entityContainer[id].onCollision(collided);
+      }
+      // basically corner check
+      if (!_sceneChannel.canMoveTo(dest)) {
+        dest = current_trans.position;
       }
     }
     // its a wall pos --> quick exit
@@ -88,6 +95,87 @@ void EntityManager::resolveMovement(float delta) {
   for (auto &[id, dest] : intents) {
     _entityContainer[id].setTransform(
         {dest, _entityContainer[id].transform().angle});
+  }
+}
+
+void EntityManager::resolveVisibility() {
+  // on each non_player: check dist
+  for (Entity &e : _entityContainer) {
+    if (e.isPlayer())
+      continue;
+    Transform current_trans = e.transform();
+    for (Entity &other : _entityContainer) {
+      // self check
+      if (e.ID() == other.ID())
+        continue;
+      Transform other_trans = other.transform();
+      float dist_sq = ((other_trans.position.x - current_trans.position.x) *
+                       (other_trans.position.x - current_trans.position.x)) +
+                      ((other_trans.position.y - current_trans.position.y) *
+                       (other_trans.position.y - current_trans.position.y));
+      // distance check
+      if (dist_sq - e.viewDistance() * e.viewDistance() > 0.f)
+        continue;
+
+      vec2f relative_pos = other_trans.position - current_trans.position;
+      vec2f focus_point = {sinf(current_trans.angle),
+                           cosf(current_trans.angle)};
+      float diff_cos = (focus_point.dot(relative_pos)) /
+                       (std::sqrt((focus_point.x * focus_point.x +
+                                   focus_point.y * focus_point.y) *
+                                  (relative_pos.x * relative_pos.x +
+                                   relative_pos.y * relative_pos.y)));
+
+      diff_cos = std::clamp(diff_cos, -1.f, 1.f);
+      float rad_diff = acosf(diff_cos);
+
+      // in fov check
+      if (rad_diff > e.fov() / 2.f)
+        continue;
+
+      // obstruction check w/ raycast
+
+      bool hitwall = false;
+      float rayLength = 0;
+      vec2f rayDir = relative_pos.normalized();
+      vec2f deltaDist{(rayDir.x == 0.f) ? 1e30f : std::abs(1.f / rayDir.x),
+                      (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
+
+      vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
+      vec2f mapPos{current_trans.position.x, current_trans.position.y};
+      vec2f sideDist{
+          (stepDir.x == 1) ? mapPos.x + 1.f - current_trans.position.x
+                           : current_trans.position.x - mapPos.x,
+          (stepDir.y == 1) ? mapPos.y + 1.f - current_trans.position.y
+                           : current_trans.position.y - mapPos.y};
+      if (sideDist.x <= 0.0001f)
+        sideDist.x = 1.f;
+      if (sideDist.y <= 0.0001f)
+        sideDist.y = 1.f;
+      sideDist.x = sideDist.x * deltaDist.x;
+      sideDist.y = sideDist.y * deltaDist.y;
+      while (!hitwall && rayLength < e.viewDistance()) {
+        if (sideDist.x < sideDist.y) {
+          sideDist.x += deltaDist.x;
+          mapPos.x += stepDir.x;
+          rayLength = sideDist.x;
+        } else {
+          sideDist.y += deltaDist.y;
+          mapPos.y += stepDir.y;
+          rayLength = sideDist.y;
+        }
+
+        if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
+          hitwall = true;
+        }
+      }
+
+      if (hitwall)
+        continue;
+
+      // got through all checks, entity is visible
+      e.onVisible(other);
+    }
   }
 }
 

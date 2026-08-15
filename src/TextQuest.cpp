@@ -87,7 +87,7 @@ int main() {
   Transform init{{2.f, 2.f}, 0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   Entity p(std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler()),
-           init, &intex, 100, .0f);
+           init, &intex, 100, .0f, true, 0.f, 0.f);
   p.setMoveSpeedAllDirectons(3.5f);
   p.setTurnSpeedAlldirections(2.5f);
   sceneMan.AddEntity(p);
@@ -113,9 +113,9 @@ int main() {
   }
   Transform IstvanInit{{10.f, 9.f}, 0.f};
   Entity Istvan(std::make_unique<IstvanBehaviorController>(), IstvanInit,
-                IstvantexV, 100, 0.2f);
-  Istvan.setMoveSpeedAllDirectons(.5f);
-  Istvan.setTurnSpeedAlldirections(.5f);
+                IstvantexV, 100, 0.2f, false, 360.f, 8.f);
+  Istvan.setMoveSpeedAllDirectons(.0f);
+  Istvan.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Istvan);
 
   // ==================
@@ -138,7 +138,9 @@ int main() {
   }
   Transform BelaInit{{12.f, 10.f}, 0.f};
   Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
-              30, .35f);
+              30, .35f, false, 1.f, 1.f);
+  Bela.setMoveSpeedAllDirectons(.0f);
+  Bela.setTurnSpeedAlldirections(1.5f);
   sceneMan.AddEntity(Bela);
 
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);

@@ -4,8 +4,6 @@
 #include "../Headers/Entity.h"
 #include "../Headers/EntityDistance.h"
 #include "../Headers/IEntitySceneChannel.h"
-#include <functional>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -46,6 +44,8 @@ public:
 private:
   void resolveStates();
   void resolveMovement(float delta);
+  void resolveVisibility();
+
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };

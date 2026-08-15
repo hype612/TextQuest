@@ -10,17 +10,21 @@
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::string *tex, int initHP,
-               float collisionRadius)
+               float collisionRadius, bool isPlayer, float fov_in_deg,
+               float viewDistance)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
-      _collisionRadius(collisionRadius),
-      _behaviourCtrl(std::move(behaviourCtrl)) {}
+      _collisionRadius(collisionRadius), _isPlayer(isPlayer),
+      _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
+      _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::vector<std::string> texVec, int initHP,
-               float collisionRadius)
+               float collisionRadius, bool isPlayer, float fov_in_deg,
+               float viewDistance)
     : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),
-      _collisionRadius(collisionRadius),
-      _behaviourCtrl(std::move(behaviourCtrl)) {}
+      _collisionRadius(collisionRadius), _isPlayer(isPlayer),
+      _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
+      _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 // =============
 // Process
 // =============
@@ -32,6 +36,9 @@ void Entity::onCollision(ICollidable &other) {
   _behaviourCtrl->onCollision(*this, other);
 }
 
+void Entity::onVisible(Entity &other) {
+  _behaviourCtrl->onVisible(*this, other);
+}
 // =============
 // Getters
 // =============
@@ -39,7 +46,9 @@ void Entity::onCollision(ICollidable &other) {
 Collidable Entity::collidableKind() const { return Collidable::ENTITY; }
 
 int Entity::ID() const { return _id; }
-
+bool Entity::isPlayer() const { return _isPlayer; }
+float Entity::viewDistance() const { return _viewDistance; }
+float Entity::fov() const { return _fov; }
 const Transform &Entity::transform() const { return _transform; }
 std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 

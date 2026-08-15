@@ -11,11 +11,14 @@ public:
   IstvanBehaviorController();
   vec2f Tick(Entity &self, float delta) override;
   void onCollision(Entity &self, ICollidable &other) override;
+  virtual void onVisible(Entity &self, Entity &other) override;
 
 private:
   vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
   std::array<MoveDirection, 2> _alternates;
   int _a_idx;
+  vec2f _target;
+  float _targetAngle;
 };
 
 #endif // ISTVANBEHAVIORCONTROLLER_H

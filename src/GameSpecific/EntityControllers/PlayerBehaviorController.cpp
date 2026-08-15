@@ -1,6 +1,5 @@
 #include "../Headers/PlayerBehaviorController.h"
 #include "../../Headers/Entity.h"
-#include "../../Headers/Logger.h"
 #include "MoveDirection.h"
 
 #include <cmath>
