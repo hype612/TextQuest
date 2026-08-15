@@ -25,6 +25,8 @@ bool NotcursesInputHandler::keyDown(MoveDirection dir) const {
   return _mvmtKeyStates[static_cast<int>(dir)];
 }
 
+bool NotcursesInputHandler::quitPressed() const { return _quitPressed; }
+
 void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   std::string dbg = "KeyEvent received: ";
   dbg += *in;
@@ -71,9 +73,9 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
     if (evtype == NCTYPE_RELEASE)
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
     break;
-  case 'j':
+  case 'x':
     if (evtype == NCTYPE_PRESS) {
-      // figure out new way to swtich debug plane rendering on/off
+      _quitPressed = true;
     }
     break;
   default:

@@ -14,6 +14,7 @@ public:
   void Init() override;
   void ReceiveInput() override;
   bool keyDown(MoveDirection dir) const override;
+  bool quitPressed() const;
   ~NotcursesInputHandler() = default;
 
 private:
@@ -21,6 +22,7 @@ private:
 
   std::shared_ptr<notcurses> _nc;
   std::array<bool, moveDirectionCount> _mvmtKeyStates;
+  bool _quitPressed = false;
 };
 
 #endif // OS Check end

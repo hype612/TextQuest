@@ -31,7 +31,7 @@ void NotcursesRenderer::OverwriteBuffer(char *newBuffer) {
     return;
   }
 
-  _screenBuffer = newBuffer;
+  memcpy(_screenBuffer, newBuffer, _screenWidth * _screenHeight);
 
   ncplane_erase(notcurses_stdplane(_nc.get()));
   for (int y = 0; y < _screenHeight; y++) {

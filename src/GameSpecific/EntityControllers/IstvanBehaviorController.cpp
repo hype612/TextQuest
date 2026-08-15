@@ -53,6 +53,7 @@ vec2f IstvanBehaviorController::moveIntent(MoveDirection dir, Entity &self,
   return {0.f, 0.f};
 }
 
-void IstvanBehaviorController::onCollision(Entity &, ICollidable &) {
+void IstvanBehaviorController::onCollision(Entity &self, ICollidable &) {
   _a_idx = (_a_idx + 1) % 2;
+  self.setHealth(self.health() - 10);
 }

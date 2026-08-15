@@ -1,5 +1,4 @@
 #include "../Headers/EntityManager.h"
-#include "../Headers/ICollidable.h"
 #include "../Headers/IEntitySceneChannel.h"
 #include "../Headers/Logger.h"
 #include "../Headers/TerrainCollidable.h"
@@ -13,6 +12,20 @@ EntityManager::EntityManager(IEntitySceneChannel &channel)
     : _sceneChannel(channel) {}
 
 void EntityManager::process(float delta) {
+  resolveStates();
+  resolveMovement(delta);
+}
+
+void EntityManager::resolveStates() {
+  for (Entity &e : _entityContainer) {
+    if (e.health() <= 0) {
+      e.setTransform({{-1.f, -1.f}, 0.f});
+      e.setMoveSpeedAllDirectons(0.f);
+    }
+  }
+}
+
+void EntityManager::resolveMovement(float delta) {
   // vec2f dest;
   std::vector<std::pair<EntityId, vec2f>> intents;
   intents.reserve(_entityContainer.size());
@@ -76,43 +89,11 @@ void EntityManager::process(float delta) {
     _entityContainer[id].setTransform(
         {dest, _entityContainer[id].transform().angle});
   }
-  // apply validated
-  for (auto &[id, dest] : intents) {
-    _entityContainer[id].setTransform(
-        {dest, _entityContainer[id].transform().angle});
-  }
-}
-
-bool EntityManager::notTerrain(Entity &e, const vec2f &dest) {
-  return _sceneChannel.canMoveTo({dest.x, e.transform().position.y});
-  /*
-  if (dest != e.transform().position) {
-    if (_sceneChannel.canMoveTo({dest.x, e.transform().position.y})) {
-      e.setTransform({{dest.x, e.transform().position.y},
-  e.transform().angle});
-    }
-    if (_sceneChannel.canMoveTo({e.transform().position.x, dest.y})) {
-      e.setTransform({{e.transform().position.x, dest.y},
-  e.transform().angle});
-    }
-  }
-  */
 }
 
 // ================================
 // Container Getters
 // ================================
-
-// naive searches, later add something to speed it up if neccessary
-std::optional<std::reference_wrapper<Entity>>
-EntityManager::getEntityAtPos(int coord_x, int coord_y) {
-  for (Entity &e : _entityContainer) {
-    if (e.transform().position.x == coord_x &&
-        e.transform().position.y == coord_y)
-      return e;
-  }
-  return std::nullopt;
-}
 
 int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
   for (const Entity &e : _entityContainer) {

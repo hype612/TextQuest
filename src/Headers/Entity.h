@@ -52,7 +52,7 @@ public:
                         int shadingIdx) const;
   std::vector<int> scaledMask(unsigned int width, unsigned int height) const;
 
-  int getHP();
+  int health() const;
   float moveSpeedOnDir(MoveDirection direction) const;
   float collisionRadius() const;
 
@@ -62,7 +62,7 @@ public:
 
   void move(float delta, MoveDirection dir);
   void setID(int id);
-  void modifyHealth(int amount);
+  void setHealth(int new_value);
   void setTransform(const Transform &new_transform);
 
   void addToX(float rval_x);

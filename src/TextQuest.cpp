@@ -138,7 +138,7 @@ int main() {
   }
   Transform BelaInit{{12.f, 10.f}, 0.f};
   Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
-              100, .35f);
+              30, .35f);
   sceneMan.AddEntity(Bela);
 
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);

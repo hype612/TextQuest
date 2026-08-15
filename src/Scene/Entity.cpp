@@ -69,7 +69,7 @@ std::vector<int> Entity::scaledMask(unsigned int width,
                                     unsigned int height) const {
   return _texMapper.scaledMask(width, height);
 }
-int Entity::getHP() { return _health; }
+int Entity::health() const { return _health; }
 float Entity::moveSpeedOnDir(MoveDirection direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];
 }
@@ -174,9 +174,4 @@ void Entity::setTransform(const Transform &new_transform) {
   _transform = new_transform;
 }
 
-void Entity::modifyHealth(int amount) {
-  _health += amount;
-  if (_health <= 0) {
-    // destroy object
-  }
-}
+void Entity::setHealth(int new_value) { _health = new_value; }

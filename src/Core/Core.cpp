@@ -70,6 +70,10 @@ void GameEngine::run_game() {
     float f_elapsed_time = elapsed_time.count();
 
     _inputHandler->ReceiveInput();
+    // TODO: Overhaul the input system so
+    // this ugly thing can be removed
+    if (static_cast<NotcursesInputHandler *>(_inputHandler)->quitPressed())
+      _sceneRunning = false;
     _sceneManager.process(f_elapsed_time);
     _zBuffer.clear();
     RayCastingProcess(cam);
@@ -290,6 +294,9 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
 }
 
 GameEngine::~GameEngine() {
+  // so it doesnt hijack the terminal input
+  fputs("\033[<u", stdout);
+  fflush(stdout);
   delete _renderer;
   delete _inputHandler;
   delete[] screen;

@@ -18,8 +18,6 @@ public:
   // ways to access items in container
   // ================================
 
-  std::optional<std::reference_wrapper<Entity>> getEntityAtPos(int coord_x,
-                                                               int coord_y);
   int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
 
@@ -46,7 +44,8 @@ public:
   entitiesSortedByDistanceTo(const vec2f &target) const;
 
 private:
-  bool notTerrain(Entity &e, const vec2f &dest);
+  void resolveStates();
+  void resolveMovement(float delta);
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };
