@@ -29,11 +29,16 @@ Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
 // Process
 // =============
 vec2f Entity::process(float delta) {
+  if (_lastCollision < _collisionCooldown)
+    _lastCollision += delta;
   return _behaviourCtrl->Tick(*this, delta);
 }
 
 void Entity::onCollision(ICollidable &other) {
-  _behaviourCtrl->onCollision(*this, other);
+  if (_lastCollision >= _collisionCooldown) {
+    _behaviourCtrl->onCollision(*this, other);
+    _lastCollision = .0f;
+  }
 }
 
 void Entity::onVisible(Entity &other) {
@@ -50,6 +55,7 @@ bool Entity::isPlayer() const { return _isPlayer; }
 float Entity::viewDistance() const { return _viewDistance; }
 float Entity::fov() const { return _fov; }
 const Transform &Entity::transform() const { return _transform; }
+float Entity::collisionCooldown() const { return _collisionCooldown; }
 std::string Entity::getTexture() const { return _texMapper.getTexture(); }
 
 const std::vector<int> &Entity::getTexMask() const {

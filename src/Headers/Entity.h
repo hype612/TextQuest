@@ -43,6 +43,7 @@ public:
   float viewDistance() const;
   float fov() const;
   const Transform &transform() const;
+  float collisionCooldown() const;
 
   std::string getTexture() const;
   std::string getTexColumnAt(int height, float hitpoint, int wallTop) const;
@@ -87,7 +88,8 @@ private:
   bool _isPlayer;
   float _fov;
   float _viewDistance;
-
+  float _collisionCooldown = .2f;
+  float _lastCollision = .0f;
   std::unique_ptr<IBehaviorController> _behaviourCtrl;
   std::array<float, moveDirectionCount> _directionalSpeeds;
 };

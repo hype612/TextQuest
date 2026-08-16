@@ -85,10 +85,12 @@ void EntityManager::resolveMovement(float delta) {
       if (dist_newx - min_dist_sq < 0.f) {
         dest.x = current_trans.position.x;
         _entityContainer[id].onCollision(e);
+        e.onCollision(_entityContainer[id]);
       }
       if (dist_newy - min_dist_sq < 0.f) {
         dest.y = current_trans.position.y;
         _entityContainer[id].onCollision(e);
+        e.onCollision(_entityContainer[id]);
       }
     }
   }

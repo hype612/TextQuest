@@ -77,7 +77,6 @@ void GameEngine::run_game() {
     _sceneManager.process(f_elapsed_time);
     _zBuffer.clear();
     RayCastingProcess(cam);
-    std::string printzbuff;
     EntityProjectionProcess(cam);
     _renderer->OverwriteBuffer(screen);
     std::vector<std::string> dbgNfo = {
