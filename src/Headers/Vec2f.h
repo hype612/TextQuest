@@ -1,8 +1,8 @@
 #ifndef VEC2F_H
 #define VEC2F_H
 
+#include "Logger.h"
 #include <cmath>
-#include <iostream>
 
 struct vec2f {
   float x, y;
@@ -35,7 +35,8 @@ struct vec2f {
   void normalize() {
     float len = std::sqrt(x * x + y * y);
     if (len == 0) {
-      std::cerr << "normalize was called on a null-vec." << std::endl;
+      Logger::GetInstance()->log("normalize was called on a null-vec.",
+                                 LogType::CORE, LogLevel::ERROR);
       return;
     }
     x /= len;
@@ -44,7 +45,8 @@ struct vec2f {
   vec2f normalized() {
     float len = std::sqrt(x * x + y * y);
     if (len == 0) {
-      std::cerr << "normalize was called on a null-vec." << std::endl;
+      Logger::GetInstance()->log("normalize was called on a null-vec.",
+                                 LogType::CORE, LogLevel::ERROR);
       return {-1.f, -1.f};
     }
     return {x /= len, y /= len};

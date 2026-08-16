@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -129,11 +130,17 @@ void EntityManager::resolveVisibility() {
       diff_cos = std::clamp(diff_cos, -1.f, 1.f);
       float rad_diff = acosf(diff_cos);
 
+      Logger::GetInstance()->log(
+          "rad_diff: " + std::to_string(rad_diff) +
+              " threshold: " + std::to_string(e.fov() / 2.f),
+          LogType::CORE, LogLevel::INFO);
+
       // in fov check
       if (rad_diff > e.fov() / 2.f)
         continue;
 
       // obstruction check w/ raycast
+      float distToTarget = std::sqrt(dist_sq);
 
       bool hitwall = false;
       float rayLength = 0;
@@ -142,7 +149,8 @@ void EntityManager::resolveVisibility() {
                       (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
 
       vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
-      vec2f mapPos{current_trans.position.x, current_trans.position.y};
+      vec2f mapPos{std::floor(current_trans.position.x),
+                   std::floor(current_trans.position.y)};
       vec2f sideDist{
           (stepDir.x == 1) ? mapPos.x + 1.f - current_trans.position.x
                            : current_trans.position.x - mapPos.x,
@@ -154,7 +162,7 @@ void EntityManager::resolveVisibility() {
         sideDist.y = 1.f;
       sideDist.x = sideDist.x * deltaDist.x;
       sideDist.y = sideDist.y * deltaDist.y;
-      while (!hitwall && rayLength < e.viewDistance()) {
+      while (!hitwall && rayLength < distToTarget) {
         if (sideDist.x < sideDist.y) {
           sideDist.x += deltaDist.x;
           mapPos.x += stepDir.x;
@@ -167,6 +175,14 @@ void EntityManager::resolveVisibility() {
 
         if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
           hitwall = true;
+          Logger::GetInstance()->log(
+              "hitwall at mapPos: " + std::to_string(mapPos.x) + "," +
+                  std::to_string(mapPos.y) +
+                  " istvan pos: " + std::to_string(current_trans.position.x) +
+                  "," + std::to_string(current_trans.position.y) +
+                  " player pos: " + std::to_string(other_trans.position.x) +
+                  "," + std::to_string(other_trans.position.y),
+              LogType::CORE, LogLevel::INFO);
         }
       }
 
@@ -174,6 +190,11 @@ void EntityManager::resolveVisibility() {
         continue;
 
       // got through all checks, entity is visible
+      Logger::GetInstance()->log(
+          "istvan sees you at position: " +
+              std::to_string(other.transform().position.x) + ":" +
+              std::to_string(other.transform().position.y),
+          LogType::CORE, LogLevel::INFO);
       e.onVisible(other);
     }
   }

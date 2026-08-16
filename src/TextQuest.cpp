@@ -111,9 +111,9 @@ int main() {
   for (const auto &key : Istvankeys) {
     IstvantexV.push_back(Istvantexs[key]);
   }
-  Transform IstvanInit{{10.f, 9.f}, 0.f};
+  Transform IstvanInit{{10.f, 9.f}, 1.f};
   Entity Istvan(std::make_unique<IstvanBehaviorController>(), IstvanInit,
-                IstvantexV, 100, 0.2f, false, 360.f, 8.f);
+                IstvantexV, 100, 0.2f, false, 180.f, 8.f);
   Istvan.setMoveSpeedAllDirectons(.0f);
   Istvan.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Istvan);
@@ -121,7 +121,6 @@ int main() {
   // ==================
   // Bela upload
   // ==================
-
   std::unordered_map<std::string, std::string> Belatexs;
   sceneMan.loadResources(
       "/home/attila/Kitchen/TextQuest/Resources/Textures/Cyberdemon/",
@@ -136,13 +135,12 @@ int main() {
   for (const auto &key : Belakeys) {
     BelatexV.push_back(Belatexs[key]);
   }
-  Transform BelaInit{{12.f, 10.f}, 0.f};
+  Transform BelaInit{{12.f, 10.f}, 1.f};
   Entity Bela(std::make_unique<IstvanBehaviorController>(), BelaInit, BelatexV,
-              30, .35f, false, 1.f, 1.f);
+              30, .35f, false, 180.f, 4.f);
   Bela.setMoveSpeedAllDirectons(.0f);
-  Bela.setTurnSpeedAlldirections(1.5f);
+  Bela.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Bela);
-
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);
