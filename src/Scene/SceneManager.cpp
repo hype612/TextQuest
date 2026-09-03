@@ -2,6 +2,8 @@
 #include "./Camera.h"
 #include "./MapManager.h"
 #include "Core.h"
+#include "EntityManager.h"
+#include "Logger.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>

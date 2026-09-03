@@ -33,6 +33,7 @@ public:
   vec2f process(float delta);
   void onCollision(ICollidable &other);
   void onVisible(Entity &other);
+  void onHit(Entity &other);
   // =============
   // Getters
   // =============
@@ -56,6 +57,8 @@ public:
   std::vector<int> scaledMask(unsigned int width, unsigned int height) const;
 
   int health() const;
+  bool shooting() const;
+  int dmg() const;
   float moveSpeedOnDir(MoveDirection direction) const;
   float collisionRadius() const;
 
@@ -67,6 +70,8 @@ public:
   void setID(int id);
   void setHealth(int new_value);
   void setTransform(const Transform &new_transform);
+  void setShooting(bool new_value);
+  void setDmg(int new_value);
 
   void addToX(float rval_x);
   void addToY(float rval_y);
@@ -90,6 +95,8 @@ private:
   float _viewDistance;
   float _collisionCooldown = .2f;
   float _lastCollision = .0f;
+  bool _isShooting = false;
+  int _dmg = 20;
   std::unique_ptr<IBehaviorController> _behaviourCtrl;
   std::array<float, moveDirectionCount> _directionalSpeeds;
 };

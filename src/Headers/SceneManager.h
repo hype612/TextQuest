@@ -30,6 +30,8 @@ public:
   void uploadTextureForWall(const char &mapChar, std::string &wallTex);
   void uploadTextureVecForWall(const char &mapChar,
                                std::vector<std::string> &wallTexV);
+
+  // Channel implementation
   bool canMoveTo(const vec2f &dest) const override;
   bool isOutOfBounds(int test_x, int test_y) const;
   bool isWall(int test_x, int test_y) const;
@@ -57,7 +59,6 @@ public:
 private:
   EntityManager _entityManager;
   MapManager _mapManager;
-  // Player _player;
   // need to postpone construction
   std::optional<Camera> _camera;
 };

@@ -44,6 +44,7 @@ void Entity::onCollision(ICollidable &other) {
 void Entity::onVisible(Entity &other) {
   _behaviourCtrl->onVisible(*this, other);
 }
+void Entity::onHit(Entity &other) { _behaviourCtrl->onHit(*this, other); }
 // =============
 // Getters
 // =============
@@ -85,6 +86,8 @@ std::vector<int> Entity::scaledMask(unsigned int width,
   return _texMapper.scaledMask(width, height);
 }
 int Entity::health() const { return _health; }
+bool Entity::shooting() const { return _isShooting; }
+int Entity::dmg() const { return _dmg; }
 float Entity::moveSpeedOnDir(MoveDirection direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];
 }
@@ -189,4 +192,6 @@ void Entity::setTransform(const Transform &new_transform) {
   _transform = new_transform;
 }
 
+void Entity::setShooting(bool new_value) { _isShooting = new_value; }
+void Entity::setDmg(int new_value) { _dmg = new_value; }
 void Entity::setHealth(int new_value) { _health = new_value; }

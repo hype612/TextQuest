@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-enum class LogType { CORE, INPUT, RENDER, TEXPREP };
+enum class LogType { CORE, INPUT, RENDER, TEXPREP, SCENE };
 
 enum LogLevel { INFO = 0, WARNING, ERROR };
 
@@ -27,6 +27,7 @@ private:
   static std::ofstream _inputLog;
   static std::ofstream _renderLog;
   static std::ofstream _texprepLog;
+  static std::ofstream _sceneLog;
 };
 
 #endif // LOGGER_H

@@ -29,6 +29,10 @@ void Logger::log(const std::string &msg, LogType type, LogLevel lv) {
     _commonLog << "TEXPREP:" << lv << ": " << msg << std::endl;
     _texprepLog << msg << std::endl;
     break;
+  case LogType::SCENE:
+    _commonLog << "SCENE:" << lv << ": " << msg << std::endl;
+    _sceneLog << msg << std::endl;
+    break;
   }
 }
 
@@ -40,6 +44,7 @@ void Logger::forceFlush() {
   _inputLog.flush();
   _renderLog.flush();
   _texprepLog.flush();
+  _sceneLog.flush();
 }
 
 Logger::~Logger() {
@@ -54,7 +59,7 @@ Logger::~Logger() {
   _inputLog.close();
   _renderLog.close();
   _texprepLog.close();
-
+  _sceneLog.close();
   delete instancePtr;
   instancePtr = nullptr;
 }
@@ -66,3 +71,4 @@ std::ofstream Logger::_coreLog("./logs/core.log", std::ios_base::trunc);
 std::ofstream Logger::_inputLog("./logs/input.log", std::ios_base::trunc);
 std::ofstream Logger::_renderLog("./logs/render.log", std::ios_base::trunc);
 std::ofstream Logger::_texprepLog("./logs/texprep.log", std::ios_base::trunc);
+std::ofstream Logger::_sceneLog("./logs/scene.log", std::ios_base::trunc);

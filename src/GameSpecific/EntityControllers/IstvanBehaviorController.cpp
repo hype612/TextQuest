@@ -93,3 +93,9 @@ void IstvanBehaviorController::onVisible(Entity &self, Entity &other) {
   self.setMoveSpeedAllDirectons(1.5f);
   self.setTurnSpeedAlldirections(3.f);
 }
+
+void IstvanBehaviorController::onHit(Entity &self, Entity &other) {
+  Logger::GetInstance()->log("istvan was shot", LogType::SCENE,
+                             LogLevel::WARNING);
+  self.setHealth(self.health() - other.dmg());
+}

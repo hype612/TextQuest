@@ -13,6 +13,7 @@ public:
 private:
   vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
   IInputHandler &_inputHandler;
+  // TODO: ugly af remove asap after testing
 };
 
 #endif // PLAYERBEHAVIOURCONTROLLER_H

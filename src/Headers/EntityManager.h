@@ -19,6 +19,9 @@ public:
   int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
 
+  // TODO: rework these so the ids are persistant.
+  // possibly implement swap-pop to save on time
+
   void addEntity(Entity &entity);
   void removeEntity(int id);
   void removeAllEntities();
@@ -43,8 +46,12 @@ public:
 
 private:
   void resolveStates();
+  void resolveProjectiles();
   void resolveMovement(float delta);
   void resolveVisibility();
+
+  bool projectileHit(vec2f origin, vec2f target, float hit_delta, vec2f dir,
+                     float max_dist);
 
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;

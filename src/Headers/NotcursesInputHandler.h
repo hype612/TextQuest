@@ -21,7 +21,7 @@ private:
   void KeyEvent(char in[], ncintype_e evtype);
 
   std::shared_ptr<notcurses> _nc;
-  std::array<bool, moveDirectionCount> _mvmtKeyStates;
+  std::array<bool, moveDirectionCount + 1> _mvmtKeyStates;
   bool _quitPressed = false;
 };
 

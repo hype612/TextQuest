@@ -16,6 +16,7 @@ EntityManager::EntityManager(IEntitySceneChannel &channel)
 
 void EntityManager::process(float delta) {
   resolveStates();
+  resolveProjectiles();
   resolveMovement(delta);
   resolveVisibility();
 }
@@ -25,6 +26,38 @@ void EntityManager::resolveStates() {
     if (e.health() <= 0) {
       e.setTransform({{-1.f, -1.f}, 0.f});
       e.setMoveSpeedAllDirectons(0.f);
+    }
+  }
+}
+
+void EntityManager::resolveProjectiles() {
+  Logger::GetInstance()->log("starting projectile resolution...",
+                             LogType::SCENE, LogLevel::WARNING);
+  Logger::GetInstance()->forceFlush();
+  for (Entity &e : _entityContainer) {
+    Logger::GetInstance()->log("enumerating entities...", LogType::SCENE,
+                               LogLevel::WARNING);
+    Logger::GetInstance()->forceFlush();
+    if (!e.shooting()) {
+      Logger::GetInstance()->log("Entity not shooting...", LogType::SCENE,
+                                 LogLevel::WARNING);
+      Logger::GetInstance()->forceFlush();
+      continue;
+    }
+    Logger::GetInstance()->log("Entity is shooting. Computing dir...",
+                               LogType::SCENE, LogLevel::WARNING);
+    Logger::GetInstance()->forceFlush();
+    vec2f dir = {std::sin(e.transform().angle), std::cos(e.transform().angle)};
+    for (Entity &other : _entityContainer) {
+      if (e.ID() == other.ID())
+        continue;
+      if (projectileHit(e.transform().position, other.transform().position,
+                        other.collisionRadius(), dir, 20.f)) {
+        Logger::GetInstance()->log("Entity shot a target", LogType::SCENE,
+                                   LogLevel::WARNING);
+        other.onHit(e);
+        break;
+      }
     }
   }
 }
@@ -132,11 +165,6 @@ void EntityManager::resolveVisibility() {
       diff_cos = std::clamp(diff_cos, -1.f, 1.f);
       float rad_diff = acosf(diff_cos);
 
-      Logger::GetInstance()->log(
-          "rad_diff: " + std::to_string(rad_diff) +
-              " threshold: " + std::to_string(e.fov() / 2.f),
-          LogType::CORE, LogLevel::INFO);
-
       // in fov check
       if (rad_diff > e.fov() / 2.f)
         continue;
@@ -200,6 +228,34 @@ void EntityManager::resolveVisibility() {
       e.onVisible(other);
     }
   }
+}
+
+bool EntityManager::projectileHit(vec2f origin, vec2f target, float hit_delta,
+                                  vec2f dir, float max_dist) {
+  Logger::GetInstance()->log("spawnProjectile was called.", LogType::SCENE,
+                             LogLevel::WARNING);
+  if (dir.x * dir.x + dir.y * dir.y - 1.f >= 0.0001f) {
+    Logger::GetInstance()->log(
+        "spawnProjectile was called with non-unitvector dir. ", LogType::SCENE,
+        LogLevel::WARNING);
+    return false;
+  }
+  vec2f to_delta = target - origin;
+  float cross = to_delta.cross(dir);
+
+  if (std::abs(cross) > hit_delta) {
+    return false;
+  }
+
+  float dot = to_delta.dot(dir);
+
+  if (dot < -hit_delta || dot > max_dist + hit_delta) {
+    return false;
+  }
+
+  vec2f hit_point = origin + dir * dot;
+  vec2f diff = hit_point - origin;
+  return (diff.x * diff.x + diff.y * diff.y) <= max_dist * (max_dist);
 }
 
 // ================================

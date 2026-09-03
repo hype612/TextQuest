@@ -10,6 +10,7 @@ PlayerBehaviorController::PlayerBehaviorController(IInputHandler &input)
     : _inputHandler(input) {}
 
 vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
+
   vec2f moveDelta{0.f, 0.f};
   if (_inputHandler.keyDown(MoveDirection::FORWARD)) {
     moveDelta += moveIntent(MoveDirection::FORWARD, self, delta);
@@ -28,6 +29,11 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
   }
   if (_inputHandler.keyDown(MoveDirection::TURN_RIGHT)) {
     moveDelta += moveIntent(MoveDirection::TURN_RIGHT, self, delta);
+  }
+  if (_inputHandler.keyDown(MoveDirection::SHOOT)) {
+    moveDelta += moveIntent(MoveDirection::SHOOT, self, delta);
+  } else {
+    self.setShooting(false);
   }
   return self.transform().position + moveDelta;
 }
@@ -64,6 +70,10 @@ vec2f PlayerBehaviorController::moveIntent(MoveDirection dir, Entity &self,
     break;
   case MoveDirection::TURN_RIGHT:
     self.addToAngle(self.moveSpeedOnDir(dir) * delta);
+    return {0.f, 0.f};
+    break;
+  case MoveDirection::SHOOT:
+    self.setShooting(true);
     return {0.f, 0.f};
     break;
   }

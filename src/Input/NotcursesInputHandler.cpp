@@ -78,6 +78,14 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
       _quitPressed = true;
     }
     break;
+  case 'i':
+    if (evtype == NCTYPE_PRESS) {
+      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = true;
+    }
+    if (evtype == NCTYPE_RELEASE) {
+      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = false;
+    }
+    break;
   default:
     break;
   }
