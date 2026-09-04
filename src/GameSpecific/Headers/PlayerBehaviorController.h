@@ -11,9 +11,10 @@ public:
   vec2f Tick(Entity &self, float delta) override;
 
 private:
+  float _sinceLastShot = 0.f;
+  const float _shootcd = 0.1f;
   vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
   IInputHandler &_inputHandler;
-  // TODO: ugly af remove asap after testing
 };
 
 #endif // PLAYERBEHAVIOURCONTROLLER_H

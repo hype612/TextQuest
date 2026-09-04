@@ -18,8 +18,8 @@ EntityManager::EntityManager(IEntitySceneChannel &channel)
 
 void EntityManager::process(float delta) {
   resolveStates();
-  resolveProjectiles();
   resolveMovement(delta);
+  resolveProjectiles();
   resolveVisibility();
 }
 

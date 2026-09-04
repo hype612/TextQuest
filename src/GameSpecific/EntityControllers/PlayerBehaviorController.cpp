@@ -10,6 +10,7 @@ PlayerBehaviorController::PlayerBehaviorController(IInputHandler &input)
     : _inputHandler(input) {}
 
 vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
+  self.setShooting(false);
 
   vec2f moveDelta{0.f, 0.f};
   if (_inputHandler.keyDown(MoveDirection::FORWARD)) {
@@ -73,7 +74,11 @@ vec2f PlayerBehaviorController::moveIntent(MoveDirection dir, Entity &self,
     return {0.f, 0.f};
     break;
   case MoveDirection::SHOOT:
-    self.setShooting(true);
+    _sinceLastShot += delta;
+    if (_sinceLastShot >= _shootcd) {
+      self.setShooting(true);
+      _sinceLastShot = 0.f;
+    }
     return {0.f, 0.f};
     break;
   }
