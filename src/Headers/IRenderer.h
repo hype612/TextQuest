@@ -1,9 +1,12 @@
 #ifndef IRENDERER_H
 #define IRENDERER_H
 
+#include "Rect.h"
 #include "Vec2i.h"
 #include <string>
 #include <vector>
+
+using OverlayId = int;
 
 class IRenderer {
 public:
@@ -16,6 +19,13 @@ public:
   virtual vec2i screenSize() const = 0;
   virtual void PrintDebugInfo(const std::vector<std::string> &nfo) = 0;
   virtual ~IRenderer() = default;
+
+  // layer/plane management
+  virtual OverlayId createHudArea(Rect area) = 0;
+  virtual OverlayId createPopupArea(Rect area) = 0;
+  virtual void
+  setOverlayContent(OverlayId id,
+                    const std::vector<const std::string> &content) = 0;
 
 protected:
   IRenderer() {}

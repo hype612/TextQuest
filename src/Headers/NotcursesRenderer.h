@@ -1,6 +1,7 @@
 #ifndef NOTCURSESRENDERER_H
 #define NOTCURSESRENDERER_H
 
+#include <unordered_map>
 #if (defined(LINUX) || defined(__linux__))
 
 #include "IRenderer.h"
@@ -18,13 +19,28 @@ public:
   vec2i screenSize() const override;
   int screenHeight() const override;
   int screenWidth() const override;
-  // void SetScreenSize(int x, int y) override;
+
+  // layer/plane management
+  OverlayId createHudArea(Rect area) override;
+  OverlayId createPopupArea(Rect area) override;
+  void
+  setOverlayContent(OverlayId id,
+                    const std::vector<const std::string> &content) override;
   ~NotcursesRenderer();
 
 private:
   char *_screenBuffer;
   std::shared_ptr<notcurses> _nc;
-  ncplane *_debugPln;
+  // no explicit world plane
+  // we utilize the built-in default ncplane
+  // ncplane *_viewModel;
+  ncplane *_debugPlane;
+  ncplane *_hudPlane;
+  ncplane *_popupPlane;
+
+  enum class RenderPlane { HUD, POPUP, DEBUG };
+  std::unordered_map<OverlayId, std::pair<RenderPlane, Rect>> _overdrawArea;
+  OverlayId _topId = -1;
 };
 
 #endif // OS check end
