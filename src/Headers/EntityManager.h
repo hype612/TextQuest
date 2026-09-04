@@ -50,9 +50,9 @@ private:
   void resolveMovement(float delta);
   void resolveVisibility();
 
-  bool projectileHit(vec2f origin, vec2f target, float hit_delta, vec2f dir,
-                     float max_dist);
-
+  std::optional<float> projectileHitDistSq(vec2f origin, vec2f target,
+                                           float hit_delta, vec2f dir,
+                                           float max_dist);
   std::vector<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };

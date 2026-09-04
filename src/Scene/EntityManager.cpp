@@ -3,10 +3,12 @@
 #include "../Headers/Logger.h"
 #include "../Headers/TerrainCollidable.h"
 #include "Entity.h"
+#include "EntityDistance.h"
 #include "Transform.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -31,33 +33,30 @@ void EntityManager::resolveStates() {
 }
 
 void EntityManager::resolveProjectiles() {
-  Logger::GetInstance()->log("starting projectile resolution...",
-                             LogType::SCENE, LogLevel::WARNING);
-  Logger::GetInstance()->forceFlush();
+
+  std::pair<EntityId, float> closest;
   for (Entity &e : _entityContainer) {
-    Logger::GetInstance()->log("enumerating entities...", LogType::SCENE,
-                               LogLevel::WARNING);
-    Logger::GetInstance()->forceFlush();
     if (!e.shooting()) {
-      Logger::GetInstance()->log("Entity not shooting...", LogType::SCENE,
-                                 LogLevel::WARNING);
-      Logger::GetInstance()->forceFlush();
       continue;
     }
-    Logger::GetInstance()->log("Entity is shooting. Computing dir...",
-                               LogType::SCENE, LogLevel::WARNING);
-    Logger::GetInstance()->forceFlush();
+
     vec2f dir = {std::sin(e.transform().angle), std::cos(e.transform().angle)};
+    closest = {-1, std::numeric_limits<float>::infinity()};
     for (Entity &other : _entityContainer) {
       if (e.ID() == other.ID())
         continue;
-      if (projectileHit(e.transform().position, other.transform().position,
-                        other.collisionRadius(), dir, 20.f)) {
-        Logger::GetInstance()->log("Entity shot a target", LogType::SCENE,
-                                   LogLevel::WARNING);
-        other.onHit(e);
-        break;
+
+      if (auto d = projectileHitDistSq(e.transform().position,
+                                       other.transform().position,
+                                       other.collisionRadius(), dir, 20.f)) {
+        if (*d < closest.second) {
+          closest = {other.ID(), *d};
+        }
       }
+    }
+
+    if (closest.first != -1) {
+      _entityContainer[closest.first].onHit(e);
     }
   }
 }
@@ -230,32 +229,28 @@ void EntityManager::resolveVisibility() {
   }
 }
 
-bool EntityManager::projectileHit(vec2f origin, vec2f target, float hit_delta,
-                                  vec2f dir, float max_dist) {
-  Logger::GetInstance()->log("spawnProjectile was called.", LogType::SCENE,
-                             LogLevel::WARNING);
+std::optional<float>
+EntityManager::projectileHitDistSq(vec2f origin, vec2f target, float hit_delta,
+                                   vec2f dir, float max_dist) {
   if (dir.x * dir.x + dir.y * dir.y - 1.f >= 0.0001f) {
-    Logger::GetInstance()->log(
-        "spawnProjectile was called with non-unitvector dir. ", LogType::SCENE,
-        LogLevel::WARNING);
-    return false;
+    return std::nullopt;
   }
   vec2f to_delta = target - origin;
   float cross = to_delta.cross(dir);
 
   if (std::abs(cross) > hit_delta) {
-    return false;
+    return std::nullopt;
   }
 
   float dot = to_delta.dot(dir);
 
   if (dot < -hit_delta || dot > max_dist + hit_delta) {
-    return false;
+    return std::nullopt;
   }
 
   vec2f hit_point = origin + dir * dot;
   vec2f diff = hit_point - origin;
-  return (diff.x * diff.x + diff.y * diff.y) <= max_dist * (max_dist);
+  return diff.x * diff.x + diff.y * diff.y;
 }
 
 // ================================
