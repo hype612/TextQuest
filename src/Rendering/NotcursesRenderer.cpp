@@ -1,6 +1,5 @@
 #include "../Headers/NotcursesRenderer.h"
 #include "Logger.h"
-#include "RenderAssetManager.h"
 #include <iostream>
 #include <memory>
 #include <notcurses/notcurses.h>
@@ -62,9 +61,33 @@ int NotcursesRenderer::screenHeight() const { return _screenHeight; }
 int NotcursesRenderer::screenWidth() const { return _screenWidth; }
 
 OverlayId NotcursesRenderer::createHudArea(Rect area) {
+  if (area.x <= 0 || area.y <= 0) {
+    Logger::GetInstance()->log(
+        "CreatePopupArea: x or y of the new rectangle was a negative value, "
+        "skipping the creation. x: " +
+            std::to_string(area.x) + " y: " + std::to_string(area.y),
+        LogType::RENDER, LogLevel::ERROR);
+    return -1;
+  }
+
+  if (area.width <= 0 || area.height <= 0) {
+    Logger::GetInstance()->log("CreatePopupArea: width or height of the new "
+                               "rectangle was a negative value, "
+                               "skipping the creation. width: " +
+                                   std::to_string(area.width) +
+                                   " height: " + std::to_string(area.height),
+                               LogType::RENDER, LogLevel::ERROR);
+    return -1;
+  }
   for (const auto &[id, area_nfo] : _overdrawArea) {
     const auto &[pln, r] = area_nfo;
     if (pln == RenderPlane::HUD && r.overlaps(area)) {
+      Logger::GetInstance()->log("CreatePopupArea: width or height of the new "
+                                 "rectangle was a negative value, "
+                                 "skipping the creation. width: " +
+                                     std::to_string(area.width) +
+                                     " height: " + std::to_string(area.height),
+                                 LogType::RENDER, LogLevel::ERROR);
       return -1;
     }
   }
@@ -75,9 +98,37 @@ OverlayId NotcursesRenderer::createHudArea(Rect area) {
 }
 OverlayId NotcursesRenderer::createPopupArea(Rect area) {
   // check overlap on same layer
+  if (area.x <= 0 || area.y <= 0) {
+    Logger::GetInstance()->log(
+        "CreatePopupArea: x or y of the new rectangle was a negative value, "
+        "skipping the creation. x: " +
+            std::to_string(area.x) + " y: " + std::to_string(area.y),
+        LogType::RENDER, LogLevel::ERROR);
+    return -1;
+  }
+
+  if (area.width <= 0 || area.height <= 0) {
+    Logger::GetInstance()->log("CreatePopupArea: width or height of the new "
+                               "rectangle was a negative value, "
+                               "skipping the creation. width: " +
+                                   std::to_string(area.width) +
+                                   " height: " + std::to_string(area.height),
+                               LogType::RENDER, LogLevel::ERROR);
+    return -1;
+  }
+
   for (const auto &[id, area_nfo] : _overdrawArea) {
     const auto &[pln, r] = area_nfo;
     if (pln == RenderPlane::POPUP && r.overlaps(area)) {
+      Logger::GetInstance()->log(
+          "CreatePopupArea: new rectangle overlaps with existing rectangle on "
+          "the same plane. New rect: (" +
+              std::to_string(area.x) + "," + std::to_string(area.y) + "," +
+              std::to_string(area.width) + "," + std::to_string(area.height) +
+              "), Existing rect: " + std::to_string(r.x) + "," +
+              std::to_string(r.y) + "," + std::to_string(r.width) + "," +
+              std::to_string(r.height) + "(",
+          LogType::RENDER, LogLevel::ERROR);
       return -1;
     }
   }
@@ -85,25 +136,26 @@ OverlayId NotcursesRenderer::createPopupArea(Rect area) {
   _topId++;
   _overdrawArea[_topId] = std::make_pair(RenderPlane::POPUP, area);
   return _topId;
-  // add or log and decline if necessary
 }
 void NotcursesRenderer::setOverlayContent(
-    OverlayId id, const std::vector<const std::string> &content) {
+    OverlayId id, const std::vector<std::string> &content) {
 
   // TODO: ERASE ALL PLANES SOMEWHERE
   // BEFORE IT BITES YOU IN THE ASS
-  const std::pair<RenderPlane, Rect> &current = _overdrawArea[id];
-  // test for id
 
-  // test content lengte
-  if (content.size() > current.second.width * current.second.height) {
+  const std::pair<RenderPlane, Rect> &current = _overdrawArea.at(id);
+
+  int c_len = 0;
+  for (const auto &s : content) {
+    c_len += s.length();
+  }
+  if (c_len > (current.second.width * current.second.height)) {
     Logger::GetInstance()->log("SetOverlaycontent: Content size did not match "
                                "the area size. OverlayId: " +
                                    std::to_string(id),
                                LogType::RENDER, LogLevel::ERROR);
-    return;
   }
-  vec2i cursor = {current.second.x, current.second.y};
+
   ncplane *active_plane;
   switch (current.first) {
   case RenderPlane::HUD:
@@ -114,9 +166,20 @@ void NotcursesRenderer::setOverlayContent(
     break;
   }
 
-  ncplane_cursor_move_yx(active_plane, cursor.y, cursor.x);
-  // ncplane_putstr(_debugPlane, nfo[i].c_str());
-}
+  vec2i cursor = {current.second.x, current.second.y};
+
+  int printheight = (content.size() < current.second.height)
+                        ? content.size()
+                        : current.second.height;
+  // iterate and write based on the rect
+  // the programmer is notified in the logs
+  // and also it should be visually appearant if
+  // the rect does not contain what was inputted
+  for (int y = 0; y < printheight; y++) {
+    ncplane_cursor_move_yx(active_plane, cursor.y + y, cursor.x);
+    ncplane_putstr(_debugPlane,
+                   content[y].substr(0, current.second.width).c_str());
+  }
 }
 
 NotcursesRenderer::~NotcursesRenderer() { delete[] _screenBuffer; }

@@ -20,12 +20,14 @@ public:
   virtual void PrintDebugInfo(const std::vector<std::string> &nfo) = 0;
   virtual ~IRenderer() = default;
 
-  // layer/plane management
-  virtual OverlayId createHudArea(Rect area) = 0;
-  virtual OverlayId createPopupArea(Rect area) = 0;
-  virtual void
-  setOverlayContent(OverlayId id,
-                    const std::vector<const std::string> &content) = 0;
+  // TODO: make this more generic
+  // Rendered should not care about what you are rendering
+  // virtual OverlayId createHudArea(Rect area) = 0;
+  // virtual OverlayId createPopupArea(Rect area) = 0;
+  // virtual void setOverlayContent(OverlayId id,
+  //                              const std::vector<std::string> &content) = 0;
+
+  virtual OverlayId createOverlay(Rect area) = 0;
 
 protected:
   IRenderer() {}

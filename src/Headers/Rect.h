@@ -4,8 +4,8 @@
 struct Rect {
   int x;
   int y;
-  unsigned int width;
-  unsigned int height;
+  int width;
+  int height;
 
   bool overlaps(const Rect &other) const {
     return x < other.x + other.width && x + width > other.x &&
