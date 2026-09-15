@@ -6,6 +6,7 @@
 #include "IRenderer.h"
 #include <memory>
 #include <notcurses/notcurses.h>
+#include <unordered_map>
 #include <vector>
 
 class NotcursesRenderer : public IRenderer {
@@ -20,24 +21,19 @@ public:
   int screenWidth() const override;
 
   // layer/plane management
-  // OverlayId createHudArea(Rect area) override;
-  // OverlayId createPopupArea(Rect area) override;
-  // void setOverlayContent(OverlayId id,
-  //                       const std::vector<std::string> &content) override;
-  virtual OverlayId createOverlay(Rect area) override;
+  void setOverlayContent(OverlayId id,
+                         const std::vector<std::string> &content) override;
+  void setOverlaRegion(OverlayId id, Rect region,
+                       const std::vector<std::string> &content) override;
+  OverlayId createOverlay(Rect area) override;
   ~NotcursesRenderer();
 
 private:
   char *_screenBuffer;
   std::shared_ptr<notcurses> _nc;
-  // no explicit world plane
-  // we utilize the built-in default ncplane
-  // ncplane *_viewModel;
-  // ncplane *_debugPlane;
-  // ncplane *_hudPlane;
-  // ncplane *_popupPlane;
-  // enum class RenderPlane { HUD, POPUP };
-  std::unordered_map<OverlayId, std::pair<RenderPlane, Rect>> _overdrawArea;
+  // does NOT contain the default plane
+  ncplane *_debugPlane;
+  std::unordered_map<OverlayId, ncplane *> _overlayPlanes;
   OverlayId _topId = -1;
 };
 
