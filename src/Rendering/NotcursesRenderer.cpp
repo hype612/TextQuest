@@ -120,30 +120,39 @@ void NotcursesRenderer::setOverlayContent(
   }
 }
 
-void NotcursesRenderer::setOverlaRegion(
+void NotcursesRenderer::setOverlayRegion(
     OverlayId id, Rect region, const std::vector<std::string> &content) {
   ncplane *current = _overlayPlanes.at(id);
-  unsigned int p_width, p_height;
-  int p_x, p_y;
-  ncplane_dim_yx(current, &p_height, &p_width);
-  ncplane_yx(current, &p_y, &p_x);
 
+  // check if rect is completely in plane
+  Rect target;
+  ncplane_dim_yx(current, &target.height, &target.width);
+  ncplane_yx(current, &target.y, &target.x);
+  if (!target.contains(region)) {
+    Logger::GetInstance()->log(
+        "setOverlayRegion: overwrite region is not fully in target region.",
+        LogType::RENDER, LogLevel::ERROR);
+    return;
+  }
+
+  // roughly check if the new content fits the rect
   int c_len = 0;
   for (const auto &s : content) {
     c_len += s.length();
   }
-  if (c_len > (static_cast<int>(p_width * p_height))) {
-    Logger::GetInstance()->log("SetOverlaycontent: Content size did not match "
+  if (c_len > (static_cast<int>(region.width * region.height))) {
+    Logger::GetInstance()->log("setOverlayRegion: Content size did not match "
                                "the area size. OverlayId: " +
                                    std::to_string(id),
                                LogType::RENDER, LogLevel::ERROR);
   }
 
-  ncplane_erase(current);
-  int printheight = (content.size() < p_height) ? content.size() : p_height;
+  // override region
+  int printheight =
+      (content.size() < region.height) ? content.size() : region.height;
   for (int y = 0; y < printheight; y++) {
-    ncplane_cursor_move_yx(current, y, 0);
-    ncplane_putstr(current, content[y].substr(0, p_width).c_str());
+    ncplane_cursor_move_yx(current, region.y + y, region.x);
+    ncplane_putstr(current, content[y].substr(0, target.width).c_str());
   }
 }
 

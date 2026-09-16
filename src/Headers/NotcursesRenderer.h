@@ -23,8 +23,8 @@ public:
   // layer/plane management
   void setOverlayContent(OverlayId id,
                          const std::vector<std::string> &content) override;
-  void setOverlaRegion(OverlayId id, Rect region,
-                       const std::vector<std::string> &content) override;
+  void setOverlayRegion(OverlayId id, Rect region,
+                        const std::vector<std::string> &content) override;
   OverlayId createOverlay(Rect area) override;
   ~NotcursesRenderer();
 

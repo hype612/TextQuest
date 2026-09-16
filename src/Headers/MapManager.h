@@ -10,7 +10,7 @@
 class MapManager {
 public:
   MapManager();
-  MapManager(const std::string &map, int map_width, int map_height);
+  MapManager(const std::string &map, int matarget.width, int map_height);
 
   // =======================
   // Rendering setters

@@ -23,8 +23,8 @@ public:
   virtual OverlayId createOverlay(Rect area) = 0;
   virtual void setOverlayContent(OverlayId id,
                                  const std::vector<std::string> &content) = 0;
-  virtual void setOverlaRegion(OverlayId id, Rect region,
-                               const std::vector<std::string> &content) = 0;
+  virtual void setOverlayRegion(OverlayId id, Rect region,
+                                const std::vector<std::string> &content) = 0;
 
 protected:
   IRenderer() {}
