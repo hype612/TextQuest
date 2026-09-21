@@ -3,6 +3,8 @@ NOTCURSES_CFLAGS := $(shell pkg-config --cflags notcurses-core)
 NOTCURSES_LIBS := $(shell pkg-config --libs notcurses-core)
 # Shared flags (no sanitizers here)
 BASE_CXXFLAGS := -Wall -Wextra -std=c++23 -g -Isrc/Headers $(NOTCURSES_CFLAGS)
+# emit .d files so header edits trigger rebuilds of dependent objects
+DEPFLAGS := -MMD -MP
 SAN_FLAGS := -fsanitize=address -fsanitize=undefined
 CXXFLAGS := $(BASE_CXXFLAGS) -O1 $(SAN_FLAGS)
 LDFLAGS := $(SAN_FLAGS)
@@ -24,7 +26,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(NOTCURSES_LIBS) -lncursesw
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(BASE_CXXFLAGS) -O2 -c $< -o $@
+	$(CXX) $(BASE_CXXFLAGS) $(DEPFLAGS) -O2 -c $< -o $@
 
 # sanitized build, for isolating sanitizer-only issues
 debug: $(TARGET_DEBUG)
@@ -32,7 +34,9 @@ $(TARGET_DEBUG): $(DEBUG_OBJS)
 	$(CXX) $(DEBUG_OBJS) -o $@ $(LDFLAGS) $(LDLIBS)
 $(BUILD_DIR_DEBUG)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
+
+-include $(OBJS:.o=.d) $(DEBUG_OBJS:.o=.d)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BUILD_DIR_DEBUG) $(TARGET) $(TARGET_DEBUG)

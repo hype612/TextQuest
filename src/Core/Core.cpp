@@ -5,6 +5,7 @@
 #include "../Headers/Transform.h"
 #include "NotcursesInputHandler.h"
 #include "NotcursesRenderer.h"
+#include "UIManager.h"
 #include "Vec2f.h"
 #include "Vec2i.h"
 #include "WallSide.h"
@@ -38,6 +39,7 @@ GameEngine::GameEngine() : _sceneManager(), _renderAssetManager(_sceneManager) {
   _renderer = new WindowsRenderer();
   _inputHandler = new WindowsInputHanlder(_player);
 #endif
+  _uimanager = new UIManager(*_renderer);
 }
 
 void GameEngine::enableDistanceShading(bool enabled) {
@@ -48,8 +50,11 @@ void GameEngine::setDistanceShadingThresholds(
   _renderAssetManager.setDistanceShadingThresholds(thresholds);
 }
 
+vec2i GameEngine::screenSize() { return _renderer->screenSize(); }
+
 SceneManager &GameEngine::sceneMan() { return _sceneManager; }
 IInputHandler &GameEngine::inputHandler() { return *_inputHandler; }
+UIManager &GameEngine::uiMan() { return *_uimanager; }
 
 void GameEngine::run_game() {
   _sceneRunning = true;
@@ -86,6 +91,7 @@ void GameEngine::run_game() {
         "fps: " + std::to_string(1.f / f_elapsed_time)};
     _renderer->PrintDebugInfo(dbgNfo);
     _renderer->PrintBuffer();
+    _uimanager->process();
   }
 }
 
@@ -295,5 +301,6 @@ GameEngine::~GameEngine() {
   fflush(stdout);
   delete _renderer;
   delete _inputHandler;
+  delete _uimanager;
   delete[] screen;
 }

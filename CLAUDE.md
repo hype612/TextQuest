@@ -16,10 +16,10 @@ make clean
 ```
 
 - Dependencies: `notcurses-core` (via pkg-config) and `ncursesw`.
-- The Makefile has **no header dependency tracking** — after editing a header, run `make clean` (or touch the dependent .cpp files) or you will link stale objects.
+- The Makefile tracks header dependencies via `-MMD -MP` (`.d` files next to the objects), so editing a header rebuilds only the files that include it. If the Makefile itself or the flags change, run `make clean`.
 - New `.cpp` files anywhere under `src/` are picked up automatically (`find src -name '*.cpp'`). `-Isrc/Headers` is on the include path, but `src/GameSpecific/Headers/` is not, so those files use relative includes.
 - There is no test suite and no linter config.
-- Run from the repo root: `Logger` writes to `./logs/{common,core,input,render,texprep,scene}.log` (truncated each run), and `src/TextQuest.cpp` loads textures from **hardcoded absolute paths** under `/home/attila/Kitchen/TextQuest/Resources/Textures/`.
+- Run from the repo root: `Logger` writes to `./logs/{common,core,input,render,texprep,scene}.log` (truncated each run), and `src/TextQuest.cpp` loads textures from paths relative to the working directory (`Resources/Textures/...`), so it must be run from the repo root.
 - Controls (see `NotcursesInputHandler.cpp`): `w/s` forward/back, `a/d` strafe, `q/e` turn, `i` shoot, `x` quit. Key release events are used, so the terminal needs the kitty keyboard protocol; `~GameEngine` pops that mode on exit.
 - Only the Linux/notcurses path is live. The `Windows*` and `NCurses*` renderer/input `.cpp` files are still matched by the build glob, but they are neutralized by `#if` platform guards or commented out. They are stale and not expected to compile if re-enabled.
 
@@ -56,9 +56,10 @@ Textures are plain-text ASCII art generated offline from images:
 - Projectiles are hitscan. Only the closest entity along the ray (distance squared, max 20 units) gets `onHit`.
 - Angle convention: direction = `(sin(angle), cos(angle))`.
 
-**UI system** (`src/UIDisplay/`, in progress and not yet wired into `GameEngine`):
+**UI system** (`src/UIDisplay/`; `UIManager` is owned by `GameEngine`, reachable via `uiMan()`, and flushed each frame by `process()`):
 - Responsibilities are split: `UIManager` owns and manages overlays/elements through integer `UIElementHandle`s. `IRenderer` only creates an overlay plane (`createOverlay(Rect)` returns an `OverlayId`) and replaces its content (`setOverlayContent`, which erases and rewrites the whole plane).
-- `UIElement` follows the same composition pattern as `Entity` (behavior via `IUIElementBehavior`, no subclassing). It is move-only and keeps `design` (static frame) separate from `content`, which is spliced into `writableArea` on every render.
+- `UIElement` is a passive, move-only data holder: `design` (static frame) and `content` (spliced into `writableArea`), each with a dirty flag set by `updateDesign` / `updateContent`. It is the only place that tracks dirtiness, and `UIManager::process` writes only dirty parts. There is no behavior object and no per-frame polling.
+- UI logic lives in game-side *presenters* (`src/GameSpecific/UIControllers/`), e.g. `HealthBarPresenter`. A presenter implements an observer interface (`IHealthObserver`), holds `UIManager&` plus a `UIElementHandle`, and pushes new lines with `elementAt(h)->updateContent(...)` when the event fires. The event source (`PlayerBehaviorController::onHit`) holds a non-owning observer pointer. Declare presenters after the `GameEngine` in `main` so they are destroyed first.
 - `NotcursesRenderer::createOverlay` rejects rects that overlap an existing overlay or have non-positive coordinates or size. `destroyOverlay` doesn't exist yet.
 
 **Logging**: `Logger::GetInstance()->log(msg, LogType::X, LogLevel::Y)` (a static singleton). Use it rather than stdout/stderr while the game is running, because notcurses owns the terminal.

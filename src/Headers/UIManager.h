@@ -11,7 +11,7 @@ class UIManager {
 public:
   explicit UIManager(IRenderer &renderer);
 
-  void process(float delta);
+  void process();
 
   // Moves `element` into UIManager's keeping and hands back a handle for
   // it. A plain int, not an address - map storage decouples the handle
@@ -20,8 +20,7 @@ public:
   // internally.
   //
   //   UIElementHandle hp = uiManager.addElement(
-  //       UIElement(std::make_unique<HealthBarBehavior>(), renderer, area,
-  //                 writableArea, design));
+  //       UIElement(area, writableArea, design));
   UIElementHandle addElement(UIElement element);
 
   // Tears down an element added via addElement(). Invalidates the handle -
@@ -37,7 +36,6 @@ public:
 private:
   IRenderer &_renderer;
   std::unordered_map<UIElementHandle, UIElement> _elements;
-  UIElementHandle _nextId = 0;
 };
 
 #endif // UIMANAGER_H

@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include "GameSpecific/Headers/HealthBarPresenter.h"
 #include "GameSpecific/Headers/IstvanBehaviorController.h"
 #include "GameSpecific/Headers/PlayerBehaviorController.h"
 #include "Headers/Core.h"
@@ -41,7 +42,7 @@ int main() {
   l->log("map inited", LogType::CORE, LogLevel::INFO);
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
   sceneMan.loadResources(
-      "/home/attila/Kitchen/TextQuest/Resources/Textures/wall/", wtexs);
+      "Resources/Textures/wall/", wtexs);
   std::vector<std::string> walltexV;
   std::vector<std::string> keys;
   keys.reserve(wtexs.size());
@@ -60,7 +61,7 @@ int main() {
   std::unordered_map<std::string, std::string> ttexs;
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
   sceneMan.loadResources(
-      "/home/attila/Kitchen/TextQuest/Resources/Textures/tnt/", ttexs);
+      "Resources/Textures/tnt/", ttexs);
   std::vector<std::string> tnttexV;
   std::vector<std::string> tkeys;
   tkeys.reserve(ttexs.size());
@@ -86,20 +87,23 @@ int main() {
   std::string intex = " \n";
   Transform init{{2.f, 2.f}, 0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
-  Entity p(std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler()),
-           init, &intex, 100, .0f, true, 0.f, 0.f);
+  constexpr int playerMaxHp = 100;
+  auto playerCtrl =
+      std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler());
+  PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
+  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, .0f, true, 0.f,
+           0.f);
   p.setMoveSpeedAllDirectons(3.5f);
   p.setTurnSpeedAlldirections(2.5f);
   sceneMan.AddEntity(p);
   l->log("player added to entities", LogType::CORE, LogLevel::INFO);
-
   // ==================
   // Istvan upload
   // ==================
 
   std::unordered_map<std::string, std::string> Istvantexs;
   sceneMan.loadResources(
-      "/home/attila/Kitchen/TextQuest/Resources/Textures/FeralGhoul/",
+      "Resources/Textures/FeralGhoul/",
       Istvantexs);
   std::vector<std::string> IstvantexV;
   std::vector<std::string> Istvankeys;
@@ -123,7 +127,7 @@ int main() {
   // ==================
   std::unordered_map<std::string, std::string> Belatexs;
   sceneMan.loadResources(
-      "/home/attila/Kitchen/TextQuest/Resources/Textures/Cyberdemon/",
+      "Resources/Textures/Cyberdemon/",
       Belatexs);
   std::vector<std::string> BelatexV;
   std::vector<std::string> Belakeys;
@@ -141,6 +145,19 @@ int main() {
   Bela.setMoveSpeedAllDirectons(.0f);
   Bela.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Bela);
+
+  // ==================
+  // Health bar
+  // ==================
+  vec2i scr = ge_ptr->screenSize();
+  Rect hbArea{1, scr.y - 3, 42, 3};
+  Rect hbWritable{1, 1, 40, 1};
+  UIElementHandle hbHandle = ge_ptr->uiMan().addElement(
+      UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
+  // declared after ge_ptr, so it is destroyed before the UIManager
+  HealthBarPresenter healthBar(ge_ptr->uiMan(), hbHandle, playerMaxHp);
+  playerCtrlPtr->setHealthObserver(&healthBar);
+  healthBar.onHealthChanged(50);
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);

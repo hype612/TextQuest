@@ -84,3 +84,9 @@ vec2f PlayerBehaviorController::moveIntent(MoveDirection dir, Entity &self,
   }
   return {0.f, 0.f};
 }
+
+void PlayerBehaviorController::onHit(Entity &self, Entity &other) {
+  self.setHealth(self.health() - other.dmg());
+  if (_healthObserver)
+    _healthObserver->onHealthChanged(self.health());
+}

@@ -125,9 +125,8 @@ void NotcursesRenderer::setOverlayRegion(
   ncplane *current = _overlayPlanes.at(id);
 
   // check if rect is completely in plane
-  Rect target;
+  Rect target{0, 0, 0, 0};
   ncplane_dim_yx(current, &target.height, &target.width);
-  ncplane_yx(current, &target.y, &target.x);
   if (!target.contains(region)) {
     Logger::GetInstance()->log(
         "setOverlayRegion: overwrite region is not fully in target region.",
@@ -152,7 +151,7 @@ void NotcursesRenderer::setOverlayRegion(
       (content.size() < region.height) ? content.size() : region.height;
   for (int y = 0; y < printheight; y++) {
     ncplane_cursor_move_yx(current, region.y + y, region.x);
-    ncplane_putstr(current, content[y].substr(0, target.width).c_str());
+    ncplane_putstr(current, content[y].substr(0, region.width).c_str());
   }
 }
 

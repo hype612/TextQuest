@@ -26,6 +26,9 @@ public:
   virtual void setOverlayRegion(OverlayId id, Rect region,
                                 const std::vector<std::string> &content) = 0;
 
+  IRenderer &operator=(const IRenderer &) = delete;
+  IRenderer(IRenderer &&) = delete;
+
 protected:
   IRenderer() {}
   int _screenHeight;

@@ -1,18 +1,16 @@
 #include "../Headers/IstvanBehaviorController.h"
 #include "../Headers/Entity.h"
-#include "../Headers/Logger.h"
 #include "ICollidable.h"
 #include "MoveDirection.h"
-#include <string>
 
-IstvanBehaviorController::IstvanBehaviorController() {
-  //_alternates[0] = MoveDirection::STRAFE_LEFT;
-  //_alternates[1] = MoveDirection::STRAFE_RIGHT;
-  //_a_idx = 0;
-}
+IstvanBehaviorController::IstvanBehaviorController() : _state(State::IDLE) {}
 
 vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
-
+  self.setShooting(false);
+  _targetLastSeen += delta;
+  _lastShot += delta;
+  updateState(self);
+  /*
   float dist_to_target_sq = (_target.x - self.transform().position.x) *
                                 (_target.x - self.transform().position.x) +
                             (_target.y - self.transform().position.y) *
@@ -22,9 +20,6 @@ vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
   angle_diff = std::atan2(std::sin(angle_diff), std::cos(angle_diff));
   float angle_epsilon = 0.05f;
   vec2f ret = self.transform().position;
-  Logger::GetInstance()->log("Istvan angle: " +
-                                 std::to_string(self.transform().angle),
-                             LogType::CORE, LogLevel::INFO);
   if (angle_diff > angle_epsilon) {
     ret += moveIntent(MoveDirection::TURN_RIGHT, self, delta);
   }
@@ -35,7 +30,24 @@ vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
 
   if (dist_to_target_sq >= .3f)
     ret += moveIntent(MoveDirection::FORWARD, self, delta);
+  */
   return ret;
+}
+
+void IstvanBehaviorController::updateState(Entity &self) {
+  if (_state == State::IDLE) {
+    // check if we see the player
+    if (!_hasTarget) {
+      return;
+    }
+    // has target - check if we can shoot
+    if (_targetAngle < 10.f) {
+    }
+  } else if (_state == State::CHASE) {
+    // Check if close enough to shoot
+  } else if (_state == State::ATTACK) {
+    // Check if too far away to shoot
+  }
 }
 
 vec2f IstvanBehaviorController::moveIntent(MoveDirection dir, Entity &self,
@@ -78,24 +90,22 @@ vec2f IstvanBehaviorController::moveIntent(MoveDirection dir, Entity &self,
 }
 
 void IstvanBehaviorController::onCollision(Entity &self, ICollidable &other) {
-  _a_idx = (_a_idx + 1) % 2;
   if (other.collidableKind() == Collidable::ENTITY)
     self.setHealth(self.health() - 10);
 }
 void IstvanBehaviorController::onVisible(Entity &self, Entity &other) {
   // turn to the player
-  if (!other.isPlayer())
+  if (!other.isPlayer() || _hasTarget) {
     return;
+  }
 
-  vec2f relative_pos = other.transform().position - self.transform().position;
-  _targetAngle = std::atan2(relative_pos.x, relative_pos.y);
-  _target = other.transform().position;
-  self.setMoveSpeedAllDirectons(1.5f);
-  self.setTurnSpeedAlldirections(3.f);
+  _targetE = &other;
+  _hasTarget = true;
+  // vec2f relative_pos = other.transform().position -
+  // self.transform().position; _targetAngle = std::atan2(relative_pos.x,
+  // relative_pos.y); _target = other.transform().position;
 }
 
 void IstvanBehaviorController::onHit(Entity &self, Entity &other) {
-  Logger::GetInstance()->log("istvan was shot", LogType::SCENE,
-                             LogLevel::WARNING);
   self.setHealth(self.health() - other.dmg());
 }
