@@ -16,7 +16,10 @@ IstvanBehaviorController::IstvanBehaviorController(
 vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
   self.setShooting(false);
   _lastShot += delta;
+  State prevState = _state;
   updateState(self);
+  if (_state != prevState && _stateObserver)
+    _stateObserver->onStateChanged(stateName(_state));
   vec2f ret = self.transform().position;
   switch (_state) {
   case State::IDLE:
@@ -26,7 +29,7 @@ vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
     chase(self, ret, delta);
     break;
   case State::ATTACK:
-    shoot(self, delta);
+    attack(self, delta);
     break;
   }
   return ret;
@@ -62,12 +65,10 @@ void IstvanBehaviorController::patrol(Entity &self, vec2f &acc_intent,
 void IstvanBehaviorController::chase(Entity &self, vec2f &acc_intent,
                                      float delta) {
   vec2f target = _targetE->transform().position;
-  float dist_to_target_sq = (target.x - self.transform().position.x) *
-                                (target.x - self.transform().position.x) +
-                            (target.y - self.transform().position.y) *
-                                (target.y - self.transform().position.y);
+  vec2f rel = target - self.transform().position;
+  float dist_to_target_sq = rel.x * rel.x + rel.y * rel.y;
 
-  float angle_diff = _targetAngle - self.transform().angle;
+  float angle_diff = std::atan2(rel.x, rel.y) - self.transform().angle;
   angle_diff = std::atan2(std::sin(angle_diff), std::cos(angle_diff));
   float angle_epsilon = 0.05f;
   if (angle_diff > angle_epsilon) {
@@ -82,12 +83,28 @@ void IstvanBehaviorController::chase(Entity &self, vec2f &acc_intent,
     acc_intent += moveIntent(MoveDirection::FORWARD, self, delta);
 }
 
+void IstvanBehaviorController::attack(Entity &self, float delta) {
+  vec2f target = _targetE->transform().position;
+  vec2f rel = target - self.transform().position;
+
+  float angle_diff = std::atan2(rel.x, rel.y) - self.transform().angle;
+  angle_diff = std::atan2(std::sin(angle_diff), std::cos(angle_diff));
+  const float angle_epsilon = 0.05f;
+
+  if (angle_diff > angle_epsilon) {
+    moveIntent(MoveDirection::TURN_RIGHT, self, delta);
+  } else if (angle_diff < -angle_epsilon) {
+    moveIntent(MoveDirection::TURN_LEFT, self, delta);
+  } else {
+    shoot(self, delta);
+  }
+}
+
 void IstvanBehaviorController::shoot(Entity &self, float delta) {
-  _lastShot += delta;
   if (_lastShot < _shootCooldown) {
     return;
   }
-  bool shootstate = (rand() % 100) <= _misschance;
+  bool shootstate = (rand() % 100) >= _misschance;
   self.setShooting(shootstate);
   _lastShot = 0.f;
 }
@@ -113,7 +130,6 @@ void IstvanBehaviorController::updateState(Entity &self) {
       _state = State::ATTACK;
     }
   } else if (_state == State::CHASE) {
-
     if (dist_to_target_sq <= _maxShootDist * _maxShootDist) {
       _state = State::ATTACK;
     }
@@ -164,19 +180,27 @@ vec2f IstvanBehaviorController::moveIntent(MoveDirection dir, Entity &self,
   return {0.f, 0.f};
 }
 
+std::string IstvanBehaviorController::stateName(State s) const {
+  switch (s) {
+  case State::IDLE:
+    return "IDLE";
+  case State::CHASE:
+    return "CHASE";
+  case State::ATTACK:
+    return "ATTACK";
+  }
+  return "UNKNOWN";
+}
+
 void IstvanBehaviorController::onCollision(Entity &self, ICollidable &other) {
   // do nothing for now
 }
 void IstvanBehaviorController::onVisible(Entity &self, Entity &other) {
-  // turn to the player
+  // register player as target
   if (!other.isPlayer() || _targetE != nullptr) {
     return;
   }
-
   _targetE = &other;
-  // vec2f relative_pos = other.transform().position -
-  // self.transform().position; _targetAngle = std::atan2(relative_pos.x,
-  // relative_pos.y); _target = other.transform().position;
 }
 
 void IstvanBehaviorController::onHit(Entity &self, Entity &other) {

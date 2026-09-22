@@ -29,16 +29,16 @@ boilerplate. They exclude writing the thesis text itself.
 ## Critical path (do in this order)
 
 ### 1. Enemy attacks and states (~4-6 h)
-- [ ] Give `IstvanBehaviorController` states: idle, chase, attack
+- [x] Give `IstvanBehaviorController` states: idle, chase, attack
   (`src/GameSpecific/EntityControllers/IstvanBehaviorController.cpp`).
-- [ ] In attack, call `self.setShooting(true)` on a cooldown, like the player's `_shootcd`.
+- [x] In attack, call `self.setShooting(true)` on a cooldown, like the player's `_shootcd`.
   This reaches `PlayerBehaviorController::onHit`, which drives the health bar.
 - [x] Wall line-of-sight for enemies: `EntityManager::resolveVisibility` already does a
   DDA obstruction check before calling `onVisible`, so an enemy that only attacks from
   `onVisible` never shoots through a wall.
 - [ ] (Separate gameplay bug, optional) `resolveProjectiles` has no wall check, so the
   player's shots can hit enemies behind walls.
-- [ ] Remove the per-frame `Logger` call in `IstvanBehaviorController::Tick` (log spam),
+- [x] Remove the per-frame `Logger` call in `IstvanBehaviorController::Tick` (log spam),
   initialise `_target`, `_targetAngle` and `_a_idx`, and stop `onCollision` from
   damaging the enemy itself when it touches an entity.
 - Done when: an enemy in view walks up, stops, and drains the player's health bar.

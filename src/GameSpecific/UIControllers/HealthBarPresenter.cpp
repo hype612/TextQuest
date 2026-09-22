@@ -18,10 +18,19 @@ void HealthBarPresenter::onHealthChanged(int current) {
 }
 
 std::string HealthBarPresenter::renderBar(int current, size_t width) const {
-  size_t fill = width * std::clamp(current, 0, _max) / _max;
-  std::string bar(width, ' ');
+  int clamped = std::clamp(current, 0, _max);
+  std::string label =
+      " " + std::to_string(clamped) + "/" + std::to_string(_max);
+  size_t barWidth = (width > label.size()) ? width - label.size() : 0;
+
+  size_t fill = barWidth * clamped / _max;
+  std::string bar(barWidth, ' ');
   std::fill_n(bar.begin(), fill, '#');
-  return bar;
+
+  std::string line = bar + label;
+  if (line.size() < width)
+    line += std::string(width - line.size(), ' ');
+  return line;
 }
 
 std::vector<std::string> HealthBarPresenter::design(const Rect &area) {

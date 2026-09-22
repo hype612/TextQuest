@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include "GameSpecific/Headers/HealthBarPresenter.h"
 #include "GameSpecific/Headers/IstvanBehaviorController.h"
+#include "GameSpecific/Headers/IstvanStatePresenter.h"
 #include "GameSpecific/Headers/PlayerBehaviorController.h"
 #include "Headers/Core.h"
 #include "Headers/Logger.h"
@@ -41,8 +42,7 @@ int main() {
   std::unordered_map<std::string, std::string> wtexs;
   l->log("map inited", LogType::CORE, LogLevel::INFO);
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
-  sceneMan.loadResources(
-      "Resources/Textures/wall/", wtexs);
+  sceneMan.loadResources("Resources/Textures/wall/", wtexs);
   std::vector<std::string> walltexV;
   std::vector<std::string> keys;
   keys.reserve(wtexs.size());
@@ -60,8 +60,7 @@ int main() {
 
   std::unordered_map<std::string, std::string> ttexs;
   // sceneMan.loadResources("/home/attila/Kitchen/Resources/Textures/", texs);
-  sceneMan.loadResources(
-      "Resources/Textures/tnt/", ttexs);
+  sceneMan.loadResources("Resources/Textures/tnt/", ttexs);
   std::vector<std::string> tnttexV;
   std::vector<std::string> tkeys;
   tkeys.reserve(ttexs.size());
@@ -91,7 +90,7 @@ int main() {
   auto playerCtrl =
       std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler());
   PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
-  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, .0f, true, 0.f,
+  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, 0.3f, true, 0.f,
            0.f);
   p.setMoveSpeedAllDirectons(3.5f);
   p.setTurnSpeedAlldirections(2.5f);
@@ -102,9 +101,7 @@ int main() {
   // ==================
 
   std::unordered_map<std::string, std::string> Istvantexs;
-  sceneMan.loadResources(
-      "Resources/Textures/FeralGhoul/",
-      Istvantexs);
+  sceneMan.loadResources("Resources/Textures/FeralGhoul/", Istvantexs);
   std::vector<std::string> IstvantexV;
   std::vector<std::string> Istvankeys;
   Istvankeys.reserve(Istvantexs.size());
@@ -116,15 +113,22 @@ int main() {
     IstvantexV.push_back(Istvantexs[key]);
   }
   Transform IstvanInit{{10.f, 9.f}, 1.f};
-  Entity Istvan(std::make_unique<IstvanBehaviorController>(), IstvanInit,
-                IstvantexV, 100, 0.2f, false, 180.f, 8.f);
-  Istvan.setMoveSpeedAllDirectons(.0f);
+  std::vector<vec2f> istvan_patrol_route{{10.f, 9.f}, {20.f, 9.f}, {20.f, 6.f}};
+
+  auto istvanCtrl =
+      std::make_unique<IstvanBehaviorController>(istvan_patrol_route);
+  IstvanBehaviorController *istvanCtrlPtr = istvanCtrl.get();
+  Entity Istvan(std::move(istvanCtrl), IstvanInit, IstvantexV, 100, 0.2f,
+                false, 180.f, 8.f);
+  Istvan.setMoveSpeedAllDirectons(3.0f);
   Istvan.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Istvan);
 
   // ==================
   // Bela upload
   // ==================
+
+  /*
   std::unordered_map<std::string, std::string> Belatexs;
   sceneMan.loadResources(
       "Resources/Textures/Cyberdemon/",
@@ -145,19 +149,31 @@ int main() {
   Bela.setMoveSpeedAllDirectons(.0f);
   Bela.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Bela);
+  */
 
   // ==================
   // Health bar
   // ==================
   vec2i scr = ge_ptr->screenSize();
-  Rect hbArea{1, scr.y - 3, 42, 3};
-  Rect hbWritable{1, 1, 40, 1};
+  Rect hbArea{1, scr.y - 3, 50, 3};
+  Rect hbWritable{1, 1, 48, 1};
   UIElementHandle hbHandle = ge_ptr->uiMan().addElement(
       UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
   // declared after ge_ptr, so it is destroyed before the UIManager
   HealthBarPresenter healthBar(ge_ptr->uiMan(), hbHandle, playerMaxHp);
   playerCtrlPtr->setHealthObserver(&healthBar);
-  healthBar.onHealthChanged(50);
+
+  // ==================
+  // Istvan state debug display
+  // ==================
+  Rect stateArea{1, scr.y - 7, 30, 3};
+  Rect stateWritable{1, 1, 28, 1};
+  UIElementHandle stateHandle = ge_ptr->uiMan().addElement(
+      UIElement(stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
+  // declared after ge_ptr, so it is destroyed before the UIManager
+  IstvanStatePresenter istvanState(ge_ptr->uiMan(), stateHandle);
+  istvanCtrlPtr->setStateObserver(&istvanState);
+
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);
