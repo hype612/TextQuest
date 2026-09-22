@@ -26,8 +26,14 @@ void EntityManager::process(float delta) {
 void EntityManager::resolveStates() {
   for (Entity &e : _entityContainer) {
     if (e.health() <= 0) {
-      e.setTransform({{-1.f, -1.f}, 0.f});
-      e.setMoveSpeedAllDirectons(0.f);
+      if (e.isPlayer()) {
+        _sceneChannel.playerDiedNotify();
+        break; // no reason to run past this
+      } else {
+        e.setTransform({{-1.f, -1.f}, 0.f});
+        e.setMoveSpeedAllDirectons(0.f);
+        continue;
+      }
     }
   }
 }
@@ -55,7 +61,8 @@ void EntityManager::resolveProjectiles() {
       }
     }
 
-    if (closest.first != -1) {
+    if (closest.first != -1 && !rayBlockedByWall(e.transform().position, dir,
+                                                 std::sqrt(closest.second))) {
       _entityContainer[closest.first].onHit(e);
     }
   }
@@ -170,50 +177,51 @@ void EntityManager::resolveVisibility() {
 
       // obstruction check w/ raycast
       float distToTarget = std::sqrt(dist_sq);
-
-      bool hitwall = false;
-      float rayLength = 0;
       vec2f rayDir = relative_pos.normalized();
-      vec2f deltaDist{(rayDir.x == 0.f) ? 1e30f : std::abs(1.f / rayDir.x),
-                      (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
 
-      vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
-      vec2f mapPos{std::floor(current_trans.position.x),
-                   std::floor(current_trans.position.y)};
-      vec2f sideDist{
-          (stepDir.x == 1) ? mapPos.x + 1.f - current_trans.position.x
-                           : current_trans.position.x - mapPos.x,
-          (stepDir.y == 1) ? mapPos.y + 1.f - current_trans.position.y
-                           : current_trans.position.y - mapPos.y};
-      if (sideDist.x <= 0.0001f)
-        sideDist.x = 1.f;
-      if (sideDist.y <= 0.0001f)
-        sideDist.y = 1.f;
-      sideDist.x = sideDist.x * deltaDist.x;
-      sideDist.y = sideDist.y * deltaDist.y;
-      while (!hitwall && rayLength < distToTarget) {
-        if (sideDist.x < sideDist.y) {
-          sideDist.x += deltaDist.x;
-          mapPos.x += stepDir.x;
-          rayLength = sideDist.x;
-        } else {
-          sideDist.y += deltaDist.y;
-          mapPos.y += stepDir.y;
-          rayLength = sideDist.y;
-        }
-
-        if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
-          hitwall = true;
-        }
-      }
-
-      if (hitwall)
+      if (rayBlockedByWall(current_trans.position, rayDir, distToTarget))
         continue;
 
       // got through all checks, entity is visible
       e.onVisible(other);
     }
   }
+}
+
+bool EntityManager::rayBlockedByWall(vec2f origin, vec2f dir,
+                                     float maxDist) const {
+  bool hitwall = false;
+  float rayLength = 0;
+  vec2f deltaDist{(dir.x == 0.f) ? 1e30f : std::abs(1.f / dir.x),
+                  (dir.y == 0.f) ? 1e30f : std::abs(1.f / dir.y)};
+
+  vec2i stepDir{(dir.x >= 0.f) ? 1 : -1, (dir.y >= 0.f) ? 1 : -1};
+  vec2f mapPos{std::floor(origin.x), std::floor(origin.y)};
+  vec2f sideDist{
+      (stepDir.x == 1) ? mapPos.x + 1.f - origin.x : origin.x - mapPos.x,
+      (stepDir.y == 1) ? mapPos.y + 1.f - origin.y : origin.y - mapPos.y};
+  if (sideDist.x <= 0.0001f)
+    sideDist.x = 1.f;
+  if (sideDist.y <= 0.0001f)
+    sideDist.y = 1.f;
+  sideDist.x = sideDist.x * deltaDist.x;
+  sideDist.y = sideDist.y * deltaDist.y;
+  while (!hitwall && rayLength < maxDist) {
+    if (sideDist.x < sideDist.y) {
+      sideDist.x += deltaDist.x;
+      mapPos.x += stepDir.x;
+      rayLength = sideDist.x;
+    } else {
+      sideDist.y += deltaDist.y;
+      mapPos.y += stepDir.y;
+      rayLength = sideDist.y;
+    }
+
+    if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
+      hitwall = true;
+    }
+  }
+  return hitwall;
 }
 
 std::optional<float>

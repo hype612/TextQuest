@@ -5,12 +5,14 @@
 #include "GameSpecific/Headers/PlayerBehaviorController.h"
 #include "Headers/Core.h"
 #include "Headers/Logger.h"
-#include "Headers/MoveDirection.h"
 #include "Headers/SceneManager.h"
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+// TODO: everything repeated should be
+// at least a local function
 
 int main() {
   Logger *l = Logger::GetInstance();
@@ -118,8 +120,8 @@ int main() {
   auto istvanCtrl =
       std::make_unique<IstvanBehaviorController>(istvan_patrol_route);
   IstvanBehaviorController *istvanCtrlPtr = istvanCtrl.get();
-  Entity Istvan(std::move(istvanCtrl), IstvanInit, IstvantexV, 100, 0.2f,
-                false, 180.f, 8.f);
+  Entity Istvan(std::move(istvanCtrl), IstvanInit, IstvantexV, 100, 0.2f, false,
+                180.f, 8.f);
   Istvan.setMoveSpeedAllDirectons(3.0f);
   Istvan.setTurnSpeedAlldirections(3.f);
   sceneMan.AddEntity(Istvan);
@@ -168,11 +170,37 @@ int main() {
   // ==================
   Rect stateArea{1, scr.y - 7, 30, 3};
   Rect stateWritable{1, 1, 28, 1};
-  UIElementHandle stateHandle = ge_ptr->uiMan().addElement(
-      UIElement(stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
+  UIElementHandle stateHandle = ge_ptr->uiMan().addElement(UIElement(
+      stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
   // declared after ge_ptr, so it is destroyed before the UIManager
   IstvanStatePresenter istvanState(ge_ptr->uiMan(), stateHandle);
   istvanCtrlPtr->setStateObserver(&istvanState);
+
+  // ==================
+  // Game over overlay
+  // ==================
+  ge_ptr->setOnSceneOver([&ge_ptr, scr]() {
+    const unsigned int w = 20;
+    const unsigned int h = 3;
+    Rect deathArea{(scr.x - static_cast<int>(w)) / 2,
+                   (scr.y - static_cast<int>(h)) / 2, w, h};
+    Rect deathWritable{1, 1, w - 2, 1};
+    std::vector<std::string> design = {std::string(w, '='),
+                                       "|" + std::string(w - 2, ' ') + "|",
+                                       std::string(w, '=')};
+    UIElementHandle deathHandle = ge_ptr->uiMan().addElement(
+        UIElement(deathArea, deathWritable, design));
+    UIElement *el = ge_ptr->uiMan().elementAt(deathHandle);
+    if (el) {
+      std::string msg = "YOU DIED";
+      int pad = (static_cast<int>(deathWritable.width) -
+                 static_cast<int>(msg.size())) /
+                2;
+      if (pad < 0)
+        pad = 0;
+      el->updateContent({std::string(pad, ' ') + msg});
+    }
+  });
 
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());

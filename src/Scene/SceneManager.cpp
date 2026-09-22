@@ -1,9 +1,7 @@
 #include "../Headers/SceneManager.h"
 #include "./Camera.h"
 #include "./MapManager.h"
-#include "Core.h"
 #include "EntityManager.h"
-#include "Logger.h"
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -16,6 +14,8 @@ void SceneManager::process(float delta) {
   _entityManager.process(delta);
   //_eventManager.process();
 }
+
+bool SceneManager::sceneOver() const { return _sceneOver; }
 
 // Map Related functions
 void SceneManager::initializeNewMap(std::string &map, int mapWidth,
@@ -46,6 +46,8 @@ bool SceneManager::canMoveTo(const vec2f &dest) const {
          !_mapManager.isOutOfBounds(static_cast<int>(dest.x),
                                     static_cast<int>(dest.y));
 }
+
+void SceneManager::playerDiedNotify() { _sceneOver = true; }
 
 bool SceneManager::isOutOfBounds(int test_x, int test_y) const {
   return _mapManager.isOutOfBounds(test_x, test_y);

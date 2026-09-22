@@ -54,6 +54,10 @@ private:
   std::optional<float> projectileHitDistSq(vec2f origin, vec2f target,
                                            float hit_delta, vec2f dir,
                                            float max_dist);
+  bool rayBlockedByWall(vec2f origin, vec2f dir, float maxDist) const;
+
+  // deque because it does not reallocate
+  // therefore it does not break pointers
   std::deque<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };

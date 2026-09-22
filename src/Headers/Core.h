@@ -8,6 +8,7 @@
 #include "UIManager.h"
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
+#include <functional>
 #include <vector>
 
 class GameEngine {
@@ -21,11 +22,13 @@ public:
   vec2i screenSize();
 
   // TODO: Get rid of these ASAP
-  // only for testing purposes mid-refactor
-  // implement a real API for game programmers
+  //       only for testing purposes mid-refactor
+  //       implement a real API for game programmers
   SceneManager &sceneMan();
   IInputHandler &inputHandler();
   UIManager &uiMan();
+
+  void setOnSceneOver(std::function<void()> callback);
 
   GameEngine(const GameEngine &g) = delete;
   GameEngine &operator=(const GameEngine &) = delete;
@@ -39,7 +42,9 @@ private:
                  int screenHeight, const std::string &toRender);
   // scene
   SceneManager _sceneManager;
-  bool _sceneRunning = false;
+  bool _engineRunning = false;
+  bool _sceneOverFired = false;
+  std::function<void()> _sceneOverCb;
 
   // rendering vars and consts
   IRenderer *_renderer;

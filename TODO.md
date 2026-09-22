@@ -36,7 +36,7 @@ boilerplate. They exclude writing the thesis text itself.
 - [x] Wall line-of-sight for enemies: `EntityManager::resolveVisibility` already does a
   DDA obstruction check before calling `onVisible`, so an enemy that only attacks from
   `onVisible` never shoots through a wall.
-- [ ] (Separate gameplay bug, optional) `resolveProjectiles` has no wall check, so the
+- [x] (Separate gameplay bug, optional) `resolveProjectiles` has no wall check, so the
   player's shots can hit enemies behind walls.
 - [x] Remove the per-frame `Logger` call in `IstvanBehaviorController::Tick` (log spam),
   initialise `_target`, `_targetAngle` and `_a_idx`, and stop `onCollision` from
@@ -45,11 +45,11 @@ boilerplate. They exclude writing the thesis text itself.
   It does not hit through walls.
 
 ### 2. Win, lose and restart (~4-6 h)
-- [ ] Lose: player health <= 0. Today `EntityManager::resolveStates` just moves the
+- [x] Lose: player health <= 0. Today `EntityManager::resolveStates` just moves the
   entity to (-1,-1); detect this in the game layer instead.
 - [ ] Win: all non-player entities are dead.
 - [ ] Show a "YOU DIED" / "YOU WIN" message with a new presenter (see
-  `src/GameSpecific/UIControllers/HealthBarPresenter.cpp` as the pattern).
+  `src/GameSpecific/UIControllers/HealthBarPresenter.cpp` as the pattern). YOU DIED is done but is not in a separate presenter. If needed, move it there. win condition is not tested or propagated.
 - [ ] Restart or quit on a key press.
 - Done when: the game can be finished and replayed without restarting the process by hand.
 

@@ -56,8 +56,13 @@ SceneManager &GameEngine::sceneMan() { return _sceneManager; }
 IInputHandler &GameEngine::inputHandler() { return *_inputHandler; }
 UIManager &GameEngine::uiMan() { return *_uimanager; }
 
+void GameEngine::setOnSceneOver(std::function<void()> callback) {
+  _sceneOverCb = callback;
+}
+
 void GameEngine::run_game() {
-  _sceneRunning = true;
+  _engineRunning = true;
+  _sceneOverFired = false;
   screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
   _zBuffer.reserve(_renderer->screenWidth());
   if (!_sceneManager.isMapAvailable()) {
@@ -67,7 +72,7 @@ void GameEngine::run_game() {
   }
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
-  while (_sceneRunning) {
+  while (_engineRunning) {
     const Camera *cam = _sceneManager.cameraPtr();
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
@@ -76,14 +81,23 @@ void GameEngine::run_game() {
 
     _inputHandler->ReceiveInput();
     // TODO: Overhaul the input system so
-    // this ugly thing can be removed
+    //       this ugly thing can be removed
     if (static_cast<NotcursesInputHandler *>(_inputHandler)->quitPressed())
-      _sceneRunning = false;
-    _sceneManager.process(f_elapsed_time);
-    _zBuffer.clear();
-    RayCastingProcess(cam);
-    EntityProjectionProcess(cam);
-    _renderer->OverwriteBuffer(screen);
+      _engineRunning = false;
+    if (!_sceneManager.sceneOver()) {
+      _sceneManager.process(f_elapsed_time);
+      _zBuffer.clear();
+      RayCastingProcess(cam);
+      EntityProjectionProcess(cam);
+      _renderer->OverwriteBuffer(screen);
+    } else if (!_sceneOverFired) {
+      _sceneOverFired = true;
+      if (_sceneOverCb)
+        _sceneOverCb();
+    }
+    // TODO: EIther introduce a legit built-in debug plane
+    //       or just delete this entirely and just expose
+    //       query functions for these.
     std::vector<std::string> dbgNfo = {
         "C.x: " + std::to_string(cam->follow().position.x) +
             " C.y: " + std::to_string(cam->follow().position.y) +

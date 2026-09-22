@@ -20,6 +20,9 @@ public:
   SceneManager();
 
   void process(float delta);
+  // In the current context:
+  // player died == scene is over
+  bool sceneOver() const;
 
   // Map Related functions
   void initializeNewMap(std::string &map, int mapWidth, int mapHeight);
@@ -33,6 +36,8 @@ public:
 
   // Channel implementation
   bool canMoveTo(const vec2f &dest) const override;
+  void playerDiedNotify() override;
+
   bool isOutOfBounds(int test_x, int test_y) const;
   bool isWall(int test_x, int test_y) const;
 
@@ -59,6 +64,7 @@ public:
 private:
   EntityManager _entityManager;
   MapManager _mapManager;
+  bool _sceneOver = false;
   // need to postpone construction
   std::optional<Camera> _camera;
 };

@@ -6,6 +6,7 @@
 class IEntitySceneChannel {
 public:
   virtual bool canMoveTo(const vec2f &dest) const = 0;
+  virtual void playerDiedNotify() = 0;
 };
 
 #endif // IENTITYSCENECHANNEL_H

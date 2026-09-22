@@ -38,7 +38,7 @@ Textures are plain-text ASCII art generated offline from images:
 
 **Frame loop** (`src/Core/Core.cpp`, `GameEngine::run_game`):
 1. `IInputHandler::ReceiveInput()` updates key state.
-2. `SceneManager::process(dt)` runs `EntityManager::process`, which goes through `resolveStates` (dead entities are moved to (-1,-1)), then `resolveMovement`, `resolveProjectiles`, and `resolveVisibility`.
+2. `SceneManager::process(dt)` runs `EntityManager::process`, which goes through `resolveStates` (dead non-player entities are moved to (-1,-1); a dead player instead calls `IEntitySceneChannel::playerDiedNotify()`, which sets `SceneManager::sceneOver()` and ends the run loop), then `resolveMovement`, `resolveProjectiles`, and `resolveVisibility`.
 3. `RayCastingProcess`: a DDA ray per screen column writes wall/floor chars into the engine's `char* screen` buffer and fills `_zBuffer` with one depth value per column.
 4. `EntityProjectionProcess`: billboards entity sprites far-to-near using the camera-plane inverse matrix and z-buffer tests per column.
 5. `IRenderer::OverwriteBuffer(screen)`, then `PrintDebugInfo`, then `PrintBuffer()` (`notcurses_render`).
@@ -53,7 +53,7 @@ Textures are plain-text ASCII art generated offline from images:
 - `Entity` is a single concrete class. Per-entity logic is composed in via `std::unique_ptr<IBehaviorController>` (`Tick` returns the desired new position; there are also `onCollision` / `onVisible` / `onHit` hooks). Don't subclass `Entity`. Game-specific controllers live in `src/GameSpecific/`.
 - **Entity ID == index in `EntityManager::_entityContainer`.** `addEntity` moves the passed-in entity into the vector and assigns its ID; the caller's object is left moved-from. `removeEntity` doesn't erase anything, it only moves the entity to (-1,-1). Code throughout indexes `_entityContainer[id]` directly, so don't reorder or erase from the vector without reworking IDs (there's a TODO about this).
 - Movement is intent-based. All controllers tick first, then intents are validated per axis against walls (`TerrainCollidable`) and other entities' collision radii, firing `onCollision` on both sides.
-- Projectiles are hitscan. Only the closest entity along the ray (distance squared, max 20 units) gets `onHit`.
+- Projectiles are hitscan. Only the closest entity along the ray (distance squared, max 20 units) gets `onHit`, and only if `EntityManager::rayBlockedByWall` (a shared DDA raycast, also used by `resolveVisibility`) doesn't find a wall in between.
 - Angle convention: direction = `(sin(angle), cos(angle))`.
 
 **UI system** (`src/UIDisplay/`; `UIManager` is owned by `GameEngine`, reachable via `uiMan()`, and flushed each frame by `process()`):
