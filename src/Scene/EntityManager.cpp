@@ -204,14 +204,6 @@ void EntityManager::resolveVisibility() {
 
         if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
           hitwall = true;
-          Logger::GetInstance()->log(
-              "hitwall at mapPos: " + std::to_string(mapPos.x) + "," +
-                  std::to_string(mapPos.y) +
-                  " istvan pos: " + std::to_string(current_trans.position.x) +
-                  "," + std::to_string(current_trans.position.y) +
-                  " player pos: " + std::to_string(other_trans.position.x) +
-                  "," + std::to_string(other_trans.position.y),
-              LogType::CORE, LogLevel::INFO);
         }
       }
 
@@ -219,11 +211,6 @@ void EntityManager::resolveVisibility() {
         continue;
 
       // got through all checks, entity is visible
-      Logger::GetInstance()->log(
-          "istvan sees you at position: " +
-              std::to_string(other.transform().position.x) + ":" +
-              std::to_string(other.transform().position.y),
-          LogType::CORE, LogLevel::INFO);
       e.onVisible(other);
     }
   }
@@ -317,7 +304,7 @@ std::string EntityManager::scaledTexOfEntity(int entityId, unsigned int width,
                                              unsigned int height,
                                              int shadingIdx) const {
   if (entityId < 0 ||
-      static_cast<unsigned int>(entityId) > _entityContainer.size()) {
+      static_cast<unsigned int>(entityId) >= _entityContainer.size()) {
     Logger::GetInstance()->log("Entity outside of container size.",
                                LogType::RENDER, LogLevel::ERROR);
     return std::string();
@@ -328,7 +315,7 @@ std::vector<int> EntityManager::scaledMaskOfEntity(int entityId,
                                                    unsigned int width,
                                                    unsigned int height) const {
   if (entityId < 0 ||
-      static_cast<unsigned int>(entityId) > _entityContainer.size()) {
+      static_cast<unsigned int>(entityId) >= _entityContainer.size()) {
     Logger::GetInstance()->log("Entity outside of container size.",
                                LogType::RENDER, LogLevel::ERROR);
     return std::vector<int>();

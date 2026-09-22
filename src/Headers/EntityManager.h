@@ -4,6 +4,7 @@
 #include "../Headers/Entity.h"
 #include "../Headers/EntityDistance.h"
 #include "../Headers/IEntitySceneChannel.h"
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,7 @@ private:
   std::optional<float> projectileHitDistSq(vec2f origin, vec2f target,
                                            float hit_delta, vec2f dir,
                                            float max_dist);
-  std::vector<Entity> _entityContainer;
+  std::deque<Entity> _entityContainer;
   IEntitySceneChannel &_sceneChannel;
 };
 
