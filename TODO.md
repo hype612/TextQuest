@@ -129,6 +129,13 @@ Before uploading, Neptun asks for the final title, 3-5 keywords and a max-500-ch
 | 6, quality and docs | ~9-14 |
 | Total | ~25-35, plus playtesting and debugging slack |
 
+## Stage 2
+
+- [ ] Add `setWinCondition(std::function<bool(const SceneManager&)>)` to `SceneManager`.
+- [ ] Poll it once per frame in `SceneManager::process(dt)`, alongside `resolveStates`.
+- [ ] Add `playerWonNotify()` mirroring the existing `playerDiedNotify()` / `sceneOver()` pattern.
+- [ ] Wire a win predicate (all non-player entities dead) in `src/TextQuest.cpp`.
+
 ## Cut for now (not in the proposal)
 - Viewport plane / Wolfenstein-style HUD panel with nested overlays
 - Generic `UIPresenter` base class (extract only after a third presenter)
