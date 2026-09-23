@@ -47,9 +47,10 @@ boilerplate. They exclude writing the thesis text itself.
 ### 2. Win, lose and restart (~4-6 h)
 - [x] Lose: player health <= 0. Today `EntityManager::resolveStates` just moves the
   entity to (-1,-1); detect this in the game layer instead.
-- [ ] Win: all non-player entities are dead.
-- [ ] Show a "YOU DIED" / "YOU WIN" message with a new presenter (see
-  `src/GameSpecific/UIControllers/HealthBarPresenter.cpp` as the pattern). YOU DIED is done but is not in a separate presenter. If needed, move it there. win condition is not tested or propagated.
+- [x] Win: all non-player entities are dead.
+- [x] Show a "YOU DIED" / "YOU WIN" message with a new presenter (see
+  `src/GameSpecific/UIControllers/HealthBarPresenter.cpp` as the pattern).
+- [ ] game end check and win cond check is done but is not in a separate presenter. If needed, move it there. win condition is not tested or propagated.
 - [ ] Restart or quit on a key press.
 - Done when: the game can be finished and replayed without restarting the process by hand.
 
@@ -131,10 +132,48 @@ Before uploading, Neptun asks for the final title, 3-5 keywords and a max-500-ch
 
 ## Stage 2
 
-- [ ] Add `setWinCondition(std::function<bool(const SceneManager&)>)` to `SceneManager`.
-- [ ] Poll it once per frame in `SceneManager::process(dt)`, alongside `resolveStates`.
-- [ ] Add `playerWonNotify()` mirroring the existing `playerDiedNotify()` / `sceneOver()` pattern.
-- [ ] Wire a win predicate (all non-player entities dead) in `src/TextQuest.cpp`.
+- [x] Add `setWinCondition(std::function<bool(const SceneManager&)>)` to `SceneManager`.
+- [x] Poll it once per frame in `SceneManager::process(dt)`, alongside `resolveStates`; on
+  true, set a `_playerWon` bool and `sceneOver()` (no new notifier method).
+- [x] Add `playerWon()` query on `SceneManager`, queried by the game layer once the run
+  loop ends (mirrors polling `sceneOver()`, no addition to `IEntitySceneChannel`).
+- [x] Wire a win predicate (all non-player entities dead) in `src/TextQuest.cpp`.
+
+## Stage 3
+
+Swappable scenes: the game owns scenes, the engine only shows the active one. The player
+can be carried from one scene to the next. Nothing here is implemented yet.
+
+- [x] `SceneManager`: delete copy and move operations and construct it on the heap
+  (`EntityManager` and `RenderAssetManager` hold references into it, so its address must
+  stay stable).
+- [x] `GameEngine`: replace the `SceneManager` member with a `std::shared_ptr<SceneManager>`
+  set through `setActiveScene(...)`. The game is the primary owner. The engine's copy keeps
+  the old scene alive while its own callback triggers the swap.
+- [x] Apply the swap at the top of the next loop iteration, not mid-frame. On swap: rebind
+  `RenderAssetManager` to the new scene (member bound at construction -> `optional` or
+  `rebind`), reapply the stored shading settings, clear `_sceneOverFired`, check the
+  camera is set.
+- [TBD] Move the scene-over callback from the engine to the scene:
+  `SceneManager::setOnSceneOver(std::function<void(bool won)>)`. The engine keeps only the
+  fire-once boolean and calls it from the existing scene-over branch (after `process()`).
+- [x] `SceneManager::extractPlayer()`: move the player `Entity` out and reset its ID to -1.
+  The game re-adds it to the new scene as the first entity (ID 0), sets the spawn transform
+  itself (`addEntity` touches only the ID) and re-points the camera.
+- [ ] Restart: `'r'` in `NotcursesInputHandler` with a `restartPressed()` accessor. The
+  engine polls it only while the active scene is over and the player lost, then invokes a
+  scene-level `setOnRestart` callback. It has no effect mid-game.
+- [ ] Reset input state (`_quitPressed`, held keys) on scene swap.
+- [ ] `IRenderer::destroyOverlay` (+ notcurses implementation) and
+  `UIManager::removeElement`, so scene-scoped UI (death box, Istvan state display) can be
+  torn down on swap. The health bar stays and its presenter is rebound to the new player
+  controller on restart.
+- [ ] Game side (`src/TextQuest.cpp`): split `main` into per-level builders returning a
+  `shared_ptr<SceneManager>`. Each sets its own win condition, on-over and restart
+  callbacks. Restart builds a fresh player, advancing carries the existing player (HP
+  included, decided by the game, never by the engine).
+- Done when: dying and pressing `r` rebuilds the level in the same process without
+  reinitialising notcurses, and winning can swap to a second map with the same player.
 
 ## Cut for now (not in the proposal)
 - Viewport plane / Wolfenstein-style HUD panel with nested overlays

@@ -264,6 +264,10 @@ int EntityManager::getEntityIdAtPos(int coord_x, int coord_y) const {
 
 int EntityManager::getEntityCount() const { return _entityContainer.size(); }
 
+const std::deque<Entity> &EntityManager::entities() const {
+  return _entityContainer;
+}
+
 // ================================
 // Container Setters
 // ================================
@@ -281,6 +285,17 @@ void EntityManager::removeEntity(int id) {
 }
 
 Entity &EntityManager::entityAtId(int id) { return _entityContainer[id]; }
+
+std::optional<Entity> EntityManager::extractPlayer() {
+  for (Entity &e : _entityContainer) {
+    if (e.isPlayer()) {
+      std::optional<Entity> player(std::move(e));
+      player->clearID();
+      return player;
+    }
+  }
+  return std::nullopt;
+}
 
 void EntityManager::removeAllEntities() {
   _entityContainer.clear();

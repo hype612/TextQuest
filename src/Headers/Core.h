@@ -9,6 +9,8 @@
 #include "WindowsInputHandler.h"
 #include "WindowsRenderer.h"
 #include <functional>
+#include <memory>
+#include <optional>
 #include <vector>
 
 class GameEngine {
@@ -16,6 +18,8 @@ public:
   GameEngine();
   void run_game();
   ~GameEngine();
+
+  void setScene(const std::shared_ptr<SceneManager> &sc_man);
 
   void enableDistanceShading(bool enabled);
   void setDistanceShadingThresholds(const std::vector<float> &thresholds);
@@ -41,16 +45,21 @@ private:
   void RenderCol(int ceiling, int floor, int col, int screenWidth,
                  int screenHeight, const std::string &toRender);
   // scene
-  SceneManager _sceneManager;
-  bool _engineRunning = false;
-  bool _sceneOverFired = false;
+  void applyPendingScene();
+  std::shared_ptr<SceneManager> _sceneManager; // active
+  std::shared_ptr<SceneManager> _pendingScene; // applied at loop top
   std::function<void()> _sceneOverCb;
 
   // rendering vars and consts
+  bool _shadingEnabled = false;
+  std::vector<float> _shadingThresholds;
+  bool _engineRunning = false;
+  bool _sceneOverFired = false;
+
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
   char *screen;
-  RenderAssetManager _renderAssetManager;
+  std::optional<RenderAssetManager> _renderAssetManager;
   UIManager *_uimanager;
   std::vector<float> _zBuffer;
 };

@@ -68,6 +68,8 @@ public:
 
   void move(float delta, MoveDirection dir);
   void setID(int id);
+  // makes the entity adoptable by another EntityManager
+  void clearID();
   void setHealth(int new_value);
   void setTransform(const Transform &new_transform);
   void setShooting(bool new_value);

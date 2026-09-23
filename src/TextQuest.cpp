@@ -10,15 +10,25 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // TODO: everything repeated should be
 // at least a local function
 
-int main() {
+// The controllers are owned by their entities inside the scene. The raw
+// pointers are handed out so main can attach presenters to them.
+struct BuiltScene {
+  std::shared_ptr<SceneManager> scene;
+  PlayerBehaviorController *playerCtrl;
+  IstvanBehaviorController *istvanCtrl;
+};
+
+static constexpr int playerMaxHp = 100;
+
+static BuiltScene buildScene(GameEngine &ge) {
   Logger *l = Logger::GetInstance();
-  auto ge_ptr = std::make_unique<GameEngine>();
-  SceneManager &sceneMan = ge_ptr->sceneMan();
-  l->log("ge_ptr good, sceneman returned", LogType::CORE, LogLevel::INFO);
+  auto scene = std::make_shared<SceneManager>();
+  SceneManager &sceneMan = *scene;
   std::string map = "";
   map += "################################";
   map += "#..............................#";
@@ -78,19 +88,11 @@ int main() {
          LogLevel::INFO);
   sceneMan.uploadTextureVecForWall('T', tnttexV);
 
-  ge_ptr->enableDistanceShading(true);
-  std::vector<float> shadingThresholds;
-  for (int i = 1; i < 8; i++)
-    shadingThresholds.push_back(i * 2);
-  ge_ptr->setDistanceShadingThresholds(shadingThresholds);
-  l->log("uploaded all textures", LogType::CORE, LogLevel::INFO);
-
   std::string intex = " \n";
   Transform init{{2.f, 2.f}, 0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
-  constexpr int playerMaxHp = 100;
   auto playerCtrl =
-      std::make_unique<PlayerBehaviorController>(ge_ptr->inputHandler());
+      std::make_unique<PlayerBehaviorController>(ge.inputHandler());
   PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
   Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, 0.3f, true, 0.f,
            0.f);
@@ -154,6 +156,37 @@ int main() {
   */
 
   // ==================
+  // Win cond setup
+  // ==================
+  sceneMan.setWinCondition([](const SceneManager &sc_man) -> bool {
+    return std::ranges::all_of(sc_man.entities(), [](const Entity &e) {
+      return e.isPlayer() || e.health() <= 0;
+    });
+  });
+
+  sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
+  sceneMan.setCameraFovDegrees(90);
+  l->log("camera follow set", LogType::CORE, LogLevel::INFO);
+  return {scene, playerCtrlPtr, istvanCtrlPtr};
+}
+
+int main() {
+  Logger *l = Logger::GetInstance();
+  auto ge_ptr = std::make_unique<GameEngine>();
+  BuiltScene built = buildScene(*ge_ptr);
+  auto scene = built.scene;
+  ge_ptr->setScene(scene);
+  SceneManager &sceneMan = *scene;
+  l->log("ge_ptr good, scene set", LogType::CORE, LogLevel::INFO);
+
+  ge_ptr->enableDistanceShading(true);
+  std::vector<float> shadingThresholds;
+  for (int i = 1; i < 8; i++)
+    shadingThresholds.push_back(i * 2);
+  ge_ptr->setDistanceShadingThresholds(shadingThresholds);
+  l->log("uploaded all textures", LogType::CORE, LogLevel::INFO);
+
+  // ==================
   // Health bar
   // ==================
   vec2i scr = ge_ptr->screenSize();
@@ -163,23 +196,23 @@ int main() {
       UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
   // declared after ge_ptr, so it is destroyed before the UIManager
   HealthBarPresenter healthBar(ge_ptr->uiMan(), hbHandle, playerMaxHp);
-  playerCtrlPtr->setHealthObserver(&healthBar);
+  built.playerCtrl->setHealthObserver(&healthBar);
 
   // ==================
   // Istvan state debug display
   // ==================
-  Rect stateArea{1, scr.y - 7, 30, 3};
+  Rect stateArea{2, scr.y - 7, 30, 3};
   Rect stateWritable{1, 1, 28, 1};
   UIElementHandle stateHandle = ge_ptr->uiMan().addElement(UIElement(
       stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
   // declared after ge_ptr, so it is destroyed before the UIManager
   IstvanStatePresenter istvanState(ge_ptr->uiMan(), stateHandle);
-  istvanCtrlPtr->setStateObserver(&istvanState);
+  built.istvanCtrl->setStateObserver(&istvanState);
 
   // ==================
   // Game over overlay
   // ==================
-  ge_ptr->setOnSceneOver([&ge_ptr, scr]() {
+  ge_ptr->setOnSceneOver([&ge_ptr, scr, &sceneMan]() {
     const unsigned int w = 20;
     const unsigned int h = 3;
     Rect deathArea{(scr.x - static_cast<int>(w)) / 2,
@@ -188,11 +221,16 @@ int main() {
     std::vector<std::string> design = {std::string(w, '='),
                                        "|" + std::string(w - 2, ' ') + "|",
                                        std::string(w, '=')};
-    UIElementHandle deathHandle = ge_ptr->uiMan().addElement(
-        UIElement(deathArea, deathWritable, design));
+    UIElementHandle deathHandle =
+        ge_ptr->uiMan().addElement(UIElement(deathArea, deathWritable, design));
     UIElement *el = ge_ptr->uiMan().elementAt(deathHandle);
     if (el) {
-      std::string msg = "YOU DIED";
+      std::string msg;
+      if (sceneMan.playerWon()) {
+        msg = "YOU WON";
+      } else {
+        msg = "YOU DIED";
+      }
       int pad = (static_cast<int>(deathWritable.width) -
                  static_cast<int>(msg.size())) /
                 2;
@@ -203,8 +241,5 @@ int main() {
   });
 
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
-  sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
-  sceneMan.setCameraFovDegrees(90);
-  l->log("camera follow set", LogType::CORE, LogLevel::INFO);
   ge_ptr->run_game();
 }

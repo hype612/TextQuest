@@ -5,6 +5,7 @@
 #include "../Headers/EntityDistance.h"
 #include "../Headers/IEntitySceneChannel.h"
 #include <deque>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,7 @@ public:
 
   int getEntityIdAtPos(int coordX, int coordY) const;
   int getEntityCount() const;
+  const std::deque<Entity> &entities() const;
 
   // TODO: rework these so the ids are persistant.
   // possibly implement swap-pop to save on time
@@ -27,6 +29,7 @@ public:
   void removeEntity(int id);
   void removeAllEntities();
   Entity &entityAtId(int id);
+  std::optional<Entity> extractPlayer();
 
   // ================================
   // for renderer

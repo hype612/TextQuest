@@ -5,6 +5,7 @@
 #include "../Headers/Transform.h"
 #include "NotcursesInputHandler.h"
 #include "NotcursesRenderer.h"
+#include "SceneManager.h"
 #include "UIManager.h"
 #include "Vec2f.h"
 #include "Vec2i.h"
@@ -14,12 +15,13 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <memory>
 #include <ncurses.h>
 #include <notcurses/notcurses.h>
 #include <ranges>
 #include <string>
 
-GameEngine::GameEngine() : _sceneManager(), _renderAssetManager(_sceneManager) {
+GameEngine::GameEngine() {
 
 #if (defined(LINUX) || defined(__linux__))
   notcurses_options ncopts{getenv("TERM"),
@@ -43,16 +45,20 @@ GameEngine::GameEngine() : _sceneManager(), _renderAssetManager(_sceneManager) {
 }
 
 void GameEngine::enableDistanceShading(bool enabled) {
-  _renderAssetManager.setDistanceShading(enabled);
+  _shadingEnabled = enabled;
+  if (_renderAssetManager)
+    _renderAssetManager->setDistanceShading(enabled);
 }
 void GameEngine::setDistanceShadingThresholds(
     const std::vector<float> &thresholds) {
-  _renderAssetManager.setDistanceShadingThresholds(thresholds);
+  _shadingThresholds = thresholds;
+  if (_renderAssetManager)
+    _renderAssetManager->setDistanceShadingThresholds(thresholds);
 }
 
 vec2i GameEngine::screenSize() { return _renderer->screenSize(); }
 
-SceneManager &GameEngine::sceneMan() { return _sceneManager; }
+SceneManager &GameEngine::sceneMan() { return *_sceneManager; }
 IInputHandler &GameEngine::inputHandler() { return *_inputHandler; }
 UIManager &GameEngine::uiMan() { return *_uimanager; }
 
@@ -60,20 +66,37 @@ void GameEngine::setOnSceneOver(std::function<void()> callback) {
   _sceneOverCb = callback;
 }
 
+void GameEngine::setScene(const std::shared_ptr<SceneManager> &sc_man) {
+  _pendingScene = sc_man;
+}
+
+void GameEngine::applyPendingScene() {
+  if (!_pendingScene)
+    return;
+  _sceneManager = std::move(_pendingScene);
+  _renderAssetManager.emplace(*_sceneManager);
+  _renderAssetManager->setDistanceShading(_shadingEnabled);
+  _renderAssetManager->setDistanceShadingThresholds(_shadingThresholds);
+  _sceneOverFired = false;
+  // TODO: reset input state, check camera is set
+}
+
 void GameEngine::run_game() {
   _engineRunning = true;
-  _sceneOverFired = false;
-  screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
-  _zBuffer.reserve(_renderer->screenWidth());
-  if (!_sceneManager.isMapAvailable()) {
-    Logger::GetInstance()->log("Map was never uploaded. Shutting down GameLoop",
-                               LogType::CORE, LogLevel::ERROR);
+  applyPendingScene();
+  if (!_sceneManager || !_sceneManager->isMapAvailable()) {
+    Logger::GetInstance()->log(
+        "No scene set or map was never uploaded. Shutting down GameLoop",
+        LogType::CORE, LogLevel::ERROR);
     return;
   }
+  screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
+  _zBuffer.reserve(_renderer->screenWidth());
   auto tp1 = std::chrono::system_clock::now();
   auto tp2 = std::chrono::system_clock::now();
   while (_engineRunning) {
-    const Camera *cam = _sceneManager.cameraPtr();
+    applyPendingScene();
+    const Camera *cam = _sceneManager->cameraPtr();
     tp2 = std::chrono::system_clock::now();
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
@@ -84,8 +107,8 @@ void GameEngine::run_game() {
     //       this ugly thing can be removed
     if (static_cast<NotcursesInputHandler *>(_inputHandler)->quitPressed())
       _engineRunning = false;
-    if (!_sceneManager.sceneOver()) {
-      _sceneManager.process(f_elapsed_time);
+    if (!_sceneManager->sceneOver()) {
+      _sceneManager->process(f_elapsed_time);
       _zBuffer.clear();
       RayCastingProcess(cam);
       EntityProjectionProcess(cam);
@@ -154,13 +177,13 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
         side = WallSide::VERTICAL;
       }
 
-      if (_sceneManager.isOutOfBounds(mapPos.x, mapPos.y)) {
+      if (_sceneManager->isOutOfBounds(mapPos.x, mapPos.y)) {
         sideDist.x = max_raylength;
         sideDist.y = max_raylength;
         break;
       }
 
-      if (_sceneManager.isWall(mapPos.x, mapPos.y)) {
+      if (_sceneManager->isWall(mapPos.x, mapPos.y)) {
         hitwall = true;
       }
       std::string sideStr;
@@ -205,7 +228,7 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
       int wallTop = (screenHeight / 2) - (wallHeight / 2);
       int visibleTop = std::max(0, -wallTop);
       int visibleBot = std::min(screenHeight - wallTop, (int)wallHeight);
-      toRender = _renderAssetManager.charColumn({mapPos.x, mapPos.y, wallHeight,
+      toRender = _renderAssetManager->charColumn({mapPos.x, mapPos.y, wallHeight,
                                                  visibleTop, visibleBot,
                                                  hitpoint, distance_to_wall});
     }
@@ -252,7 +275,7 @@ void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
 
 void GameEngine::EntityProjectionProcess(const Camera *cam) {
   std::vector<EntityDistance> entities =
-      _sceneManager.entitiesSortedByDistanceTo(cam->follow().position);
+      _sceneManager->entitiesSortedByDistanceTo(cam->follow().position);
   vec2f camDir{std::sin(cam->follow().angle), std::cos(cam->follow().angle)};
   vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
                -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
@@ -264,7 +287,7 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
   ic2 *= ideterminant;
   float fakeEyeHeight = 1.f;
   for (const EntityDistance &e : entities | std::views::reverse) {
-    vec2f entityRelPos = _sceneManager.entityAtId(e.id).transform().position -
+    vec2f entityRelPos = _sceneManager->entityAtId(e.id).transform().position -
                          cam->follow().position;
     entityRelPos = ic1 * entityRelPos.x + ic2 * entityRelPos.y;
     if (entityRelPos.y <= 0.1f) {
@@ -281,7 +304,7 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
     int screenX = static_cast<int>((scWidth / 2.f) *
                                    (1 + entityRelPos.x / entityRelPos.y));
 
-    std::string eTex = _renderAssetManager.scaledEntityTex(e.id, width, height,
+    std::string eTex = _renderAssetManager->scaledEntityTex(e.id, width, height,
                                                            entityRelPos.y);
     int colwidth = eTex.find('\n');
     int texStart = static_cast<int>(screenX - colwidth / 2.f);

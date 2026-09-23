@@ -12,10 +12,19 @@
 SceneManager::SceneManager() : _entityManager(*this), _mapManager() {}
 void SceneManager::process(float delta) {
   _entityManager.process(delta);
-  //_eventManager.process();
+  if (_winCondition && _winCondition(*this)) {
+    _playerWon = true;
+    _sceneOver = true;
+  }
 }
 
 bool SceneManager::sceneOver() const { return _sceneOver; }
+bool SceneManager::playerWon() const { return _playerWon; }
+
+void SceneManager::setWinCondition(
+    std::function<bool(const SceneManager &)> win_cond) {
+  _winCondition = win_cond;
+}
 
 // Map Related functions
 void SceneManager::initializeNewMap(std::string &map, int mapWidth,
@@ -70,15 +79,22 @@ void SceneManager::removeEntity(int entityId) {
   _entityManager.removeEntity(entityId);
 }
 void SceneManager::removeAllEntities() { _entityManager.removeAllEntities(); }
+std::optional<Entity> SceneManager::extractPlayer() {
+  return _entityManager.extractPlayer();
+}
 
 std::vector<EntityDistance>
 SceneManager::entitiesSortedByDistanceTo(const vec2f &target) const {
   return _entityManager.entitiesSortedByDistanceTo(target);
 }
 
+const std::deque<Entity> &SceneManager::entities() const {
+  return _entityManager.entities();
+}
+
 // Camera
 const Camera &SceneManager::camera() const {
-  if (_camera.has_value()) {
+  if (!_camera.has_value()) {
     std::cerr << "Camera accessed before SetCameraFollow was ever called"
               << std::endl;
     std::exit(EXIT_FAILURE);
@@ -91,7 +107,7 @@ const Camera *SceneManager::cameraPtr() const {
 }
 
 const Transform &SceneManager::cameraFollow() const {
-  if (_camera.has_value()) {
+  if (!_camera.has_value()) {
     std::cerr << "Camera accessed before SetCameraFollow was ever called"
               << std::endl;
     std::exit(EXIT_FAILURE);

@@ -188,6 +188,8 @@ void Entity::setID(int id) {
   return;
 }
 
+void Entity::clearID() { _id = -1; }
+
 void Entity::setTransform(const Transform &new_transform) {
   _transform = new_transform;
 }

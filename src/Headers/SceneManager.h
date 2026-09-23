@@ -9,6 +9,7 @@
 #include "MapManager.h"
 #include "RenderAssetManager.h"
 #include "Transform.h"
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -19,10 +20,17 @@ public:
 
   SceneManager();
 
+  SceneManager(SceneManager &&) = delete;
+  SceneManager(const SceneManager &) = delete;
+  SceneManager &operator=(const SceneManager &) = delete;
+  SceneManager &operator=(SceneManager &&) = delete;
+
   void process(float delta);
   // In the current context:
   // player died == scene is over
+  void setWinCondition(std::function<bool(const SceneManager &)>);
   bool sceneOver() const;
+  bool playerWon() const;
 
   // Map Related functions
   void initializeNewMap(std::string &map, int mapWidth, int mapHeight);
@@ -47,6 +55,8 @@ public:
   void removeEntity(Entity &entity);
   void removeEntity(int entityId);
   void removeAllEntities();
+  std::optional<Entity> extractPlayer();
+  const std::deque<Entity> &entities() const;
   std::vector<EntityDistance>
   entitiesSortedByDistanceTo(const vec2f &target) const;
 
@@ -65,6 +75,8 @@ private:
   EntityManager _entityManager;
   MapManager _mapManager;
   bool _sceneOver = false;
+  bool _playerWon = false;
+  std::function<bool(const SceneManager &)> _winCondition;
   // need to postpone construction
   std::optional<Camera> _camera;
 };
