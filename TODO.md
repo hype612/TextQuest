@@ -77,7 +77,8 @@ boilerplate. They exclude writing the thesis text itself.
 ### 6. Code quality and documentation (~9-14 h)
 - [x] Replace hardcoded `/home/attila/Kitchen/TextQuest/...` texture paths in
   `src/TextQuest.cpp` with repo-relative paths (~1 h).
-- [ ] Move game setup out of `main` into a `Game` class under `src/GameSpecific/` (~2-3 h).
+- [x] Move game setup out of `main` into a `Game` class under `src/GameSpecific/` (~2-3 h).
+  Done as `TextQuestCore` (`src/GameSpecific/Game/`), a concrete class with no interface.
 - [x] Add header dependency tracking to the `Makefile` (`-MMD -MP`) (~0.5 h).
 - [x] `~GameEngine` does not `delete _uimanager` (~0.25 h).
 - [ ] Delete, or clearly mark, the stale `Windows*` and `NCurses*` files (~1 h).
@@ -185,12 +186,12 @@ can be carried from one scene to the next. Nothing here is implemented yet.
   `UIManager::removeElement`, plus `UIManager::clear()`. On restart `startScene` clears
   every overlay and rebuilds the whole HUD (health bar and Istvan state display) together
   with the scene, so the presenters are re-attached to the new controllers.
-- [ ] Game side (`src/TextQuest.cpp`): split `main` into per-level builders returning a
+- [ ] Game side (`src/GameSpecific/Game/TextQuestCore.cpp`): split `main` into per-level builders returning a
   `shared_ptr<SceneManager>`. Each sets its own win condition, on-over and restart
   callbacks. Restart builds a fresh player, advancing carries the existing player (HP
   included, decided by the game, never by the engine). Partly done: `buildScene`,
-  `buildHud` and `startScene` exist, but the callbacks are still set in `main`, and there
-  is only one level.
+  `buildHud` and `startScene` exist as `TextQuestCore` members and the callbacks are set in
+  its constructor, but there is only one level.
 - Done when: dying and pressing `r` rebuilds the level in the same process without
   reinitialising notcurses, and winning can swap to a second map with the same player.
 
