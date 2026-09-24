@@ -33,6 +33,7 @@ public:
   UIManager &uiMan();
 
   void setOnSceneOver(std::function<void()> callback);
+  void setPostSceneOver(std::function<void()> callback);
 
   GameEngine(const GameEngine &g) = delete;
   GameEngine &operator=(const GameEngine &) = delete;
@@ -49,6 +50,7 @@ private:
   std::shared_ptr<SceneManager> _sceneManager; // active
   std::shared_ptr<SceneManager> _pendingScene; // applied at loop top
   std::function<void()> _sceneOverCb;
+  std::function<void()> _postSceneOverCb;
 
   // rendering vars and consts
   bool _shadingEnabled = false;

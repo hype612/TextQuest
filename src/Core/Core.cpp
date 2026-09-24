@@ -66,6 +66,10 @@ void GameEngine::setOnSceneOver(std::function<void()> callback) {
   _sceneOverCb = callback;
 }
 
+void GameEngine::setPostSceneOver(std::function<void()> callback) {
+  _postSceneOverCb = callback;
+}
+
 void GameEngine::setScene(const std::shared_ptr<SceneManager> &sc_man) {
   _pendingScene = sc_man;
 }
@@ -103,9 +107,7 @@ void GameEngine::run_game() {
     float f_elapsed_time = elapsed_time.count();
 
     _inputHandler->ReceiveInput();
-    // TODO: Overhaul the input system so
-    //       this ugly thing can be removed
-    if (static_cast<NotcursesInputHandler *>(_inputHandler)->quitPressed())
+    if (_inputHandler->rawKeyPressed('x'))
       _engineRunning = false;
     if (!_sceneManager->sceneOver()) {
       _sceneManager->process(f_elapsed_time);
@@ -117,8 +119,11 @@ void GameEngine::run_game() {
       _sceneOverFired = true;
       if (_sceneOverCb)
         _sceneOverCb();
+    } else {
+      if (_postSceneOverCb)
+        _postSceneOverCb();
     }
-    // TODO: EIther introduce a legit built-in debug plane
+    // TODO: Either introduce a legit built-in debug plane
     //       or just delete this entirely and just expose
     //       query functions for these.
     std::vector<std::string> dbgNfo = {
@@ -228,9 +233,9 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
       int wallTop = (screenHeight / 2) - (wallHeight / 2);
       int visibleTop = std::max(0, -wallTop);
       int visibleBot = std::min(screenHeight - wallTop, (int)wallHeight);
-      toRender = _renderAssetManager->charColumn({mapPos.x, mapPos.y, wallHeight,
-                                                 visibleTop, visibleBot,
-                                                 hitpoint, distance_to_wall});
+      toRender = _renderAssetManager->charColumn(
+          {mapPos.x, mapPos.y, wallHeight, visibleTop, visibleBot, hitpoint,
+           distance_to_wall});
     }
     _zBuffer.push_back(distance_to_wall);
     RenderCol(ceiling, floor, x, screenWidth, screenHeight, toRender);
@@ -305,7 +310,7 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
                                    (1 + entityRelPos.x / entityRelPos.y));
 
     std::string eTex = _renderAssetManager->scaledEntityTex(e.id, width, height,
-                                                           entityRelPos.y);
+                                                            entityRelPos.y);
     int colwidth = eTex.find('\n');
     int texStart = static_cast<int>(screenX - colwidth / 2.f);
     int texEnd = texStart + colwidth;

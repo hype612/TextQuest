@@ -13,10 +13,12 @@ NotcursesInputHandler::NotcursesInputHandler(std::shared_ptr<notcurses> nc)
 
 void NotcursesInputHandler::Init() {}
 void NotcursesInputHandler::ReceiveInput() {
+  _pressedThisFrame.clear();
   ncinput in_char;
   timespec ts{0, 1000000};
   uint32_t rc;
   while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0) {
+    _pressedThisFrame.insert(in_char.id);
     KeyEvent(in_char.utf8, in_char.evtype);
   }
 }
@@ -25,11 +27,11 @@ bool NotcursesInputHandler::keyDown(MoveDirection dir) const {
   return _mvmtKeyStates[static_cast<int>(dir)];
 }
 
-bool NotcursesInputHandler::quitPressed() const { return _quitPressed; }
+bool NotcursesInputHandler::rawKeyPressed(uint32_t key) const {
+  return _pressedThisFrame.contains(key);
+}
 
 void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
-  std::string dbg = "KeyEvent received: ";
-  dbg += *in;
   switch (*in) {
   case 'w':
     if (evtype == NCTYPE_PRESS) {
@@ -72,11 +74,6 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
     if (evtype == NCTYPE_RELEASE)
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
-    break;
-  case 'x':
-    if (evtype == NCTYPE_PRESS) {
-      _quitPressed = true;
-    }
     break;
   case 'i':
     if (evtype == NCTYPE_PRESS) {

@@ -1,5 +1,6 @@
 #include "UIManager.h"
 #include "Logger.h"
+#include "UIElement.h"
 #include <utility>
 
 UIManager::UIManager(IRenderer &renderer) : _renderer(renderer) {}
@@ -16,10 +17,17 @@ UIElementHandle UIManager::addElement(UIElement element) {
 }
 
 void UIManager::removeElement(UIElementHandle handle) {
-  // NOTE: this only drops UIManager's ownership of the element - the
-  // underlying ncplane isn't destroyed yet, IRenderer has no
-  // destroyOverlay(OverlayId) counterpart to createOverlay() yet.
-  _elements.erase(handle);
+  if (_elements.contains(handle)) {
+    _renderer.destroyOverlay(handle);
+    _elements.erase(handle);
+  }
+}
+
+void UIManager::clear() {
+  for (auto &[handle, elem] : _elements) {
+    _renderer.destroyOverlay(handle);
+  }
+  _elements.clear();
 }
 
 UIElement *UIManager::elementAt(UIElementHandle handle) {

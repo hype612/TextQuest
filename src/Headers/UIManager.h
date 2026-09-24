@@ -28,7 +28,7 @@ public:
   // NOTE: needs IRenderer to grow a matching destroyOverlay(OverlayId) -
   // not there yet.
   void removeElement(UIElementHandle handle);
-
+  void clear();
   // Resolves a handle to its element, or nullptr if the handle is
   // invalid / already removed.
   UIElement *elementAt(UIElementHandle handle);

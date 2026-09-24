@@ -5,8 +5,10 @@
 #include "./IInputHandler.h"
 #include "./MoveDirection.h"
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <notcurses/notcurses.h>
+#include <unordered_set>
 
 class NotcursesInputHandler : public IInputHandler {
 public:
@@ -14,7 +16,7 @@ public:
   void Init() override;
   void ReceiveInput() override;
   bool keyDown(MoveDirection dir) const override;
-  bool quitPressed() const;
+  bool rawKeyPressed(uint32_t key) const override;
   ~NotcursesInputHandler() = default;
 
 private:
@@ -22,7 +24,7 @@ private:
 
   std::shared_ptr<notcurses> _nc;
   std::array<bool, moveDirectionCount + 1> _mvmtKeyStates;
-  bool _quitPressed = false;
+  std::unordered_set<char32_t> _pressedThisFrame;
 };
 
 #endif // OS Check end

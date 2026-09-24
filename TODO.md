@@ -51,8 +51,8 @@ boilerplate. They exclude writing the thesis text itself.
 - [x] Show a "YOU DIED" / "YOU WIN" message with a new presenter (see
   `src/GameSpecific/UIControllers/HealthBarPresenter.cpp` as the pattern).
 - [ ] game end check and win cond check is done but is not in a separate presenter. If needed, move it there. win condition is not tested or propagated.
-- [ ] Restart or quit on a key press.
-- Done when: the game can be finished and replayed without restarting the process by hand.
+- [x] Restart or quit on a key press.
+- IT IS Done|Done when: the game can be finished and replayed without restarting the process by hand.
 
 ### 3. Difficulty settings (~2-3 h)
 - [ ] `Difficulty` struct with multipliers: enemy damage, enemy health, enemy speed,
@@ -79,22 +79,37 @@ boilerplate. They exclude writing the thesis text itself.
   `src/TextQuest.cpp` with repo-relative paths (~1 h).
 - [ ] Move game setup out of `main` into a `Game` class under `src/GameSpecific/` (~2-3 h).
 - [x] Add header dependency tracking to the `Makefile` (`-MMD -MP`) (~0.5 h).
-- [ ] `~GameEngine` does not `delete _uimanager` (~0.25 h).
+- [x] `~GameEngine` does not `delete _uimanager` (~0.25 h).
 - [ ] Delete, or clearly mark, the stale `Windows*` and `NCurses*` files (~1 h).
 - [ ] Turn `CLAUDE.md` and the design decisions (presenter/observer UI, intent-based
   movement, composition over subclassing) into the thesis architecture section (~4-8 h).
 - [ ] Optional: a few tests, e.g. for `HealthBarPresenter::renderBar` and map generation.
 
+### 7. Stretch: sprite facing and state animation (~6-8 h, not in the proposal)
+Only start this after steps 1-6 are done, and only if still on schedule at the Oct 18
+decision point. It must be finished before the Oct 25 feature freeze, otherwise drop it.
+- [ ] Facing indicator: pick a sprite variant (front / back to start) from the angle
+  between the entity's facing and the direction to the camera, so the player can tell
+  whether an enemy faces them (~2-3 h).
+- [ ] State-based animation component: per-state frame lists (idle, chase, attack, dead),
+  a frame timer, driven by the state `IstvanBehaviorController` already exposes (~4-5 h).
+- [ ] Texture storage per entity becomes `state -> facing -> frame -> shading`; extend
+  `TexGen.py` accordingly. Build the small version first, generalise later.
+- Art: AI-generated or sourced from elsewhere. Record the source and licence of every
+  sourced asset, and note AI-generated ones for the AI usage declaration.
+- Done when: an enemy visibly changes frames per state and its sprite differs when it
+  faces the player versus away.
+
 ## Known issues (small, fix opportunistically)
 - [ ] In `GameEngine::run_game`, `_uimanager->process()` runs after `PrintBuffer()`,
   so overlay changes show one frame late. Move it before `PrintBuffer()`.
-- [ ] `sceneMan.AddEntity(p)` leaves the caller's `Entity` moved-from. Anything done to
+- [x] `sceneMan.AddEntity(p)` leaves the caller's `Entity` moved-from. Anything done to
   the local after that (e.g. `p.setHealth(50)`) is lost. Use `entityAtId(...)`.
-- [ ] `Entity::setHealth` does not notify anyone. Only `PlayerBehaviorController::onHit`
+- [x] `Entity::setHealth` does not notify anyone. Only `PlayerBehaviorController::onHit`
   updates the health observer, so pickups or other damage sources would not reach the bar.
-- [ ] `Rect::overlaps` treats touching edges as overlapping, so `createOverlay` rejects
+- [x] `Rect::overlaps` treats touching edges as overlapping, so `createOverlay` rejects
   elements that merely touch.
-- [ ] `GameEngine::screnSize` is misspelled (`src/Headers/Core.h` and `Core.cpp`).
+- [x] `GameEngine::screnSize` is misspelled (`src/Headers/Core.h` and `Core.cpp`).
 
 ## Schedule (8 h/week, from 2026-09-21; HARD deadline: Tuesday 2026-12-01, no extension)
 
@@ -109,7 +124,7 @@ Before uploading, Neptun asks for the final title, 3-5 keywords and a max-500-ch
 | 2 | Sep 28-Oct 4 | Step 2 (6 h), leak and UI-order fixes (0.5 h) | Outline, start ray-casting chapter (1.5 h) |
 | 3 | Oct 5-11 | Step 3 (3 h), `Game` class (3 h) | 2 h |
 | 4 | Oct 12-18 | Step 4 (5 h) | 3 h |
-| 5 | Oct 19-25 | Step 5 (3 h), stale-file cleanup (1 h) | 4 h |
+| 5 | Oct 19-25 | Step 5 (3 h), stale-file cleanup (1 h), step 7 stretch only if ahead | 4 h |
 | | **Oct 25** | **Feature freeze**, bug fixes only | |
 | 6-8 | Oct 26-Nov 15 | Playtesting and bug fixes only | ~8 h/week, **full draft by Nov 15** |
 | 9 | Nov 16-22 | Gameplay recording, clean-clone build check | Supervisors review the draft, you revise |
@@ -119,7 +134,8 @@ Before uploading, Neptun asks for the final title, 3-5 keywords and a max-500-ch
 - Do the path fix first: it lets you build and run on another machine (e.g. at work).
   The terminal must support the kitty keyboard protocol (see `CLAUDE.md`).
 - Send an outline to the supervisors in October and a real draft by Nov 15 at the latest.
-- If a step slips, cut step 5, then step 4, never the writing time. Decide on Oct 18.
+- If a step slips, cut step 7 first, then step 5, then step 4, never the writing time.
+  Decide on Oct 18.
 - Keep notes on where AI assistance was used, so the declaration is accurate.
 
 ## Estimates
@@ -160,18 +176,21 @@ can be carried from one scene to the next. Nothing here is implemented yet.
 - [x] `SceneManager::extractPlayer()`: move the player `Entity` out and reset its ID to -1.
   The game re-adds it to the new scene as the first entity (ID 0), sets the spawn transform
   itself (`addEntity` touches only the ID) and re-points the camera.
-- [ ] Restart: `'r'` in `NotcursesInputHandler` with a `restartPressed()` accessor. The
-  engine polls it only while the active scene is over and the player lost, then invokes a
-  scene-level `setOnRestart` callback. It has no effect mid-game.
+- [x] Restart: done differently from the original design. The engine calls
+  `setPostSceneOver` every frame while the scene is over, and the game polls
+  `rawKeyPressed('r')` there and calls `startScene`. It has no effect mid-game. No
+  `restartPressed()` accessor or `setOnRestart` exists.
 - [ ] Reset input state (`_quitPressed`, held keys) on scene swap.
-- [ ] `IRenderer::destroyOverlay` (+ notcurses implementation) and
-  `UIManager::removeElement`, so scene-scoped UI (death box, Istvan state display) can be
-  torn down on swap. The health bar stays and its presenter is rebound to the new player
-  controller on restart.
+- [x] `IRenderer::destroyOverlay` (+ notcurses implementation) and
+  `UIManager::removeElement`, plus `UIManager::clear()`. On restart `startScene` clears
+  every overlay and rebuilds the whole HUD (health bar and Istvan state display) together
+  with the scene, so the presenters are re-attached to the new controllers.
 - [ ] Game side (`src/TextQuest.cpp`): split `main` into per-level builders returning a
   `shared_ptr<SceneManager>`. Each sets its own win condition, on-over and restart
   callbacks. Restart builds a fresh player, advancing carries the existing player (HP
-  included, decided by the game, never by the engine).
+  included, decided by the game, never by the engine). Partly done: `buildScene`,
+  `buildHud` and `startScene` exist, but the callbacks are still set in `main`, and there
+  is only one level.
 - Done when: dying and pressing `r` rebuilds the level in the same process without
   reinitialising notcurses, and winning can swap to a second map with the same player.
 

@@ -170,13 +170,55 @@ static BuiltScene buildScene(GameEngine &ge) {
   return {scene, playerCtrlPtr, istvanCtrlPtr};
 }
 
+// Per-scene HUD. The presenters are observers of the scene's controllers, so
+// they are created together with the scene and replaced when it is reloaded.
+struct SceneHud {
+  std::unique_ptr<HealthBarPresenter> healthBar;
+  std::unique_ptr<IstvanStatePresenter> istvanState;
+};
+
+static SceneHud buildHud(GameEngine &ge, BuiltScene &built) {
+  SceneHud hud;
+  vec2i scr = ge.screenSize();
+
+  // Health bar
+  Rect hbArea{1, scr.y - 3, 50, 3};
+  Rect hbWritable{1, 1, 48, 1};
+  UIElementHandle hbHandle = ge.uiMan().addElement(
+      UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
+  hud.healthBar =
+      std::make_unique<HealthBarPresenter>(ge.uiMan(), hbHandle, playerMaxHp);
+  built.playerCtrl->setHealthObserver(hud.healthBar.get());
+
+  // Istvan state debug display
+  Rect stateArea{2, scr.y - 7, 30, 3};
+  Rect stateWritable{1, 1, 28, 1};
+  UIElementHandle stateHandle = ge.uiMan().addElement(UIElement(
+      stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
+  hud.istvanState =
+      std::make_unique<IstvanStatePresenter>(ge.uiMan(), stateHandle);
+  built.istvanCtrl->setStateObserver(hud.istvanState.get());
+  return hud;
+}
+
+// Builds a fresh scene plus its HUD and queues it on the engine. Also used
+// for retrying: the old presenters and every overlay are dropped first, so
+// the new HUD does not collide with the old overlays.
+static void startScene(GameEngine &ge, SceneHud &hud) {
+  hud = SceneHud{};
+  ge.uiMan().clear();
+  BuiltScene built = buildScene(ge);
+  hud = buildHud(ge, built);
+  ge.setScene(built.scene);
+}
+
 int main() {
   Logger *l = Logger::GetInstance();
   auto ge_ptr = std::make_unique<GameEngine>();
-  BuiltScene built = buildScene(*ge_ptr);
-  auto scene = built.scene;
-  ge_ptr->setScene(scene);
-  SceneManager &sceneMan = *scene;
+  // declared after ge_ptr, so the presenters are destroyed before the
+  // UIManager
+  SceneHud hud;
+  startScene(*ge_ptr, hud);
   l->log("ge_ptr good, scene set", LogType::CORE, LogLevel::INFO);
 
   ge_ptr->enableDistanceShading(true);
@@ -187,32 +229,10 @@ int main() {
   l->log("uploaded all textures", LogType::CORE, LogLevel::INFO);
 
   // ==================
-  // Health bar
-  // ==================
-  vec2i scr = ge_ptr->screenSize();
-  Rect hbArea{1, scr.y - 3, 50, 3};
-  Rect hbWritable{1, 1, 48, 1};
-  UIElementHandle hbHandle = ge_ptr->uiMan().addElement(
-      UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
-  // declared after ge_ptr, so it is destroyed before the UIManager
-  HealthBarPresenter healthBar(ge_ptr->uiMan(), hbHandle, playerMaxHp);
-  built.playerCtrl->setHealthObserver(&healthBar);
-
-  // ==================
-  // Istvan state debug display
-  // ==================
-  Rect stateArea{2, scr.y - 7, 30, 3};
-  Rect stateWritable{1, 1, 28, 1};
-  UIElementHandle stateHandle = ge_ptr->uiMan().addElement(UIElement(
-      stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
-  // declared after ge_ptr, so it is destroyed before the UIManager
-  IstvanStatePresenter istvanState(ge_ptr->uiMan(), stateHandle);
-  built.istvanCtrl->setStateObserver(&istvanState);
-
-  // ==================
   // Game over overlay
   // ==================
-  ge_ptr->setOnSceneOver([&ge_ptr, scr, &sceneMan]() {
+  vec2i scr = ge_ptr->screenSize();
+  ge_ptr->setOnSceneOver([&ge_ptr, scr]() {
     const unsigned int w = 20;
     const unsigned int h = 3;
     Rect deathArea{(scr.x - static_cast<int>(w)) / 2,
@@ -226,10 +246,10 @@ int main() {
     UIElement *el = ge_ptr->uiMan().elementAt(deathHandle);
     if (el) {
       std::string msg;
-      if (sceneMan.playerWon()) {
-        msg = "YOU WON";
+      if (ge_ptr->sceneMan().playerWon()) {
+        msg = "YOU WON. Retry? (r=yes, x=quit)";
       } else {
-        msg = "YOU DIED";
+        msg = "YOU DIED. Retry? (r=yes, x=quit)";
       }
       int pad = (static_cast<int>(deathWritable.width) -
                  static_cast<int>(msg.size())) /
@@ -237,6 +257,11 @@ int main() {
       if (pad < 0)
         pad = 0;
       el->updateContent({std::string(pad, ' ') + msg});
+    }
+  });
+  ge_ptr->setPostSceneOver([&ge_ptr, &hud]() {
+    if (ge_ptr->inputHandler().rawKeyPressed('r')) {
+      startScene(*ge_ptr, hud);
     }
   });
 

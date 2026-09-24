@@ -26,6 +26,7 @@ public:
   void setOverlayRegion(OverlayId id, Rect region,
                         const std::vector<std::string> &content) override;
   OverlayId createOverlay(Rect area) override;
+  bool destroyOverlay(OverlayId id) override;
   ~NotcursesRenderer();
 
 private:

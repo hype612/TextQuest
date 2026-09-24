@@ -26,6 +26,7 @@ public:
   virtual void setOverlayRegion(OverlayId id, Rect region,
                                 const std::vector<std::string> &content) = 0;
 
+  virtual bool destroyOverlay(OverlayId id) = 0;
   IRenderer &operator=(const IRenderer &) = delete;
   IRenderer(IRenderer &&) = delete;
 

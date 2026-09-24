@@ -1,4 +1,5 @@
 #include "../Headers/NotcursesRenderer.h"
+#include "IRenderer.h"
 #include "Logger.h"
 #include <iostream>
 #include <memory>
@@ -92,6 +93,19 @@ OverlayId NotcursesRenderer::createOverlay(Rect area) {
   _overlayPlanes[_topId] = ncplane_create(notcurses_stdplane(_nc.get()), &opts);
   return _topId;
 }
+
+bool NotcursesRenderer::destroyOverlay(OverlayId id) {
+  if (!_overlayPlanes.contains(id)) {
+    Logger::GetInstance()->log(
+        "destroyOverlay: function was called with invalid id.", LogType::RENDER,
+        LogLevel::ERROR);
+    return false;
+  }
+  ncplane_destroy(_overlayPlanes.at(id));
+  _overlayPlanes.erase(id);
+  return true;
+}
+
 void NotcursesRenderer::setOverlayContent(
     OverlayId id, const std::vector<std::string> &content) {
 
