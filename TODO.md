@@ -87,6 +87,20 @@ boilerplate. They exclude writing the thesis text itself.
   `createLinks()`, not before.
 - [ ] Wire `MapGenerator` output into `SceneManager::initializeNewMap` (currently only
   exercised standalone via `src/GameSpecific/MapGen/main.cpp`).
+- [ ] Replace `carveCorridor`'s straight L-shape with a drunkard's walk, for a less
+  mechanical/more organic-looking tunnel between rooms. Implementation sketch:
+  - Start a cursor at `a`. Loop until the cursor equals `b` (or is adjacent to it).
+  - Each step, most of the time (e.g. 70-80%) move one cell toward `b` along whichever axis
+    has the larger remaining distance (`|dx|` vs `|dy|`) — this is what guarantees the walk
+    actually terminates instead of wandering forever.
+  - The rest of the time, take a random cardinal step (up/down/left/right) instead — this is
+    what breaks the straight-line look into a wandering tunnel.
+  - Carve `Tile::FLOOR` at the cursor's cell on every step (including the biased ones).
+  - Keep the "waver" probability as a tunable parameter (constructor param or constant,
+    matching how `part_params`/CA already expose their knobs) rather than hardcoding it.
+  - Sanity-check against runaway loops on very large/degenerate rects (e.g. cap total steps
+    to a few multiples of the Manhattan distance between `a` and `b`, fall back to the old
+    L-shape carve if the cap is hit).
 
 ### 5. Feedback mechanisms (~2-3 h)
 - [ ] Damage feedback (message or short flash) when the player is hit.
