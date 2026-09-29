@@ -69,6 +69,25 @@ boilerplate. They exclude writing the thesis text itself.
 - [ ] Fallback if generation looks bad: load maps from files plus a next-level step.
 - Done when: each run (or each seed) gives a different playable layout.
 
+#### BSP + cellular-automata map generator (`src/GameSpecific/MapGen/`)
+- [x] `BspNode`: recursive rect partitioning (`bsp_node.hpp`).
+- [x] `CellularAutomata`: per-leaf cave generation (`cellularAutomata.hpp`).
+- [x] `MapGenerator::FillRooms`: carve each BSP leaf's rect with CA, force outer border to wall.
+- [x] `MapGenerator::createLinks`: post-order BSP traversal (`connectSubtree`), one floor-cell
+  anchor per subtree (`findFloorCell`), L-shaped corridor carve between sibling anchors
+  (`carveCorridor`). Leaves whose CA output is all-wall are regenerated in a loop until a
+  floor cell exists, so `findFloorCell`'s `{-1,-1}` sentinel never reaches `carveCorridor`.
+- [ ] Flood-fill prune after `createLinks()`: a single BSP leaf's CA cave can contain more than
+  one disconnected floor blob (`findFloorCell` only ever returns the first one it scans), so
+  picking one anchor per leaf doesn't guarantee every floor cell in the final map is reachable.
+  Fix: capture the `vec2i` that the root `connectSubtree(&_bspRoot)` call returns (guaranteed to
+  be part of the fully corridor-linked component) as a flood-fill seed, BFS/DFS over
+  4-connected `Tile::FLOOR` neighbors marking a same-size visited grid, then sweep `_map` and
+  convert any `Tile::FLOOR` cell that was never visited to `Tile::WALL`. Must run after
+  `createLinks()`, not before.
+- [ ] Wire `MapGenerator` output into `SceneManager::initializeNewMap` (currently only
+  exercised standalone via `src/GameSpecific/MapGen/main.cpp`).
+
 ### 5. Feedback mechanisms (~2-3 h)
 - [ ] Damage feedback (message or short flash) when the player is hit.
 - [ ] Kill / hit messages, reusing the message presenter from step 2.
