@@ -77,7 +77,7 @@ boilerplate. They exclude writing the thesis text itself.
   anchor per subtree (`findFloorCell`), L-shaped corridor carve between sibling anchors
   (`carveCorridor`). Leaves whose CA output is all-wall are regenerated in a loop until a
   floor cell exists, so `findFloorCell`'s `{-1,-1}` sentinel never reaches `carveCorridor`.
-- [ ] Flood-fill prune after `createLinks()`: a single BSP leaf's CA cave can contain more than
+- [x] Flood-fill prune after `createLinks()`: a single BSP leaf's CA cave can contain more than
   one disconnected floor blob (`findFloorCell` only ever returns the first one it scans), so
   picking one anchor per leaf doesn't guarantee every floor cell in the final map is reachable.
   Fix: capture the `vec2i` that the root `connectSubtree(&_bspRoot)` call returns (guaranteed to
@@ -233,3 +233,31 @@ can be carried from one scene to the next. Nothing here is implemented yet.
 - Generic `UIPresenter` base class (extract only after a third presenter)
 - Terminal resize handling
 - GPU migration and the Windows path
+
+## Spawn point & enemy placement sketch (not implemented yet)
+
+Runs after `MapGenerator::createLinks()`, which already BFS-floods from the fully-linked
+anchor and seals off any `Tile::FLOOR` cell the flood never reached -- so this pass can
+assume every remaining `Tile::FLOOR` cell in `_map` is genuinely reachable.
+
+- [ ] Collect leaf rects for free while `createRoom()` already recurses into them:
+  `std::vector<Rect> _leafRooms;`, `push_back(node->rect())` where it already builds that
+  leaf's `CellularAutomata`.
+- [ ] `enum class SpawnType { PLAYER, ENEMY, BOSS };` and
+  `struct SpawnPoint { SpawnType type; vec2i pos; };`.
+- [ ] `struct spawn_params { float max_enemy_density = 0.1f; int boss_room_count = 0; };`
+  -- `max_enemy_density` is a per-floor-tile probability ceiling (same style as
+  `CellularAutomata`'s noise threshold); no separate min density, overkill for now.
+- [ ] `MapGenerator::generateSpawnPoints(const spawn_params&)`, run after `createLinks()`:
+  - Player: pick one random leaf room, one random `Tile::FLOOR` cell inside it.
+  - Boss: pick `boss_room_count` distinct leaf rooms (excluding the player's), one random
+    floor cell each -- flat 1:1, no density math, so the game programmer sets the exact
+    boss-tile count directly.
+  - Enemies: for every remaining leaf room (not the player's, not a boss room), roll each
+    `Tile::FLOOR` cell against `max_enemy_density`.
+  - All results pushed into a `std::vector<SpawnPoint> _spawnPoints`.
+- [ ] `const std::vector<SpawnPoint>& spawnPoints() const` accessor. `MapGenerator` stays
+  Entity-agnostic -- it only hands back positions/types; `TextQuest.cpp`/GameSpecific code
+  turns those into actual `Entity` instances via `EntityManager::addEntity`.
+- Done when: player spawn, boss tiles, and density-capped enemy spawns are all queryable
+  off `MapGenerator` after generation, with nothing placed on an unreachable floor cell.
