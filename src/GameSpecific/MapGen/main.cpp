@@ -17,11 +17,18 @@ int main() {
   std::streambuf *oldBuf = std::cout.rdbuf(discard.rdbuf());
 
   MapGenerator generator(r, pp, /*min_wall_neighbor_count=*/5,
-                         /*noise_distribution=*/0.4f);
+                         /*noise_distribution=*/0.35f);
   generator.FillRooms();
+  std::ostringstream beforeStream;
+  beforeStream << generator;
+  std::string beforeLinks = beforeStream.str();
   generator.createLinks();
 
   std::cout.rdbuf(oldBuf);
 
-  std::cout << generator;
+  // Compare the two maps: after createLinks() the rooms should be joined and
+  // every floor cell not reachable from them should have turned into a wall.
+  std::cout << "--- after FillRooms ---\n" << beforeLinks;
+  std::cout << "\n--- after createLinks (corridors + unreachable pruned) ---\n"
+            << generator;
 }

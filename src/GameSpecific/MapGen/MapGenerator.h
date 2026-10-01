@@ -4,6 +4,7 @@
 #include "../../Headers/Vec2i.h"
 #include "bsp_node.hpp"
 #include "cellularAutomata.hpp"
+#include <queue>
 
 constexpr int ideal_generation_num = 4;
 
@@ -23,9 +24,19 @@ public:
     enforceBorder();
   }
 
-  // create walkable links between rooms
-  // Must run after FillRooms() has populated _map.
-  void createLinks() { connectSubtree(&_bspRoot); }
+  // create walkable links between rooms, then fill in any floor
+  // that can't be reached from them (isolated cave pockets)
+  void createLinks() {
+    vec2i bfs_start = connectSubtree(&_bspRoot);
+    std::vector<std::vector<bool>> accessible_mask = floodfill(bfs_start);
+    for (size_t y = 0; y < _map.size(); y++) {
+      for (size_t x = 0; x < _map[y].size(); x++) {
+        if (_map[y][x] == Tile::FLOOR && !accessible_mask[y][x]) {
+          _map[y][x] = Tile::WALL;
+        }
+      }
+    }
+  }
 
   friend std::ostream &operator<<(std::ostream &os, const MapGenerator &mg) {
     for (const auto &row : mg._map) {
@@ -38,6 +49,43 @@ public:
   }
 
 private:
+  std::vector<std::vector<bool>> floodfill(vec2i bfs_start) {
+    std::vector<std::vector<bool>> msk(
+        _map.size(), std::vector<bool>(_map[0].size(), false));
+    std::queue<vec2i> q;
+    q.push(bfs_start);
+    msk[bfs_start.y][bfs_start.x] = true;
+
+    while (!q.empty()) {
+      vec2i nxt = q.front();
+      q.pop();
+
+      if (nxt.y > 0 && msk[nxt.y - 1][nxt.x] == false &&
+          _map[nxt.y - 1][nxt.x] == Tile::FLOOR) {
+        msk[nxt.y - 1][nxt.x] = true;
+        q.push({nxt.x, nxt.y - 1});
+      }
+      if (static_cast<unsigned int>(nxt.y + 1) < _map.size() &&
+          msk[nxt.y + 1][nxt.x] == false &&
+          _map[nxt.y + 1][nxt.x] == Tile::FLOOR) {
+        msk[nxt.y + 1][nxt.x] = true;
+        q.push({nxt.x, nxt.y + 1});
+      }
+      if (nxt.x > 0 && msk[nxt.y][nxt.x - 1] == false &&
+          _map[nxt.y][nxt.x - 1] == Tile::FLOOR) {
+        msk[nxt.y][nxt.x - 1] = true;
+        q.push({nxt.x - 1, nxt.y});
+      }
+      if (static_cast<unsigned int>(nxt.x + 1) < _map[0].size() &&
+          msk[nxt.y][nxt.x + 1] == false &&
+          _map[nxt.y][nxt.x + 1] == Tile::FLOOR) {
+        msk[nxt.y][nxt.x + 1] = true;
+        q.push({nxt.x + 1, nxt.y});
+      }
+    }
+    return msk;
+  }
+
   void createRoom(const BspNode *node) {
     if (!node) {
       return;
