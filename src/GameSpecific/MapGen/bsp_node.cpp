@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 
-int partition_delim(int l, int h) { return rand() % (h - l) + l; }
+int BspNode::partition_delim(int l, int h) { return rand() % (h - l) + l; }
 
 std::ostream &operator<<(std::ostream &o, const Rect &r) {
   return o << r.x << ";" << r.y << ";" << r.width << ";" << r.height;
@@ -12,15 +12,12 @@ std::ostream &operator<<(std::ostream &o, const Rect &r) {
 BspNode::BspNode(Rect r, BspNode *parent, const part_params &pp)
     : _parent(parent), _rect(r) {
   // Partition if possible
-  // if not == leaf node so print
+  // if not == leaf node
   if ((static_cast<int>(_rect.width) > pp.max_width ||
        static_cast<int>(_rect.height) > pp.max_height) &&
       (static_cast<int>(_rect.width) >= pp.min_width &&
        static_cast<int>(_rect.height) >= pp.min_height))
     partition(pp);
-  else {
-    std::cout << _rect << std::endl;
-  }
 }
 
 void BspNode::partition(const part_params &pp) {

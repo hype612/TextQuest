@@ -52,7 +52,8 @@ std::ostream &printWithSpawns(std::ostream &os, const MapGenerator &mg) {
   return os;
 }
 
-int main() {
+// TODO: drop this ASAP
+int test_main() {
   std::srand(std::time(nullptr));
 
   part_params pp;

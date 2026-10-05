@@ -36,6 +36,7 @@ public:
   // cells against max_enemy_density.
   void generateSpawnPoints(float max_enemy_density, int boss_room_count);
   const std::vector<SpawnPoint> &spawnPoints() const { return _spawnPoints; }
+  const std::vector<std::vector<Tile>> &map() { return _map; }
 
   // TODO: remove if testing is done
   friend std::ostream &operator<<(std::ostream &os, const MapGenerator &mg);

@@ -5,8 +5,6 @@
 
 #include "../../Headers/Rect.h"
 
-int partition_delim(int l, int h);
-
 std::ostream &operator<<(std::ostream &o, const Rect &r);
 
 struct part_params {
@@ -31,6 +29,8 @@ public:
   bool is_leaf() const { return !_l_child && !_r_child; }
 
 private:
+  int partition_delim(int l, int h);
+
   BspNode *_parent = nullptr;
   std::unique_ptr<BspNode> _l_child;
   std::unique_ptr<BspNode> _r_child;
