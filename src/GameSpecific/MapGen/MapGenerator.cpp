@@ -19,6 +19,8 @@ void MapGenerator::FillRooms() {
   // if leaf == let generator do its thang
   createRoom(&_bspRoot);
   enforceBorder();
+  FillRooms();
+  createLinks();
 }
 
 void MapGenerator::createLinks() {

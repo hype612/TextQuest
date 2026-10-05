@@ -66,11 +66,9 @@ int test_main() {
 
   MapGenerator generator(r, pp, /*min_wall_neighbor_count=*/5,
                          /*noise_distribution=*/0.35f);
-  generator.FillRooms();
   std::ostringstream beforeStream;
   beforeStream << generator;
   std::string beforeLinks = beforeStream.str();
-  generator.createLinks();
   generator.generateSpawnPoints(/*max_enemy_density=*/0.05f,
                                 /*boss_room_count=*/1);
 
