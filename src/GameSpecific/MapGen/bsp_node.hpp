@@ -1,21 +1,13 @@
 #pragma once
 
-#include <cstdlib>
-#include <iostream>
+#include <iosfwd>
 #include <memory>
 
-inline int partition_delim(int l, int h) { return rand() % (h - l) + l; }
+#include "../../Headers/Rect.h"
 
-struct Rect {
-  int x;
-  int y;
-  int w;
-  int h;
-};
+int partition_delim(int l, int h);
 
-inline std::ostream &operator<<(std::ostream &o, const Rect &r) {
-  return o << r.x << ";" << r.y << ";" << r.w << ";" << r.h;
-}
+std::ostream &operator<<(std::ostream &o, const Rect &r);
 
 struct part_params {
   float part_low_bound = 0.3f;
@@ -30,38 +22,8 @@ enum split { HORIZONTAL = 0, VERTICAL = 1 };
 
 class BspNode {
 public:
-  BspNode(Rect r, BspNode *parent, const part_params &pp)
-      : _parent(parent), _rect(r) {
-    // Partition if possible
-    // if not == leaf node so print
-    if ((_rect.w > pp.max_width || _rect.h > pp.max_height) &&
-        (_rect.w >= pp.min_width && _rect.h >= pp.min_height))
-      partition(pp);
-    else {
-      std::cout << _rect << std::endl;
-    }
-  }
-  void partition(const part_params &pp) {
-
-    split s = static_cast<split>(rand() % 2);
-    if (s == split::HORIZONTAL) {
-      int delim =
-          partition_delim(static_cast<int>(_rect.w * pp.part_low_bound),
-                          static_cast<int>(_rect.w * pp.part_high_bound));
-      _l_child = std::make_unique<BspNode>(
-          Rect{_rect.x, _rect.y, delim, _rect.h}, this, pp);
-      _r_child = std::make_unique<BspNode>(
-          Rect{_rect.x + delim, _rect.y, _rect.w - delim, _rect.h}, this, pp);
-    } else {
-      int delim =
-          partition_delim(static_cast<int>(_rect.h * pp.part_low_bound),
-                          static_cast<int>(_rect.h * pp.part_high_bound));
-      _l_child = std::make_unique<BspNode>(
-          Rect{_rect.x, _rect.y, _rect.w, delim}, this, pp);
-      _r_child = std::make_unique<BspNode>(
-          Rect{_rect.x, _rect.y + delim, _rect.w, _rect.h - delim}, this, pp);
-    }
-  }
+  BspNode(Rect r, BspNode *parent, const part_params &pp);
+  void partition(const part_params &pp);
 
   const Rect &rect() const { return _rect; }
   const BspNode *left() const { return _l_child.get(); }

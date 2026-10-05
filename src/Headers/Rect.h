@@ -21,6 +21,10 @@ struct Rect {
            other.y + static_cast<int>(other.height) <=
                y + static_cast<int>(height);
   }
+  bool contains(float px, float py) const {
+    return px >= x && px < x + static_cast<int>(width) && py >= y &&
+           py < y + static_cast<int>(height);
+  }
 };
 
 #endif // RECT_H

@@ -18,8 +18,8 @@ inline void visualize(const BspNode &root, std::ostream &os = std::cout) {
   const int scale_x = 2;
   const int scale_y = 1;
 
-  const int cols = bounds.w * scale_x + 1;
-  const int rows = bounds.h * scale_y + 1;
+  const int cols = static_cast<int>(bounds.width) * scale_x + 1;
+  const int rows = static_cast<int>(bounds.height) * scale_y + 1;
   std::vector<std::string> grid(rows, std::string(cols, ' '));
 
   auto to_col = [&](int x) { return (x - bounds.x) * scale_x; };
@@ -27,9 +27,9 @@ inline void visualize(const BspNode &root, std::ostream &os = std::cout) {
 
   auto draw_rect = [&](const Rect &r) {
     int c0 = to_col(r.x);
-    int c1 = to_col(r.x + r.w);
+    int c1 = to_col(r.x + static_cast<int>(r.width));
     int r0 = to_row(r.y);
-    int r1 = to_row(r.y + r.h);
+    int r1 = to_row(r.y + static_cast<int>(r.height));
 
     for (int c = c0; c <= c1; ++c) {
       grid[r0][c] = '-';
