@@ -2,25 +2,26 @@
 #include "bsp_node.hpp"
 
 #include <algorithm>
-#include <ostream>
 #include <queue>
 
 MapGenerator::MapGenerator(const Rect &parent_area, const part_params &params,
                            int min_wall_neighbor_count,
-                           float noise_distribution)
+                           float noise_distribution, unsigned int seed)
     : _bspRoot(parent_area, nullptr, params),
       _ca_min_wall_neighbor_count(min_wall_neighbor_count),
       _ca_noise_distribution(noise_distribution), _parentArea(parent_area),
       _map(parent_area.height,
-           std::vector<Tile>(parent_area.width, Tile::WALL)) {}
+           std::vector<Tile>(parent_area.width, Tile::WALL)) {
+  srand(seed);
+  FillRooms();
+  createLinks();
+}
 
 void MapGenerator::FillRooms() {
   // traverse bsp.
   // if leaf == let generator do its thang
   createRoom(&_bspRoot);
   enforceBorder();
-  FillRooms();
-  createLinks();
 }
 
 void MapGenerator::createLinks() {
@@ -95,17 +96,6 @@ void MapGenerator::generateSpawnPoints(float max_enemy_density,
       }
     }
   }
-}
-
-// TODO: remove if testing is done
-std::ostream &operator<<(std::ostream &os, const MapGenerator &mg) {
-  for (const auto &row : mg._map) {
-    for (Tile t : row) {
-      os << (t == Tile::WALL ? '#' : '.');
-    }
-    os << '\n';
-  }
-  return os;
 }
 
 const BspNode *MapGenerator::findLeafContaining(const BspNode *node,

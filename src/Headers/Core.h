@@ -17,6 +17,9 @@ class GameEngine {
 public:
   GameEngine();
   void run_game();
+  // Scene-less frame loop for menus: polls input, calls `onFrame`, flushes the
+  // UI overlays and renders. Returns when `onFrame` returns false.
+  void runMenu(const std::function<bool()> &onFrame);
   ~GameEngine();
 
   void setScene(const std::shared_ptr<SceneManager> &sc_man);
@@ -60,7 +63,7 @@ private:
 
   IRenderer *_renderer;
   IInputHandler *_inputHandler;
-  char *screen;
+  char *screen = nullptr; // allocated in run_game
   std::optional<RenderAssetManager> _renderAssetManager;
   UIManager *_uimanager;
   std::vector<float> _zBuffer;

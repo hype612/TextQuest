@@ -45,7 +45,7 @@ public:
   TextureMapper(std::string initTexture);
   // Expects all textures of the vec to be the same size
   // and vec[0] == brightest => vec[size] dimmest
-  TextureMapper(std::vector<std::string> initTexture);
+  TextureMapper(const std::vector<std::string> &initTexture);
   TextureMapper() = default;
 
 private:

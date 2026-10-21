@@ -30,8 +30,8 @@ GameEngine::GameEngine() {
                            0,
                            0,
                            0,
-                           NCOPTION_NO_ALTERNATE_SCREEN |
-                               NCOPTION_NO_CLEAR_BITMAPS};
+                           NCOPTION_NO_CLEAR_BITMAPS |
+                               NCOPTION_SUPPRESS_BANNERS};
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
   _renderer = new NotcursesRenderer(nc);
@@ -83,6 +83,16 @@ void GameEngine::applyPendingScene() {
   _renderAssetManager->setDistanceShadingThresholds(_shadingThresholds);
   _sceneOverFired = false;
   // TODO: reset input state, check camera is set
+}
+
+void GameEngine::runMenu(const std::function<bool()> &onFrame) {
+  while (true) {
+    _inputHandler->ReceiveInput();
+    if (!onFrame())
+      return;
+    _uimanager->process();
+    _renderer->PrintBuffer();
+  }
 }
 
 void GameEngine::run_game() {

@@ -1,16 +1,59 @@
 #include "TextQuestCore.h"
+#include "../MapGen/MapGenerator.h"
+#include "Difficulty.h"
 #include "Entity.h"
 #include "Logger.h"
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+namespace {
+// Flattens the generator's Tile grid into the engine's map string, then
+// re-stamps each room's wall cells with a theme char picked per leaf room,
+// so different rooms can use different wall textures.
+std::string serializeThemedMap(const std::vector<std::vector<Tile>> &map,
+                               const std::vector<Rect> &leafRooms,
+                               const std::vector<char> &wallThemes) {
+  if (wallThemes.empty()) {
+    Logger::GetInstance()->log("serializeThemedMap: no wall themes given",
+                               LogType::CORE, LogLevel::ERROR);
+    Logger::GetInstance()->forceFlush();
+    std::abort();
+  }
+  int mapHeight = static_cast<int>(map.size());
+  int mapWidth = mapHeight > 0 ? static_cast<int>(map[0].size()) : 0;
+
+  std::string out(static_cast<size_t>(mapWidth) * mapHeight, '.');
+  for (int y = 0; y < mapHeight; y++)
+    for (int x = 0; x < mapWidth; x++)
+      if (map[y][x] == Tile::WALL)
+        out[y * mapWidth + x] = wallThemes[0];
+
+  for (const Rect &room : leafRooms) {
+    char theme = wallThemes[rand() % wallThemes.size()];
+    for (int y = 0; y < static_cast<int>(room.height); y++) {
+      for (int x = 0; x < static_cast<int>(room.width); x++) {
+        int gx = room.x + x, gy = room.y + y;
+        if (map[gy][gx] == Tile::WALL)
+          out[gy * mapWidth + gx] = theme;
+      }
+    }
+  }
+  return out;
+}
+} // namespace
+
 // Loads every shading variant in `dir`, ordered so lv0 (brightest) is first.
-static std::vector<std::string> loadTextureVec(SceneManager &sceneMan,
-                                               const std::string &dir) {
+std::vector<std::string> TextQuestCore::loadTextureVec(const std::string &dir) {
   std::unordered_map<std::string, std::string> texs;
-  sceneMan.loadResources(dir, texs);
+  loadResources(dir, texs);
   std::vector<std::string> keys;
   keys.reserve(texs.size());
   for (const auto &[key, value] : texs)
@@ -20,18 +63,14 @@ static std::vector<std::string> loadTextureVec(SceneManager &sceneMan,
   out.reserve(texs.size());
   for (const auto &key : keys)
     out.push_back(texs[key]);
-  Logger::GetInstance()->log(dir + " texture count: " +
-                                 std::to_string(out.size()),
-                             LogType::TEXPREP, LogLevel::INFO);
+  Logger::GetInstance()->log(
+      dir + " texture count: " + std::to_string(out.size()), LogType::TEXPREP,
+      LogLevel::INFO);
   return out;
 }
 
 TextQuestCore::TextQuestCore(GameEngine &ge)
     : _ge(ge), _ui(ge.uiMan()), _input(ge.inputHandler()) {
-  Logger *l = Logger::GetInstance();
-  startScene();
-  l->log("scene set", LogType::CORE, LogLevel::INFO);
-
   _ge.enableDistanceShading(true);
   std::vector<float> shadingThresholds;
   for (int i = 1; i < 8; i++)
@@ -43,47 +82,157 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
 }
 
 void TextQuestCore::run() {
-  Logger::GetInstance()->log("all prep is done, now running game..",
-                             LogType::CORE, LogLevel::INFO);
+  Logger *l = Logger::GetInstance();
+  std::optional<unsigned int> savedSeed = loadLastSeed();
+  MenuChoice choice = showMenu(savedSeed);
+  if (choice == MenuChoice::EXIT)
+    return;
+
+  if (!showDifficultyMenu())
+    return;
+
+  _seed = (choice == MenuChoice::LAST_SEED && savedSeed)
+              ? *savedSeed
+              : static_cast<unsigned int>(std::time(nullptr));
+  saveSeed(_seed);
+  l->log("map seed: " + std::to_string(_seed), LogType::CORE, LogLevel::INFO);
+
+  startScene();
+  l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   _ge.run_game();
+}
+
+TextQuestCore::MenuChoice
+TextQuestCore::showMenu(std::optional<unsigned int> savedSeed) {
+  vec2i scr = _ge.screenSize();
+  const unsigned int w = 36;
+  const unsigned int h = 7;
+  Rect area{(scr.x - static_cast<int>(w)) / 2,
+            (scr.y - static_cast<int>(h)) / 2, w, h};
+  Rect writable{1, 1, w - 2, h - 2};
+  std::vector<std::string> design;
+  design.push_back(std::string(w, '='));
+  for (unsigned int i = 0; i < h - 2; i++)
+    design.push_back("|" + std::string(w - 2, ' ') + "|");
+  design.push_back(std::string(w, '='));
+
+  std::string lastSeedLine =
+      savedSeed ? "  2) Replay last seed: " + std::to_string(*savedSeed)
+                : "  2) Replay last seed (none saved)";
+  UIElementHandle handle = _ui.addElement(UIElement(area, writable, design));
+  if (UIElement *el = _ui.elementAt(handle))
+    el->updateContent({"  TEXTQUEST", "", "  1) New game (random seed)",
+                       lastSeedLine, "  3) Exit"});
+
+  MenuChoice choice = MenuChoice::EXIT;
+  _ge.runMenu([&]() {
+    if (_input.rawKeyPressed('1')) {
+      choice = MenuChoice::NEW_GAME;
+      return false;
+    }
+    if (savedSeed && _input.rawKeyPressed('2')) {
+      choice = MenuChoice::LAST_SEED;
+      return false;
+    }
+    if (_input.rawKeyPressed('3') || _input.rawKeyPressed('x'))
+      return false;
+    return true;
+  });
+  _ui.removeElement(handle);
+  return choice;
+}
+
+bool TextQuestCore::showDifficultyMenu() {
+  vec2i scr = _ge.screenSize();
+  const unsigned int w = 36;
+  const unsigned int h = 7;
+  Rect area{(scr.x - static_cast<int>(w)) / 2,
+            (scr.y - static_cast<int>(h)) / 2, w, h};
+  Rect writable{1, 1, w - 2, h - 2};
+  std::vector<std::string> design;
+  design.push_back(std::string(w, '='));
+  for (unsigned int i = 0; i < h - 2; i++)
+    design.push_back("|" + std::string(w - 2, ' ') + "|");
+  design.push_back(std::string(w, '='));
+
+  UIElementHandle handle = _ui.addElement(UIElement(area, writable, design));
+  if (UIElement *el = _ui.elementAt(handle))
+    el->updateContent(
+        {"  SELECT DIFFICULTY", "", "  1) Easy", "  2) Normal", "  3) Hard"});
+
+  bool picked = false;
+  _ge.runMenu([&]() {
+    if (_input.rawKeyPressed('1')) {
+      _chosenDifficulty = EASY;
+      picked = true;
+      return false;
+    }
+    if (_input.rawKeyPressed('2')) {
+      _chosenDifficulty = NORMAL;
+      picked = true;
+      return false;
+    }
+    if (_input.rawKeyPressed('3')) {
+      _chosenDifficulty = HARD;
+      picked = true;
+      return false;
+    }
+    if (_input.rawKeyPressed('x'))
+      return false;
+    return true;
+  });
+  _ui.removeElement(handle);
+  return picked;
+}
+
+std::optional<unsigned int> TextQuestCore::loadLastSeed() const {
+  std::ifstream file(seedFile);
+  unsigned int seed;
+  if (file >> seed)
+    return seed;
+  return std::nullopt;
+}
+
+void TextQuestCore::saveSeed(unsigned int seed) const {
+  std::ofstream file(seedFile);
+  file << seed << '\n';
+  if (!file)
+    Logger::GetInstance()->log(std::string("could not write ") + seedFile,
+                               LogType::CORE, LogLevel::WARNING);
 }
 
 TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   Logger *l = Logger::GetInstance();
   auto scene = std::make_shared<SceneManager>();
   SceneManager &sceneMan = *scene;
-  std::string map = "";
-  map += "################################";
-  map += "#..............................#";
-  map += "#...####..............####.....#";
-  map += "#...#..#..............#..#.....#";
-  map += "#...####....##..##....####.....#";
-  map += "#...........##..##.............#";
-  map += "#..............................#";
-  map += "#............T.................#";
-  map += "#.............T................#";
-  map += "#..............................#";
-  map += "#.......#..............#.......#";
-  map += "#.......#......##......#.......#";
-  map += "#.......########.......#.......#";
-  map += "#....#####.............#.......#";
-  map += "#................#######.......#";
-  map += "#....#.T.#.......#.............#";
-  map += "#....#...#.......#.#######.....#";
-  map += "#....#####.......#.#...........#";
-  map += "################################";
 
-  sceneMan.initializeNewMap(map, 32, 19);
-  l->log("map inited", LogType::CORE, LogLevel::INFO);
+  MapGenerator mg(Rect{0, 0, 50, 50}, part_params{.3f, .7f, 10, 10, 20, 20}, 5,
+                  .35f, _seed);
+
   std::vector<std::string> walltexV =
-      loadTextureVec(sceneMan, "Resources/Textures/wall/");
+      loadTextureVec("Resources/Textures/wall/");
   sceneMan.uploadTextureVecForWall('#', walltexV);
-  std::vector<std::string> tnttexV =
-      loadTextureVec(sceneMan, "Resources/Textures/tnt/");
+  std::vector<std::string> tnttexV = loadTextureVec("Resources/Textures/tnt/");
   sceneMan.uploadTextureVecForWall('T', tnttexV);
 
+  std::string map = serializeThemedMap(mg.map(), mg.leafRooms(), {'#', 'T'});
+  sceneMan.initializeNewMap(map, 50, 50);
+  l->log("map inited", LogType::CORE, LogLevel::INFO);
+
+  mg.generateSpawnPoints(/*max_enemy_density=*/0.0f, /*boss_room_count=*/1);
+  vec2i playerSpawn{2, 2};
+  vec2i istvanSpawn{10, 9};
+  for (const SpawnPoint &sp : mg.spawnPoints()) {
+    if (sp.type == SpawnType::PLAYER)
+      playerSpawn = sp.pos;
+    else if (sp.type == SpawnType::BOSS)
+      istvanSpawn = sp.pos;
+  }
+
   std::string intex = " \n";
-  Transform init{{2.f, 2.f}, 0.f};
+  Transform init{
+      {static_cast<float>(playerSpawn.x), static_cast<float>(playerSpawn.y)},
+      0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   auto playerCtrl = std::make_unique<PlayerBehaviorController>(_input);
   PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
@@ -98,9 +247,12 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   // Istvan upload
   // ==================
   std::vector<std::string> IstvantexV =
-      loadTextureVec(sceneMan, "Resources/Textures/FeralGhoul/");
-  Transform IstvanInit{{10.f, 9.f}, 1.f};
-  std::vector<vec2f> istvan_patrol_route{{10.f, 9.f}, {20.f, 9.f}, {20.f, 6.f}};
+      loadTextureVec("Resources/Textures/FeralGhoul/");
+  vec2f istvanSpawnF{static_cast<float>(istvanSpawn.x),
+                     static_cast<float>(istvanSpawn.y)};
+  Transform IstvanInit{istvanSpawnF, 1.f};
+  std::vector<vec2f> istvan_patrol_route =
+      mg.generatePatrolPoints(istvanSpawnF, 3);
 
   auto istvanCtrl =
       std::make_unique<IstvanBehaviorController>(istvan_patrol_route);
@@ -177,9 +329,9 @@ void TextQuestCore::onSceneOver() {
     std::string msg = _ge.sceneMan().playerWon()
                           ? "YOU WON. Retry? (r=yes, x=quit)"
                           : "YOU DIED. Retry? (r=yes, x=quit)";
-    int pad = (static_cast<int>(deathWritable.width) -
-               static_cast<int>(msg.size())) /
-              2;
+    int pad =
+        (static_cast<int>(deathWritable.width) - static_cast<int>(msg.size())) /
+        2;
     if (pad < 0)
       pad = 0;
     el->updateContent({std::string(pad, ' ') + msg});
@@ -189,4 +341,37 @@ void TextQuestCore::onSceneOver() {
 void TextQuestCore::onPostSceneOver() {
   if (_input.rawKeyPressed('r'))
     startScene();
+}
+
+void TextQuestCore::loadResources(
+    const std::string &filePath,
+    std::unordered_map<std::string, std::string> &outTextures) {
+  std::stringstream temp;
+  std::string value;
+  std::string key;
+  for (const auto &entry : std::filesystem::directory_iterator(filePath)) {
+    if (std::filesystem::is_regular_file(entry)) {
+      std::ifstream current_file(entry.path());
+      if (current_file.fail()) {
+        std::cerr << "ERROR: failed to open file: " << entry.path().string()
+                  << " reading next texture file..." << std::endl;
+        continue;
+      }
+
+      temp.str(std::string());
+      temp << current_file.rdbuf();
+      key = entry.path().stem().string();
+      if (outTextures.find(key) != outTextures.end()) {
+        std::cerr << "ERROR: texture for this type of tile is already present. "
+                     "Skipping this one...."
+                  << std::endl;
+        std::cerr << "texture: " << std::endl;
+        std::cout << temp.str() << std::endl;
+        continue;
+      }
+      value = temp.str();
+      outTextures[key] = value;
+      current_file.close();
+    }
+  }
 }

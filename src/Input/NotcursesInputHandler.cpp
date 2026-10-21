@@ -18,7 +18,10 @@ void NotcursesInputHandler::ReceiveInput() {
   timespec ts{0, 1000000};
   uint32_t rc;
   while ((rc = notcurses_get(_nc.get(), &ts, &in_char)) > 0) {
-    _pressedThisFrame.insert(in_char.id);
+    // A release is not a press. Otherwise the release of the key that closed
+    // one menu would count as a press in the next menu.
+    if (in_char.evtype != NCTYPE_RELEASE)
+      _pressedThisFrame.insert(in_char.id);
     KeyEvent(in_char.utf8, in_char.evtype);
   }
 }

@@ -3,10 +3,7 @@
 #include "./MapManager.h"
 #include "EntityManager.h"
 #include <cstdlib>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 #include <vector>
 
 SceneManager::SceneManager() : _entityManager(*this), _mapManager() {}
@@ -124,38 +121,4 @@ void SceneManager::setCameraFollow(const Transform &new_follow) {
 
 void SceneManager::setCameraFovDegrees(float newfov) {
   _camera->setFovDegrees(newfov);
-}
-
-// Other
-void SceneManager::loadResources(
-    const std::string &filePath,
-    std::unordered_map<std::string, std::string> &outTextures) {
-  std::stringstream temp;
-  std::string value;
-  std::string key;
-  for (const auto &entry : std::filesystem::directory_iterator(filePath)) {
-    if (std::filesystem::is_regular_file(entry)) {
-      std::ifstream current_file(entry.path());
-      if (current_file.fail()) {
-        std::cerr << "ERROR: failed to open file: " << entry.path().string()
-                  << " reading next texture file..." << std::endl;
-        continue;
-      }
-
-      temp.str(std::string());
-      temp << current_file.rdbuf();
-      key = entry.path().stem().string();
-      if (outTextures.find(key) != outTextures.end()) {
-        std::cerr << "ERROR: texture for this type of tile is already present. "
-                     "Skipping this one...."
-                  << std::endl;
-        std::cerr << "texture: " << std::endl;
-        std::cout << temp.str() << std::endl;
-        continue;
-      }
-      value = temp.str();
-      outTextures[key] = value;
-      current_file.close();
-    }
-  }
 }

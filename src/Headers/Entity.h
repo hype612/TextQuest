@@ -22,7 +22,7 @@ public:
          std::string *tex, int initHP, float collisionRadius, bool isPlayer,
          float fov_in_deg, float viewDistance);
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::vector<std::string> texVec, int initHP, float collisionRadius,
+         const std::vector<std::string> &texVec, int initHP, float collisionRadius,
          bool isPlayer, float fov_in_deg, float viewDistance);
   Entity() = delete;
 

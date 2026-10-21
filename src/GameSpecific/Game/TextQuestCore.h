@@ -6,10 +6,12 @@
 #include "../Headers/IstvanStatePresenter.h"
 #include "../Headers/PlayerBehaviorController.h"
 #include "Core.h"
+#include "Difficulty.h"
 #include "IInputHandler.h"
 #include "SceneManager.h"
 #include "UIManager.h"
 #include <memory>
+#include <optional>
 
 // The game itself. Owns everything scene-scoped (HUD, presenters) and holds
 // references to the engine services, which live as long as the GameEngine.
@@ -40,14 +42,34 @@ private:
     std::unique_ptr<IstvanStatePresenter> istvanState;
   };
 
+  enum class MenuChoice { NEW_GAME, LAST_SEED, EXIT };
+
+  // Shows the start menu and blocks until an option is picked.
+  MenuChoice showMenu(std::optional<unsigned int> savedSeed);
+  // Shows the difficulty picker and blocks until an option is picked. Returns
+  // false if the player quit. The choice is not used for anything yet.
+  bool showDifficultyMenu();
+  std::optional<unsigned int> loadLastSeed() const;
+  void saveSeed(unsigned int seed) const;
+
   BuiltScene buildScene();
   SceneHud buildHud(BuiltScene &built);
   void startScene();
   void onSceneOver();
   void onPostSceneOver();
+  void loadResources(const std::string &filePath,
+                     std::unordered_map<std::string, std::string> &outTextures);
 
+  std::vector<std::string> loadTextureVec(const std::string &dir);
   static constexpr int playerMaxHp = 100;
+  // Last used map seed, relative to the working directory. Edit it by hand to
+  // play a custom seed via "replay last seed".
+  static constexpr const char *seedFile = "last_seed.txt";
 
+  // Seed of the current map. Kept so that retrying replays the same map.
+  unsigned int _seed = 0;
+
+  Difficulty _chosenDifficulty;
   GameEngine &_ge;
   UIManager &_ui;
   IInputHandler &_input;

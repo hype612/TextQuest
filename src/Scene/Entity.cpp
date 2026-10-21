@@ -18,7 +18,7 @@ Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
       _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
-               Transform pos, std::vector<std::string> texVec, int initHP,
+               Transform pos, const std::vector<std::string> &texVec, int initHP,
                float collisionRadius, bool isPlayer, float fov_in_deg,
                float viewDistance)
     : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),

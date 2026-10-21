@@ -19,7 +19,7 @@ boilerplate. They exclude writing the thesis text itself.
 |---|---|
 | Ray-cast pseudo-3D with textures | Done |
 | User interaction | Done (move, turn, shoot) |
-| Dynamic game space | Missing (map is a hardcoded string in `src/TextQuest.cpp`) |
+| Dynamic game space | Done (seeded BSP + cellular-automata generator, start menu with random / last seed) |
 | Enemy behavior patterns | Partial (enemy chases, never attacks) |
 | Difficulty settings | Missing |
 | Feedback mechanisms | Partial (health bar only) |
@@ -62,12 +62,12 @@ boilerplate. They exclude writing the thesis text itself.
 - Done when: easy, normal and hard visibly change how hard the same map is.
 
 ### 4. Dynamic game space (~3-5 h)
-- [ ] Generate a map at startup: recursive-backtracker maze from a seed, returned as the
+- [x] Generate a map at startup: recursive-backtracker maze from a seed, returned as the
   same flat `y * width + x` string that `SceneManager::initializeNewMap` takes.
-- [ ] Spawn the player and enemies at random floor cells (not inside walls, not too close
+- [x] Spawn the player and enemies at random floor cells (not inside walls, not too close
   to the player).
 - [ ] Fallback if generation looks bad: load maps from files plus a next-level step.
-- Done when: each run (or each seed) gives a different playable layout.
+- Done when: each run (or each seed) gives a different playable layout. (met: the seed picks the layout)
 
 #### BSP + cellular-automata map generator (`src/GameSpecific/MapGen/`)
 - [x] `BspNode`: recursive rect partitioning (`bsp_node.hpp`).
@@ -85,22 +85,8 @@ boilerplate. They exclude writing the thesis text itself.
   4-connected `Tile::FLOOR` neighbors marking a same-size visited grid, then sweep `_map` and
   convert any `Tile::FLOOR` cell that was never visited to `Tile::WALL`. Must run after
   `createLinks()`, not before.
-- [ ] Wire `MapGenerator` output into `SceneManager::initializeNewMap` (currently only
-  exercised standalone via `src/GameSpecific/MapGen/main.cpp`).
-- [ ] Replace `carveCorridor`'s straight L-shape with a drunkard's walk, for a less
-  mechanical/more organic-looking tunnel between rooms. Implementation sketch:
-  - Start a cursor at `a`. Loop until the cursor equals `b` (or is adjacent to it).
-  - Each step, most of the time (e.g. 70-80%) move one cell toward `b` along whichever axis
-    has the larger remaining distance (`|dx|` vs `|dy|`) — this is what guarantees the walk
-    actually terminates instead of wandering forever.
-  - The rest of the time, take a random cardinal step (up/down/left/right) instead — this is
-    what breaks the straight-line look into a wandering tunnel.
-  - Carve `Tile::FLOOR` at the cursor's cell on every step (including the biased ones).
-  - Keep the "waver" probability as a tunable parameter (constructor param or constant,
-    matching how `part_params`/CA already expose their knobs) rather than hardcoding it.
-  - Sanity-check against runaway loops on very large/degenerate rects (e.g. cap total steps
-    to a few multiples of the Manhattan distance between `a` and `b`, fall back to the old
-    L-shape carve if the cap is hit).
+- [x] Wire `MapGenerator` output into `SceneManager::initializeNewMap` (done in
+  `TextQuestCore::buildScene`; the standalone `main.cpp` test driver was removed).
 
 ### 5. Feedback mechanisms (~2-3 h)
 - [ ] Damage feedback (message or short flash) when the player is hit.
@@ -229,26 +215,27 @@ can be carried from one scene to the next. Nothing here is implemented yet.
   reinitialising notcurses, and winning can swap to a second map with the same player.
 
 ## Cut for now (not in the proposal)
+- Drunkard's-walk corridors in `carveCorridor` (the L-shaped corridors stay)
 - Viewport plane / Wolfenstein-style HUD panel with nested overlays
 - Generic `UIPresenter` base class (extract only after a third presenter)
 - Terminal resize handling
 - GPU migration and the Windows path
 
-## Spawn point & enemy placement sketch (not implemented yet)
+## Spawn point & enemy placement sketch (implemented)
 
 Runs after `MapGenerator::createLinks()`, which already BFS-floods from the fully-linked
 anchor and seals off any `Tile::FLOOR` cell the flood never reached -- so this pass can
 assume every remaining `Tile::FLOOR` cell in `_map` is genuinely reachable.
 
-- [ ] Collect leaf rects for free while `createRoom()` already recurses into them:
+- [x] Collect leaf rects for free while `createRoom()` already recurses into them:
   `std::vector<Rect> _leafRooms;`, `push_back(node->rect())` where it already builds that
   leaf's `CellularAutomata`.
-- [ ] `enum class SpawnType { PLAYER, ENEMY, BOSS };` and
+- [x] `enum class SpawnType { PLAYER, ENEMY, BOSS };` and
   `struct SpawnPoint { SpawnType type; vec2i pos; };`.
-- [ ] `struct spawn_params { float max_enemy_density = 0.1f; int boss_room_count = 0; };`
+- [x] (done as two plain parameters of `generateSpawnPoints`, no struct) `struct spawn_params { float max_enemy_density = 0.1f; int boss_room_count = 0; };`
   -- `max_enemy_density` is a per-floor-tile probability ceiling (same style as
   `CellularAutomata`'s noise threshold); no separate min density, overkill for now.
-- [ ] `MapGenerator::generateSpawnPoints(const spawn_params&)`, run after `createLinks()`:
+- [x] `MapGenerator::generateSpawnPoints(const spawn_params&)`, run after `createLinks()`:
   - Player: pick one random leaf room, one random `Tile::FLOOR` cell inside it.
   - Boss: pick `boss_room_count` distinct leaf rooms (excluding the player's), one random
     floor cell each -- flat 1:1, no density math, so the game programmer sets the exact
@@ -256,8 +243,8 @@ assume every remaining `Tile::FLOOR` cell in `_map` is genuinely reachable.
   - Enemies: for every remaining leaf room (not the player's, not a boss room), roll each
     `Tile::FLOOR` cell against `max_enemy_density`.
   - All results pushed into a `std::vector<SpawnPoint> _spawnPoints`.
-- [ ] `const std::vector<SpawnPoint>& spawnPoints() const` accessor. `MapGenerator` stays
+- [x] `const std::vector<SpawnPoint>& spawnPoints() const` accessor. `MapGenerator` stays
   Entity-agnostic -- it only hands back positions/types; `TextQuest.cpp`/GameSpecific code
   turns those into actual `Entity` instances via `EntityManager::addEntity`.
-- Done when: player spawn, boss tiles, and density-capped enemy spawns are all queryable
+- Done when (met; the flood-fill prune guarantees no unreachable floor cell): player spawn, boss tiles, and density-capped enemy spawns are all queryable
   off `MapGenerator` after generation, with nothing placed on an unreachable floor cell.

@@ -5,7 +5,6 @@
 #include "../../Headers/Vec2i.h"
 #include "bsp_node.hpp"
 #include "cellularAutomata.hpp"
-#include <iosfwd>
 #include <vector>
 
 constexpr int ideal_generation_num = 4;
@@ -19,7 +18,8 @@ struct SpawnPoint {
 class MapGenerator {
 public:
   MapGenerator(const Rect &parent_area, const part_params &params,
-               int min_wall_neighbor_count, float noise_distribution);
+               int min_wall_neighbor_count, float noise_distribution,
+               unsigned int seed);
 
   void generateSpawnPoints(float max_enemy_density, int boss_room_count);
   std::vector<vec2f> generatePatrolPoints(vec2f spawn_point,
@@ -27,13 +27,15 @@ public:
 
   const std::vector<SpawnPoint> &spawnPoints() const { return _spawnPoints; }
   const std::vector<std::vector<Tile>> &map() { return _map; }
+  const std::vector<Rect> &leafRooms() const { return _leafRooms; }
 
-  // TODO: remove if testing is done
-  friend std::ostream &operator<<(std::ostream &os, const MapGenerator &mg);
-
-  // TODO: remove if testing is done
-  friend std::ostream &printWithSpawns(std::ostream &os,
-                                       const MapGenerator &mg);
+  // default construction is inherently illegal
+  // copy ctoring does not make sense, so just deny
+  MapGenerator() = delete;
+  MapGenerator(MapGenerator &&) = delete;
+  MapGenerator(const MapGenerator &) = delete;
+  MapGenerator &operator=(const MapGenerator &) = delete;
+  MapGenerator &operator=(MapGenerator &&) = delete;
 
 private:
   // fill the rects created by BSP

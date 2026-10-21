@@ -67,10 +67,6 @@ public:
   void setCameraFollow(const Transform &new_follow);
   void setCameraFovDegrees(float newfov);
 
-  // Other
-  void loadResources(const std::string &filePath,
-                     std::unordered_map<std::string, std::string> &outTextures);
-
 private:
   EntityManager _entityManager;
   MapManager _mapManager;
