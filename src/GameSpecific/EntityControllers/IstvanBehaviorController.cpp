@@ -9,9 +9,10 @@
 #include <utility>
 
 IstvanBehaviorController::IstvanBehaviorController(
-    std::vector<vec2f> patrol_points)
+    std::vector<vec2f> patrol_points, float shootCooldown, float shootDistance)
     : _state(State::IDLE), _patrolPoints(std::move(patrol_points)),
-      _targetE(nullptr) {}
+      _targetE(nullptr), _shootCooldown(shootCooldown),
+      _maxShootDist(shootDistance) {}
 
 vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
   self.setShooting(false);

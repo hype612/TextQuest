@@ -255,7 +255,7 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
       mg.generatePatrolPoints(istvanSpawnF, 3);
 
   auto istvanCtrl =
-      std::make_unique<IstvanBehaviorController>(istvan_patrol_route);
+      std::make_unique<IstvanBehaviorController>(istvan_patrol_route, 1.f, 3.f);
   IstvanBehaviorController *istvanCtrlPtr = istvanCtrl.get();
   Entity Istvan(std::move(istvanCtrl), IstvanInit, IstvantexV, 100, 0.2f, false,
                 180.f, 8.f);
@@ -271,7 +271,6 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
       return e.isPlayer() || e.health() <= 0;
     });
   });
-
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);
   l->log("camera follow set", LogType::CORE, LogLevel::INFO);

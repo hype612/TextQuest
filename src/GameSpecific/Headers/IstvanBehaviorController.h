@@ -10,7 +10,8 @@
 
 class IstvanBehaviorController : public IBehaviorController {
 public:
-  IstvanBehaviorController(std::vector<vec2f> patrol_points);
+  IstvanBehaviorController(std::vector<vec2f> patrol_points,
+                           float shootCooldown, float shootDistance);
   vec2f Tick(Entity &self, float delta) override;
   void onCollision(Entity &self, ICollidable &other) override;
   virtual void onVisible(Entity &self, Entity &other) override;
@@ -50,8 +51,8 @@ private:
   const float _patrolArriveDistSq = 0.04f;
   const float _patrolFaceTolerance = 0.3f;
   float _lastShot = 0.f;
-  const float _shootCooldown = 1.f;
-  const float _maxShootDist = 3.f;
+  const float _shootCooldown;
+  const float _maxShootDist;
   const int _misschance = 0; // for testing
   IIstvanStateObserver *_stateObserver = nullptr;
 };
