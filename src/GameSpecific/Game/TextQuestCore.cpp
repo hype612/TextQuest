@@ -10,22 +10,20 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-namespace {
-// Flattens the generator's Tile grid into the engine's map string, then
-// re-stamps each room's wall cells with a theme char picked per leaf room,
-// so different rooms can use different wall textures.
-std::string serializeThemedMap(const std::vector<std::vector<Tile>> &map,
-                               const std::vector<Rect> &leafRooms,
-                               const std::vector<char> &wallThemes) {
+std::string
+TextQuestCore::serializeThemedMap(const std::vector<std::vector<Tile>> &map,
+                                  const std::vector<Rect> &leafRooms,
+                                  const std::vector<char> &wallThemes) const {
   if (wallThemes.empty()) {
     Logger::GetInstance()->log("serializeThemedMap: no wall themes given",
                                LogType::CORE, LogLevel::ERROR);
     Logger::GetInstance()->forceFlush();
-    std::abort();
+    throw std::invalid_argument("serializeThemedMap: no wall themes given");
   }
   int mapHeight = static_cast<int>(map.size());
   int mapWidth = mapHeight > 0 ? static_cast<int>(map[0].size()) : 0;
@@ -48,7 +46,6 @@ std::string serializeThemedMap(const std::vector<std::vector<Tile>> &map,
   }
   return out;
 }
-} // namespace
 
 // Loads every shading variant in `dir`, ordered so lv0 (brightest) is first.
 std::vector<std::string> TextQuestCore::loadTextureVec(const std::string &dir) {
@@ -79,6 +76,10 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
 
   _ge.setOnSceneOver([this]() { onSceneOver(); });
   _ge.setPostSceneOver([this]() { onPostSceneOver(); });
+
+  registerEnemyArchetype("istvan",
+                         EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"),
+                                        100, 0.2f, 180.f, 8.f, 3.f, 3.f});
 }
 
 void TextQuestCore::run() {
@@ -100,6 +101,45 @@ void TextQuestCore::run() {
   startScene();
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   _ge.run_game();
+}
+
+void TextQuestCore::registerEnemyArchetype(std::string name,
+                                           EnemyArchetype type) {
+  auto [it, succ] =
+      _enemyArchetypes.try_emplace(std::move(name), std::move(type));
+
+  // it is never intended to overwrite the value of an existing
+  // archetype for now. So it logs and throws.
+  if (!succ) {
+    Logger::GetInstance()->log(
+        "registerEnemyArchetype: insertion failed due to key duplication. The "
+        "duplicated key: " +
+            it->first + ".",
+        LogType::CORE, LogLevel::ERROR);
+    Logger::GetInstance()->forceFlush();
+    throw std::invalid_argument(
+        "registerEnemyArchetype: duplicate archetype key: " + it->first);
+  }
+}
+
+void TextQuestCore::spawnEnemy(const std::string &type_key,
+                               SceneManager &scene, vec2f pos,
+                               std::unique_ptr<IBehaviorController> ctrl) {
+  auto it = _enemyArchetypes.find(type_key);
+  if (it == _enemyArchetypes.end()) {
+    Logger::GetInstance()->log(
+        "spawnEnemy: function was called with non-existant key: " + type_key,
+        LogType::CORE, LogLevel::ERROR);
+    Logger::GetInstance()->forceFlush();
+    throw std::out_of_range("spawnEnemy: unknown archetype key: " + type_key);
+  }
+  const EnemyArchetype &a = it->second;
+
+  Entity e(std::move(ctrl), Transform{pos, 1.f}, a.textures, a.health,
+           a.collisionRadius, false, a.fovDegrees, a.viewDistance);
+  e.setMoveSpeedAllDirectons(a.moveSpeed);
+  e.setTurnSpeedAlldirections(a.turnSpeed);
+  scene.AddEntity(e);
 }
 
 TextQuestCore::MenuChoice
@@ -246,22 +286,12 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   // ==================
   // Istvan upload
   // ==================
-  std::vector<std::string> IstvantexV =
-      loadTextureVec("Resources/Textures/FeralGhoul/");
   vec2f istvanSpawnF{static_cast<float>(istvanSpawn.x),
                      static_cast<float>(istvanSpawn.y)};
-  Transform IstvanInit{istvanSpawnF, 1.f};
-  std::vector<vec2f> istvan_patrol_route =
-      mg.generatePatrolPoints(istvanSpawnF, 3);
-
-  auto istvanCtrl =
-      std::make_unique<IstvanBehaviorController>(istvan_patrol_route, 1.f, 3.f);
+  auto istvanCtrl = std::make_unique<IstvanBehaviorController>(
+      mg.generatePatrolPoints(istvanSpawnF, 3), 1.f, 3.f);
   IstvanBehaviorController *istvanCtrlPtr = istvanCtrl.get();
-  Entity Istvan(std::move(istvanCtrl), IstvanInit, IstvantexV, 100, 0.2f, false,
-                180.f, 8.f);
-  Istvan.setMoveSpeedAllDirectons(3.0f);
-  Istvan.setTurnSpeedAlldirections(3.f);
-  sceneMan.AddEntity(Istvan);
+  spawnEnemy("istvan", sceneMan, istvanSpawnF, std::move(istvanCtrl));
 
   // ==================
   // Win cond setup

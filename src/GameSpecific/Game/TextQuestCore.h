@@ -5,6 +5,7 @@
 #include "../Headers/IstvanBehaviorController.h"
 #include "../Headers/IstvanStatePresenter.h"
 #include "../Headers/PlayerBehaviorController.h"
+#include "../MapGen/cellularAutomata.hpp"
 #include "Core.h"
 #include "Difficulty.h"
 #include "EnemyArchetype.h"
@@ -22,8 +23,12 @@ public:
   explicit TextQuestCore(GameEngine &ge);
   void run();
 
-  void registerEnemyArchetype(const EnemyArchetype &type);
-  void spawnEnemy(const std::string &type);
+  void registerEnemyArchetype(std::string name, EnemyArchetype type);
+  // Builds an entity from the archetype registered under type_key and adds it
+  // to the scene. The caller picks the behavior controller; keep a raw pointer
+  // to it beforehand if you need the concrete type afterwards (e.g. HUD).
+  void spawnEnemy(const std::string &type_key, SceneManager &scene, vec2f pos,
+                  std::unique_ptr<IBehaviorController> ctrl);
 
   TextQuestCore(const TextQuestCore &) = delete;
   TextQuestCore &operator=(const TextQuestCore &) = delete;
@@ -64,6 +69,9 @@ private:
                      std::unordered_map<std::string, std::string> &outTextures);
 
   std::vector<std::string> loadTextureVec(const std::string &dir);
+  std::string serializeThemedMap(const std::vector<std::vector<Tile>> &map,
+                                 const std::vector<Rect> &leafRooms,
+                                 const std::vector<char> &wallThemes) const;
   static constexpr int playerMaxHp = 100;
   static constexpr const char *seedFile = "last_seed.txt";
 
