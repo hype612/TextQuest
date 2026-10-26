@@ -15,18 +15,11 @@ public:
 
   // Moves `element` into UIManager's keeping and hands back a handle for
   // it. A plain int, not an address - map storage decouples the handle
-  // from any container slot, so the programmer can stash/iterate handles
-  // on their own side without caring how UIManager stores things
-  // internally.
-  //
-  //   UIElementHandle hp = uiManager.addElement(
-  //       UIElement(area, writableArea, design));
+  // from any container slot.
   UIElementHandle addElement(UIElement element);
 
   // Tears down an element added via addElement(). Invalidates the handle -
   // further elementAt() calls with it return nullptr.
-  // NOTE: needs IRenderer to grow a matching destroyOverlay(OverlayId) -
-  // not there yet.
   void removeElement(UIElementHandle handle);
   void clear();
   // Resolves a handle to its element, or nullptr if the handle is

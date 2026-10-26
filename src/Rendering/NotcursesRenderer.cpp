@@ -106,8 +106,23 @@ bool NotcursesRenderer::destroyOverlay(OverlayId id) {
   return true;
 }
 
+// Sets the plane's active colors, which every later write on the plane picks
+// up. Existing cells keep the colors they were written with.
+static void applyColors(ncplane *plane, std::optional<uint32_t> fg,
+                        std::optional<uint32_t> bg) {
+  if (fg)
+    ncplane_set_fg_rgb(plane, *fg);
+  else
+    ncplane_set_fg_default(plane);
+  if (bg)
+    ncplane_set_bg_rgb(plane, *bg);
+  else
+    ncplane_set_bg_default(plane);
+}
+
 void NotcursesRenderer::setOverlayContent(
-    OverlayId id, const std::vector<std::string> &content) {
+    OverlayId id, const std::vector<std::string> &content,
+    std::optional<uint32_t> fg, std::optional<uint32_t> bg) {
 
   ncplane *current = _overlayPlanes.at(id);
   unsigned int p_width, p_height;
@@ -127,6 +142,7 @@ void NotcursesRenderer::setOverlayContent(
   }
 
   ncplane_erase(current);
+  applyColors(current, fg, bg);
   int printheight = (content.size() < p_height) ? content.size() : p_height;
   for (int y = 0; y < printheight; y++) {
     ncplane_cursor_move_yx(current, y, 0);
@@ -135,7 +151,8 @@ void NotcursesRenderer::setOverlayContent(
 }
 
 void NotcursesRenderer::setOverlayRegion(
-    OverlayId id, Rect region, const std::vector<std::string> &content) {
+    OverlayId id, Rect region, const std::vector<std::string> &content,
+    std::optional<uint32_t> fg, std::optional<uint32_t> bg) {
   ncplane *current = _overlayPlanes.at(id);
 
   // check if rect is completely in plane
@@ -161,6 +178,7 @@ void NotcursesRenderer::setOverlayRegion(
   }
 
   // override region
+  applyColors(current, fg, bg);
   int printheight =
       (content.size() < region.height) ? content.size() : region.height;
   for (int y = 0; y < printheight; y++) {

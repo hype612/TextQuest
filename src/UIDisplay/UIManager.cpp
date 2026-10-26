@@ -41,15 +41,19 @@ void UIManager::process() {
   }
   for (auto &[id, element] : _elements) {
     if (auto design = element.takeDesign()) {
-      _renderer.setOverlayContent(id, design->get());
+      _renderer.setOverlayContent(id, design->get(), std::nullopt,
+                                  std::nullopt);
       if (auto content = element.takeContent()) {
-        _renderer.setOverlayRegion(id, element.writableArea(), content->get());
+        _renderer.setOverlayRegion(id, element.writableArea(), content->get(),
+                                   std::nullopt, std::nullopt);
       } else {
         _renderer.setOverlayRegion(id, element.writableArea(),
-                                   element.peekContent());
+                                   element.peekContent(), std::nullopt,
+                                   std::nullopt);
       }
     } else if (auto d = element.takeContent()) {
-      _renderer.setOverlayRegion(id, element.writableArea(), d->get());
+      _renderer.setOverlayRegion(id, element.writableArea(), d->get(),
+                                 std::nullopt, std::nullopt);
     }
   }
 }

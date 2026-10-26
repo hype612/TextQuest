@@ -13,6 +13,65 @@ game around it. Read `CLAUDE.md` first for architecture and build notes.
 Time estimates are rough hours of focused work, assuming AI assistance for
 boilerplate. They exclude writing the thesis text itself.
 
+## Coloring (UI element colors, in progress)
+
+Goal: set a UI element's fg/bg color, optionally for a limited time (e.g. a damage flash).
+Colors are plain `std::optional<uint32_t>` (0xRRGGBB, `nullopt` = default color), no
+structs. `nullopt` means the default color, not "keep what was there".
+
+Design (decided):
+- The renderer is a stateless setter. Colors go in as parameters of every write, applied
+  with `ncplane_set_fg_rgb` / `ncplane_set_bg_rgb` (or the `_default` variants) right
+  before writing. No stored color, no base-cell tricks (the `notcurses_channels` man page
+  warns against manual channel manipulation). Only the cells written by the call get the
+  color.
+- A color change must repaint the whole element (design + content): a content-only update
+  rewrites just the writable area, so the frame would keep the old color.
+- Timing uses `dt`, not wall-clock, like the rest of the engine.
+
+Done:
+- [x] `IRenderer` / `NotcursesRenderer`: `setOverlayContent` and `setOverlayRegion` take
+  `std::optional<uint32_t> fg, std::optional<uint32_t> bg` (fg first, no defaults).
+  `UIManager::process` passes `std::nullopt, std::nullopt` as a placeholder. Not yet
+  tested in a terminal.
+
+Remaining:
+- [ ] `UIElement`: `std::optional<uint32_t> _fg, _bg` members, `setFgColor` / `setBgColor`
+  (take an optional, `nullopt` = unset, so there are no separate reset functions) and
+  `fgColor()` / `bgColor()` getters. Each setter sets `_designChanged` only if the value
+  actually changed, so setting the same color every frame does not force a redraw.
+- [ ] `UIManager::process`: replace the `std::nullopt, std::nullopt` placeholders with
+  `element.fgColor(), element.bgColor()`.
+- [ ] Check in a real terminal: colors show on frame and content, and a plain write
+  without colors draws in the default colors.
+- [ ] Timing: DECISION PENDING (A or B below).
+  - **A. Timer on the element, ticked by the manager (recommended).** Override members
+    `_overrideFg`, `_overrideBg`, `_overrideRemaining` and a `tick(dt)` that clears the
+    override on expiry and sets `_designChanged`. The getters return the override while
+    it is active, otherwise the base colors. `UIManager::process(float dt)` ticks every
+    element. `run_game` passes `f_elapsed_time`, `runMenu` computes its own `dt` or passes
+    `0`. The timer logic lives once, presenters just say "flash red for 0.3 s". Cost: the
+    element is no longer purely passive.
+  - **B. Timer outside the UI.** The element stays passive. The presenter owns the
+    countdown (it gets `dt` through `setOnFrame`) and calls `setBgColor(red)`, later
+    `setBgColor(nullopt)`. No `Core.cpp` change, but every presenter that flashes
+    reimplements the timer.
+- [ ] Game side: `DamageFlashPresenter` (an `IHealthObserver` holding `UIManager&` and a
+  `vector<UIElementHandle>`) that flashes all its elements red on damage. `UIManager`
+  stays unaware of "all elements". The player has a single `IHealthObserver*`, so add a
+  small fan-out observer that forwards to both the health bar and the flash presenter.
+  Create it in `buildHud` and keep the destruction order (presenters before `UIManager`).
+- [ ] Optional uses: persistent low-health tint on the health bar (needs "no expiry"),
+  tint on `IstvanStatePresenter` state change.
+- [ ] Update the UI section of `CLAUDE.md` with the color model, tick the "damage
+  feedback" item in step 5 below.
+- Prep refactors worth doing alongside: a shared `boxDesign(Rect)` helper (the frame
+  design is copy-pasted in `HealthBarPresenter`, `IstvanStatePresenter`,
+  `MinimapPresenter` and both menus in `TextQuestCore`), and simplifying the nested
+  design/content branch in `UIManager::process`.
+- Out of scope: per-cell colors (e.g. different colors for `#` and `e` on the minimap) and
+  separate design/content colors.
+
 ## Proposal coverage
 
 | Promise | State |
@@ -104,6 +163,13 @@ boilerplate. They exclude writing the thesis text itself.
 - [ ] Turn `CLAUDE.md` and the design decisions (presenter/observer UI, intent-based
   movement, composition over subclassing) into the thesis architecture section (~4-8 h).
 - [ ] Optional: a few tests, e.g. for `HealthBarPresenter::renderBar` and map generation.
+- [ ] Out of scope for now: invert control of the frame loop. `GameEngine::run_game` owns
+  the loop today and the game hooks in through callbacks (`setOnFrame`, `setOnSceneOver`,
+  `setPostSceneOver`, `runMenu`). Instead, the engine should expose what one iteration
+  does (input, scene process, render, UI flush) as a public tick/process call, and the
+  game runs its own loop and calls it. That removes most of the callbacks, e.g. the
+  minimap `update()` would just be called from the game's loop, and menus would no longer
+  need a separate `runMenu` loop.
 
 ### 7. Stretch: sprite facing and state animation (~6-8 h, not in the proposal)
 Only start this after steps 1-6 are done, and only if still on schedule at the Oct 18

@@ -21,10 +21,17 @@ public:
   int screenWidth() const override;
 
   // layer/plane management
-  void setOverlayContent(OverlayId id,
-                         const std::vector<std::string> &content) override;
+  // NOTE: Everything here expcects you to pass in correct
+  //       overlayIds. If you do not check your id's than
+  //       may dankamongmen have mercy on your soul.
+  void setOverlayContent(OverlayId id, const std::vector<std::string> &content,
+                         std::optional<uint32_t> fg,
+                         std::optional<uint32_t> bg) override;
   void setOverlayRegion(OverlayId id, Rect region,
-                        const std::vector<std::string> &content) override;
+                        const std::vector<std::string> &content,
+                        std::optional<uint32_t> fg,
+                        std::optional<uint32_t> bg) override;
+
   OverlayId createOverlay(Rect area) override;
   bool destroyOverlay(OverlayId id) override;
   ~NotcursesRenderer();
