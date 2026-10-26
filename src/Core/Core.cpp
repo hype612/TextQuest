@@ -70,6 +70,10 @@ void GameEngine::setPostSceneOver(std::function<void()> callback) {
   _postSceneOverCb = callback;
 }
 
+void GameEngine::setOnFrame(std::function<void(float)> callback) {
+  _onFrameCb = callback;
+}
+
 void GameEngine::setScene(const std::shared_ptr<SceneManager> &sc_man) {
   _pendingScene = sc_man;
 }
@@ -121,6 +125,8 @@ void GameEngine::run_game() {
       _engineRunning = false;
     if (!_sceneManager->sceneOver()) {
       _sceneManager->process(f_elapsed_time);
+      if (_onFrameCb)
+        _onFrameCb(f_elapsed_time);
       _zBuffer.clear();
       RayCastingProcess(cam);
       EntityProjectionProcess(cam);

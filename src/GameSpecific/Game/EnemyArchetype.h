@@ -8,11 +8,17 @@ struct EnemyArchetype {
   // Loaded once per kind, lv0 (brightest) first.
   std::vector<std::string> textures;
   int health;
+  float damage;
   float collisionRadius;
   float fovDegrees;
   float viewDistance;
   float moveSpeed;
   float turnSpeed;
+  float shootCooldown;
+  // Time between first noticing the player and the first shot.
+  float reactionDelay;
+  // Chance (0..1) that a shot is not fired at all.
+  float missChance;
 };
 
 #endif // !ENEMYARCHETYPE_H

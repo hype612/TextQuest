@@ -11,7 +11,8 @@
 class IstvanBehaviorController : public IBehaviorController {
 public:
   IstvanBehaviorController(std::vector<vec2f> patrol_points,
-                           float shootCooldown, float shootDistance);
+                           float shootCooldown, float shootDistance,
+                           float reactionDelay = 0.f, float missChance = 0.f);
   vec2f Tick(Entity &self, float delta) override;
   void onCollision(Entity &self, ICollidable &other) override;
   virtual void onVisible(Entity &self, Entity &other) override;
@@ -53,7 +54,9 @@ private:
   float _lastShot = 0.f;
   const float _shootCooldown;
   const float _maxShootDist;
-  const int _misschance = 0; // for testing
+  // Time between first noticing the player and the first shot.
+  const float _reactionDelay;
+  const float _missChance; // 0..1
   IIstvanStateObserver *_stateObserver = nullptr;
 };
 

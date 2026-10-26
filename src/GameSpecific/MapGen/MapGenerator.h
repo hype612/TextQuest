@@ -12,7 +12,7 @@ constexpr int ideal_generation_num = 4;
 enum class SpawnType { PLAYER, ENEMY, BOSS };
 struct SpawnPoint {
   SpawnType type;
-  vec2i pos;
+  vec2f pos; // world position: the middle of the spawn cell
 };
 
 class MapGenerator {

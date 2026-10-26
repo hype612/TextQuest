@@ -9,18 +9,28 @@
 #include <utility>
 
 IstvanBehaviorController::IstvanBehaviorController(
-    std::vector<vec2f> patrol_points, float shootCooldown, float shootDistance)
+    std::vector<vec2f> patrol_points, float shootCooldown, float shootDistance,
+    float reactionDelay, float missChance)
     : _state(State::IDLE), _patrolPoints(std::move(patrol_points)),
       _targetE(nullptr), _shootCooldown(shootCooldown),
-      _maxShootDist(shootDistance) {}
+      _maxShootDist(shootDistance), _reactionDelay(reactionDelay),
+      _missChance(missChance) {}
 
 vec2f IstvanBehaviorController::Tick(Entity &self, float delta) {
   self.setShooting(false);
   _lastShot += delta;
   State prevState = _state;
   updateState(self);
-  if (_state != prevState && _stateObserver)
-    _stateObserver->onStateChanged(stateName(_state));
+  if (_state != prevState) {
+    // First sighting: restart the shot timer so the first shot comes after
+    // the reaction delay (with some jitter), not instantly.
+    if (prevState == State::IDLE) {
+      float jitter = 1.f + (rand() % 50) / 100.f;
+      _lastShot = _shootCooldown - _reactionDelay * jitter;
+    }
+    if (_stateObserver)
+      _stateObserver->onStateChanged(stateName(_state));
+  }
   vec2f ret = self.transform().position;
   switch (_state) {
   case State::IDLE:
@@ -105,7 +115,7 @@ void IstvanBehaviorController::shoot(Entity &self, float delta) {
   if (_lastShot < _shootCooldown) {
     return;
   }
-  bool shootstate = (rand() % 100) >= _misschance;
+  bool shootstate = (rand() % 10000) / 10000.0f >= _missChance;
   self.setShooting(shootstate);
   _lastShot = 0.f;
 }

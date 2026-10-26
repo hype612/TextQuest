@@ -4,6 +4,7 @@
 #include "../Headers/HealthBarPresenter.h"
 #include "../Headers/IstvanBehaviorController.h"
 #include "../Headers/IstvanStatePresenter.h"
+#include "../Headers/MinimapPresenter.h"
 #include "../Headers/PlayerBehaviorController.h"
 #include "../MapGen/cellularAutomata.hpp"
 #include "Core.h"
@@ -12,6 +13,7 @@
 #include "IInputHandler.h"
 #include "SceneManager.h"
 #include "UIManager.h"
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -24,11 +26,11 @@ public:
   void run();
 
   void registerEnemyArchetype(std::string name, EnemyArchetype type);
-  // Builds an entity from the archetype registered under type_key and adds it
-  // to the scene. The caller picks the behavior controller; keep a raw pointer
-  // to it beforehand if you need the concrete type afterwards (e.g. HUD).
+  // Builds the controller of a new enemy from its difficulty-scaled archetype.
+  using ControllerFactory = std::function<std::unique_ptr<IBehaviorController>(
+      const EnemyArchetype &)>;
   void spawnEnemy(const std::string &type_key, SceneManager &scene, vec2f pos,
-                  std::unique_ptr<IBehaviorController> ctrl);
+                  const ControllerFactory &make_ctrl);
 
   TextQuestCore(const TextQuestCore &) = delete;
   TextQuestCore &operator=(const TextQuestCore &) = delete;
@@ -49,6 +51,7 @@ private:
   struct SceneHud {
     std::unique_ptr<HealthBarPresenter> healthBar;
     std::unique_ptr<IstvanStatePresenter> istvanState;
+    std::unique_ptr<MinimapPresenter> minimap;
   };
 
   enum class MenuChoice { NEW_GAME, LAST_SEED, EXIT };

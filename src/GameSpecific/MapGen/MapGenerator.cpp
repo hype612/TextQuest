@@ -40,18 +40,15 @@ std::vector<vec2f>
 MapGenerator::generatePatrolPoints(vec2f spawn_point,
                                    unsigned int count) const {
   const BspNode *room = findLeafContaining(&_bspRoot, spawn_point);
-  const Rect &r = room->rect();
-  vec2i min{r.x, r.y};
-  vec2i max{r.x + static_cast<int>(r.width), r.y + static_cast<int>(r.height)};
+  auto cells = accessibleFloorCells(room->rect());
   std::vector<vec2f> patrol;
+  if (cells.empty()) {
+    return patrol;
+  }
   patrol.reserve(count);
   while (patrol.size() != count) {
-    vec2f p{0, 0};
-    do {
-      p = {static_cast<float>(rand() % (max.x - min.x) + min.x),
-           static_cast<float>(rand() % (max.y - min.y) + min.y)};
-    } while (_accessibleMask[p.y][p.x] == false);
-    patrol.push_back(p);
+    vec2i cell = cells[rand() % cells.size()];
+    patrol.push_back({cell.x + 0.5f, cell.y + 0.5f});
   }
 
   return patrol;
@@ -77,22 +74,26 @@ void MapGenerator::generateSpawnPoints(float max_enemy_density,
 
   int playerIdx = rand() % available.size();
   auto playerCells = accessibleFloorCells(available[playerIdx]);
+  vec2i playerCell = playerCells[rand() % playerCells.size()];
   _spawnPoints.push_back(
-      {SpawnType::PLAYER, playerCells[rand() % playerCells.size()]});
+      {SpawnType::PLAYER, {playerCell.x + 0.5f, playerCell.y + 0.5f}});
   available.erase(available.begin() + playerIdx);
 
   int bossCount = std::min<int>(boss_room_count, available.size());
   for (int i = 0; i < bossCount; i++) {
     int idx = rand() % available.size();
     auto cells = accessibleFloorCells(available[idx]);
-    _spawnPoints.push_back({SpawnType::BOSS, cells[rand() % cells.size()]});
+    vec2i bossCell = cells[rand() % cells.size()];
+    _spawnPoints.push_back(
+        {SpawnType::BOSS, {bossCell.x + 0.5f, bossCell.y + 0.5f}});
     available.erase(available.begin() + idx);
   }
 
   for (const Rect &room : available) {
     for (vec2i cell : accessibleFloorCells(room)) {
       if ((rand() % 10000) / 10000.0f < max_enemy_density) {
-        _spawnPoints.push_back({SpawnType::ENEMY, cell});
+        _spawnPoints.push_back(
+            {SpawnType::ENEMY, {cell.x + 0.5f, cell.y + 0.5f}});
       }
     }
   }

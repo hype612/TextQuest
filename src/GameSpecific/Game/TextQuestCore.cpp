@@ -76,10 +76,19 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
 
   _ge.setOnSceneOver([this]() { onSceneOver(); });
   _ge.setPostSceneOver([this]() { onPostSceneOver(); });
+  _ge.setOnFrame([this](float) {
+    if (_hud.minimap)
+      _hud.minimap->update();
+  });
 
-  registerEnemyArchetype("istvan",
-                         EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"),
-                                        100, 0.2f, 180.f, 8.f, 3.f, 3.f});
+  registerEnemyArchetype(
+      "ghoul", EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"),
+                              100, 10.f, 0.2f, 180.f, 8.f, 3.f, 3.f, 1.f, 0.8f,
+                              0.3f});
+  registerEnemyArchetype(
+      "demon", EnemyArchetype{loadTextureVec("Resources/Textures/Cyberdemon/"),
+                              500, 25.f, 0.35f, 180.f, 12.f, 2.5f, 3.f, 0.7f,
+                              0.5f, 0.15f});
 }
 
 void TextQuestCore::run() {
@@ -122,9 +131,9 @@ void TextQuestCore::registerEnemyArchetype(std::string name,
   }
 }
 
-void TextQuestCore::spawnEnemy(const std::string &type_key,
-                               SceneManager &scene, vec2f pos,
-                               std::unique_ptr<IBehaviorController> ctrl) {
+void TextQuestCore::spawnEnemy(const std::string &type_key, SceneManager &scene,
+                               vec2f pos,
+                               const ControllerFactory &make_ctrl) {
   auto it = _enemyArchetypes.find(type_key);
   if (it == _enemyArchetypes.end()) {
     Logger::GetInstance()->log(
@@ -133,9 +142,20 @@ void TextQuestCore::spawnEnemy(const std::string &type_key,
     Logger::GetInstance()->forceFlush();
     throw std::out_of_range("spawnEnemy: unknown archetype key: " + type_key);
   }
-  const EnemyArchetype &a = it->second;
+  // The registered archetype holds the base stats. Scale a copy with the
+  // difficulty chosen for this run.
+  EnemyArchetype a = it->second;
+  a.health *= _chosenDifficulty.enemyHealth;
+  a.damage *= _chosenDifficulty.enemyDamage;
+  a.fovDegrees *= _chosenDifficulty.fovDegrees;
+  a.viewDistance *= _chosenDifficulty.viewDistance;
+  a.moveSpeed *= _chosenDifficulty.enemySpeed;
+  a.shootCooldown *= _chosenDifficulty.attackCooldown;
+  a.reactionDelay *= _chosenDifficulty.reactionDelay;
+  a.missChance =
+      std::clamp(a.missChance * _chosenDifficulty.missChance, 0.f, 1.f);
 
-  Entity e(std::move(ctrl), Transform{pos, 1.f}, a.textures, a.health,
+  Entity e(make_ctrl(a),Transform{pos, 1.f}, a.textures, a.health,
            a.collisionRadius, false, a.fovDegrees, a.viewDistance);
   e.setMoveSpeedAllDirectons(a.moveSpeed);
   e.setTurnSpeedAlldirections(a.turnSpeed);
@@ -259,20 +279,15 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   sceneMan.initializeNewMap(map, 50, 50);
   l->log("map inited", LogType::CORE, LogLevel::INFO);
 
-  mg.generateSpawnPoints(/*max_enemy_density=*/0.0f, /*boss_room_count=*/1);
-  vec2i playerSpawn{2, 2};
-  vec2i istvanSpawn{10, 9};
-  for (const SpawnPoint &sp : mg.spawnPoints()) {
+  mg.generateSpawnPoints(_chosenDifficulty.enemyDensity,
+                         /*boss_room_count=*/1);
+  vec2f playerSpawn{-1.f, -1.f};
+  for (const SpawnPoint &sp : mg.spawnPoints())
     if (sp.type == SpawnType::PLAYER)
       playerSpawn = sp.pos;
-    else if (sp.type == SpawnType::BOSS)
-      istvanSpawn = sp.pos;
-  }
 
   std::string intex = " \n";
-  Transform init{
-      {static_cast<float>(playerSpawn.x), static_cast<float>(playerSpawn.y)},
-      0.f};
+  Transform init{playerSpawn, 0.f};
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   auto playerCtrl = std::make_unique<PlayerBehaviorController>(_input);
   PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
@@ -283,15 +298,28 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   sceneMan.AddEntity(p);
   l->log("player added to entities", LogType::CORE, LogLevel::INFO);
 
-  // ==================
-  // Istvan upload
-  // ==================
-  vec2f istvanSpawnF{static_cast<float>(istvanSpawn.x),
-                     static_cast<float>(istvanSpawn.y)};
-  auto istvanCtrl = std::make_unique<IstvanBehaviorController>(
-      mg.generatePatrolPoints(istvanSpawnF, 3), 1.f, 3.f);
-  IstvanBehaviorController *istvanCtrlPtr = istvanCtrl.get();
-  spawnEnemy("istvan", sceneMan, istvanSpawnF, std::move(istvanCtrl));
+  // Enemies are spawned after the player so that the player keeps entity ID 0
+  // (the camera follows it).
+  IstvanBehaviorController *demonCtrlPtr = nullptr;
+  for (const SpawnPoint &sp : mg.spawnPoints()) {
+    if (sp.type == SpawnType::PLAYER)
+      continue;
+    vec2f spawnF = sp.pos;
+    IstvanBehaviorController *rawCtrl = nullptr;
+    auto makeCtrl = [&](const EnemyArchetype &a) {
+      auto ctrl = std::make_unique<IstvanBehaviorController>(
+          mg.generatePatrolPoints(spawnF, 3), a.shootCooldown, 3.f,
+          a.reactionDelay, a.missChance);
+      rawCtrl = ctrl.get();
+      return ctrl;
+    };
+    if (sp.type == SpawnType::BOSS) {
+      spawnEnemy("demon", sceneMan, spawnF, makeCtrl);
+      demonCtrlPtr = rawCtrl;
+    } else {
+      spawnEnemy("ghoul", sceneMan, spawnF, makeCtrl);
+    }
+  }
 
   // ==================
   // Win cond setup
@@ -304,7 +332,7 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
   sceneMan.setCameraFovDegrees(90);
   l->log("camera follow set", LogType::CORE, LogLevel::INFO);
-  return {scene, playerCtrlPtr, istvanCtrlPtr};
+  return {scene, playerCtrlPtr, demonCtrlPtr};
 }
 
 TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
@@ -320,13 +348,22 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
       std::make_unique<HealthBarPresenter>(_ui, hbHandle, playerMaxHp);
   built.playerCtrl->setHealthObserver(hud.healthBar.get());
 
-  // Istvan state debug display
+  // Demon state debug display
   Rect stateArea{2, scr.y - 7, 30, 3};
   Rect stateWritable{1, 1, 28, 1};
   UIElementHandle stateHandle = _ui.addElement(UIElement(
       stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
   hud.istvanState = std::make_unique<IstvanStatePresenter>(_ui, stateHandle);
   built.istvanCtrl->setStateObserver(hud.istvanState.get());
+
+  // Minimap, top-right corner
+  const int mmW = 25, mmH = 13;
+  Rect mmArea{scr.x - mmW - 1, 1, mmW, mmH};
+  Rect mmWritable{1, 1, mmW - 2, mmH - 2};
+  UIElementHandle mmHandle = _ui.addElement(
+      UIElement(mmArea, mmWritable, MinimapPresenter::design(mmArea)));
+  hud.minimap = std::make_unique<MinimapPresenter>(
+      _ui, mmHandle, *built.scene, built.scene->entityAtId(0).transform());
   return hud;
 }
 
