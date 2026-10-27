@@ -30,6 +30,9 @@ void UIElement::updateContent(std::vector<std::string> lines) {
   _contentChanged = true;
 }
 
+void UIElement::setFgColor(std::optional<uint32_t> rgb) { _fg = rgb; }
+void UIElement::setBgColor(std::optional<uint32_t> rgb) { _bg = rgb; }
+
 std::optional<std::reference_wrapper<const std::vector<std::string>>>
 UIElement::takeDesign() {
   if (!_designChanged) {
