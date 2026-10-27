@@ -35,25 +35,26 @@ UIElement *UIManager::elementAt(UIElementHandle handle) {
   return it == _elements.end() ? nullptr : &it->second;
 }
 
-void UIManager::process() {
+void UIManager::process(float dt) {
   if (_elements.empty()) {
     return;
   }
   for (auto &[id, element] : _elements) {
+    element.tick(dt);
     if (auto design = element.takeDesign()) {
-      _renderer.setOverlayContent(id, design->get(), std::nullopt,
-                                  std::nullopt);
+      _renderer.setOverlayContent(id, design->get(), element.fgColor(),
+                                  element.bgColor());
       if (auto content = element.takeContent()) {
         _renderer.setOverlayRegion(id, element.writableArea(), content->get(),
-                                   std::nullopt, std::nullopt);
+                                   element.fgColor(), element.bgColor());
       } else {
         _renderer.setOverlayRegion(id, element.writableArea(),
-                                   element.peekContent(), std::nullopt,
-                                   std::nullopt);
+                                   element.peekContent(), element.fgColor(),
+                                   element.bgColor());
       }
     } else if (auto d = element.takeContent()) {
       _renderer.setOverlayRegion(id, element.writableArea(), d->get(),
-                                 std::nullopt, std::nullopt);
+                                 element.fgColor(), element.bgColor());
     }
   }
 }

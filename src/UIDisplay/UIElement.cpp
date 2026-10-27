@@ -30,8 +30,38 @@ void UIElement::updateContent(std::vector<std::string> lines) {
   _contentChanged = true;
 }
 
-void UIElement::setFgColor(std::optional<uint32_t> rgb) { _fg = rgb; }
-void UIElement::setBgColor(std::optional<uint32_t> rgb) { _bg = rgb; }
+void UIElement::setFgColor(std::optional<uint32_t> rgb) {
+  if (_fg == rgb)
+    return;
+  _fg = rgb;
+  _designChanged = true;
+}
+
+void UIElement::setBgColor(std::optional<uint32_t> rgb) {
+  if (_bg == rgb)
+    return;
+  _bg = rgb;
+  _designChanged = true;
+}
+
+void UIElement::setColorForSec(std::optional<uint32_t> fg,
+                               std::optional<uint32_t> bg, float seconds) {
+  if (seconds <= 0.f)
+    return;
+  if (fgColor() != fg || bgColor() != bg)
+    _designChanged = true;
+  _overrideFg = fg;
+  _overrideBg = bg;
+  _overrideRemaining = seconds;
+}
+
+void UIElement::tick(float dt) {
+  if (_overrideRemaining <= 0.f)
+    return;
+  _overrideRemaining -= dt;
+  if (_overrideRemaining <= 0.f)
+    _designChanged = true; // back to the base colors
+}
 
 std::optional<std::reference_wrapper<const std::vector<std::string>>>
 UIElement::takeDesign() {

@@ -1,7 +1,9 @@
 #ifndef TEXTQUESTCORE_H
 #define TEXTQUESTCORE_H
 
+#include "../Headers/DamageFlashPresenter.h"
 #include "../Headers/HealthBarPresenter.h"
+#include "../Headers/HealthObserverFanOut.h"
 #include "../Headers/IstvanBehaviorController.h"
 #include "../Headers/IstvanStatePresenter.h"
 #include "../Headers/MinimapPresenter.h"
@@ -52,6 +54,8 @@ private:
     std::unique_ptr<HealthBarPresenter> healthBar;
     std::unique_ptr<IstvanStatePresenter> istvanState;
     std::unique_ptr<MinimapPresenter> minimap;
+    std::unique_ptr<DamageFlashPresenter> damageFlash;
+    std::unique_ptr<HealthObserverFanOut> healthFanOut;
   };
 
   enum class MenuChoice { NEW_GAME, LAST_SEED, EXIT };

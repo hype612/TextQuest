@@ -346,7 +346,6 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
       UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
   hud.healthBar =
       std::make_unique<HealthBarPresenter>(_ui, hbHandle, playerMaxHp);
-  built.playerCtrl->setHealthObserver(hud.healthBar.get());
 
   // Demon state debug display
   Rect stateArea{2, scr.y - 7, 30, 3};
@@ -364,6 +363,16 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
       UIElement(mmArea, mmWritable, MinimapPresenter::design(mmArea)));
   hud.minimap = std::make_unique<MinimapPresenter>(
       _ui, mmHandle, *built.scene, built.scene->entityAtId(0).transform());
+
+  // Damage feedback: the player has a single health observer, so fan out to
+  // the bar and the flash.
+  hud.damageFlash = std::make_unique<DamageFlashPresenter>(
+      _ui, std::vector<UIElementHandle>{hbHandle, stateHandle, mmHandle},
+      playerMaxHp);
+  hud.healthFanOut = std::make_unique<HealthObserverFanOut>();
+  hud.healthFanOut->add(hud.healthBar.get());
+  hud.healthFanOut->add(hud.damageFlash.get());
+  built.playerCtrl->setHealthObserver(hud.healthFanOut.get());
   return hud;
 }
 

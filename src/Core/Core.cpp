@@ -94,7 +94,7 @@ void GameEngine::runMenu(const std::function<bool()> &onFrame) {
     _inputHandler->ReceiveInput();
     if (!onFrame())
       return;
-    _uimanager->process();
+    _uimanager->process(0.f);
     _renderer->PrintBuffer();
   }
 }
@@ -149,7 +149,7 @@ void GameEngine::run_game() {
         "fps: " + std::to_string(1.f / f_elapsed_time)};
     _renderer->PrintDebugInfo(dbgNfo);
     _renderer->PrintBuffer();
-    _uimanager->process();
+    _uimanager->process(f_elapsed_time);
   }
 }
 

@@ -11,7 +11,8 @@ class UIManager {
 public:
   explicit UIManager(IRenderer &renderer);
 
-  void process();
+  // Ticks every element's timers by `dt` seconds, then writes the dirty ones.
+  void process(float dt);
 
   // Moves `element` into UIManager's keeping and hands back a handle for
   // it. A plain int, not an address - map storage decouples the handle

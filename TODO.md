@@ -36,27 +36,14 @@ Done:
   tested in a terminal.
 
 Remaining:
-- [ ] `UIElement`: `std::optional<uint32_t> _fg, _bg` members, `setFgColor` / `setBgColor`
-  (take an optional, `nullopt` = unset, so there are no separate reset functions) and
-  `fgColor()` / `bgColor()` getters. Each setter sets `_designChanged` only if the value
-  actually changed, so setting the same color every frame does not force a redraw.
-- [ ] `UIManager::process`: replace the `std::nullopt, std::nullopt` placeholders with
-  `element.fgColor(), element.bgColor()`.
+- [x] `UIElement` color setters/getters (`_designChanged` only on a real change),
+  `UIManager::process(float dt)` passes `fgColor()` / `bgColor()` to the renderer.
 - [ ] Check in a real terminal: colors show on frame and content, and a plain write
   without colors draws in the default colors.
-- [ ] Timing: DECISION PENDING (A or B below).
-  - **A. Timer on the element, ticked by the manager (recommended).** Override members
-    `_overrideFg`, `_overrideBg`, `_overrideRemaining` and a `tick(dt)` that clears the
-    override on expiry and sets `_designChanged`. The getters return the override while
-    it is active, otherwise the base colors. `UIManager::process(float dt)` ticks every
-    element. `run_game` passes `f_elapsed_time`, `runMenu` computes its own `dt` or passes
-    `0`. The timer logic lives once, presenters just say "flash red for 0.3 s". Cost: the
-    element is no longer purely passive.
-  - **B. Timer outside the UI.** The element stays passive. The presenter owns the
-    countdown (it gets `dt` through `setOnFrame`) and calls `setBgColor(red)`, later
-    `setBgColor(nullopt)`. No `Core.cpp` change, but every presenter that flashes
-    reimplements the timer.
-- [ ] Game side: `DamageFlashPresenter` (an `IHealthObserver` holding `UIManager&` and a
+- [x] Timing: option A. `UIElement::setColorForSec(fg, bg, seconds)` overrides both colors until the
+  timer runs out, `tick(dt)` is called by `UIManager::process(dt)` (`run_game` passes
+  the frame `dt`, `runMenu` passes 0).
+- [x] Game side: `DamageFlashPresenter` (an `IHealthObserver` holding `UIManager&` and a
   `vector<UIElementHandle>`) that flashes all its elements red on damage. `UIManager`
   stays unaware of "all elements". The player has a single `IHealthObserver*`, so add a
   small fan-out observer that forwards to both the health bar and the flash presenter.
@@ -148,7 +135,7 @@ Remaining:
   `TextQuestCore::buildScene`; the standalone `main.cpp` test driver was removed).
 
 ### 5. Feedback mechanisms (~2-3 h)
-- [ ] Damage feedback (message or short flash) when the player is hit.
+- [x] Damage feedback (message or short flash) when the player is hit. (flash done, untested in a terminal)
 - [ ] Kill / hit messages, reusing the message presenter from step 2.
 - Done when: the player gets a visible reaction to every hit taken.
 
