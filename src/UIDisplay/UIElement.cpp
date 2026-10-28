@@ -52,15 +52,30 @@ void UIElement::setColorForSec(std::optional<uint32_t> fg,
     _designChanged = true;
   _overrideFg = fg;
   _overrideBg = bg;
-  _overrideRemaining = seconds;
+  _colorOverrideRemaining = seconds;
+}
+
+void UIElement::setContentForSec(const std::vector<std::string> &override,
+                                 float seconds) {
+  if (seconds <= 0.f)
+    return;
+  if (peekContent() != override)
+    _designChanged = true;
+  _overrideContent = override;
+  _contentOverrideRemaining = seconds;
 }
 
 void UIElement::tick(float dt) {
-  if (_overrideRemaining <= 0.f)
+  if (_colorOverrideRemaining <= 0.f && _contentOverrideRemaining <= 0.f)
     return;
-  _overrideRemaining -= dt;
-  if (_overrideRemaining <= 0.f)
+
+  _colorOverrideRemaining -= dt;
+  if (_colorOverrideRemaining <= 0.f)
     _designChanged = true; // back to the base colors
+
+  _contentOverrideRemaining -= dt;
+  if (_contentOverrideRemaining <= 0.f)
+    _contentChanged = true; // back to the base colors
 }
 
 std::optional<std::reference_wrapper<const std::vector<std::string>>>
@@ -77,5 +92,5 @@ UIElement::takeContent() {
     return std::nullopt;
   }
   _contentChanged = false;
-  return _content;
+  return _contentOverrideRemaining > 0.f ? _overrideContent : _content;
 }

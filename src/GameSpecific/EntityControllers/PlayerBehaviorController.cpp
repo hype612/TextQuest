@@ -34,6 +34,8 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
   if (_inputHandler.keyDown(MoveDirection::SHOOT)) {
     moveDelta += moveIntent(MoveDirection::SHOOT, self, delta);
   } else {
+    if (_shootObserver)
+      _shootObserver->onShoot();
     self.setShooting(false);
   }
   return self.transform().position + moveDelta;

@@ -4,6 +4,7 @@
 #include "IBehaviorController.h"
 #include "IHealthObserver.h"
 #include "IInputHandler.h"
+#include "IShootObserver.h"
 #include "MoveDirection.h"
 
 class PlayerBehaviorController : public IBehaviorController {
@@ -17,6 +18,7 @@ public:
   void setHealthObserver(IHealthObserver *observer) {
     _healthObserver = observer;
   }
+  void setShootObserver(IShootObserver *observer) { _shootObserver = observer; }
 
 private:
   float _sinceLastShot = 0.f;
@@ -24,6 +26,7 @@ private:
   vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
   IInputHandler &_inputHandler;
   IHealthObserver *_healthObserver = nullptr;
+  IShootObserver *_shootObserver = nullptr;
 };
 
 #endif // PLAYERBEHAVIOURCONTROLLER_H
