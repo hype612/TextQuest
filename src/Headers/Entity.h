@@ -19,11 +19,11 @@ public:
   // Constructors
   // =============
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
-         std::string *tex, int initHP, float collisionRadius, bool isPlayer,
-         float fov_in_deg, float viewDistance);
+         std::string *tex, int initHP, float collisionRadius, float hitRadius,
+         bool isPlayer, float fov_in_deg, float viewDistance);
   Entity(std::unique_ptr<IBehaviorController> behaviourCtrl, Transform pos,
          const std::vector<std::string> &texVec, int initHP, float collisionRadius,
-         bool isPlayer, float fov_in_deg, float viewDistance);
+         float hitRadius, bool isPlayer, float fov_in_deg, float viewDistance);
   Entity() = delete;
 
   // =============
@@ -60,7 +60,10 @@ public:
   bool shooting() const;
   int dmg() const;
   float moveSpeedOnDir(MoveDirection direction) const;
+  // movement: walls and entity-vs-entity spacing
   float collisionRadius() const;
+  // hitscan: how big the entity is as a projectile target
+  float hitRadius() const;
 
   // =============
   // Setters
@@ -92,6 +95,7 @@ private:
   TextureMapper _texMapper;
   int _health;
   float _collisionRadius;
+  float _hitRadius;
   bool _isPlayer;
   float _fov;
   float _viewDistance;

@@ -43,7 +43,7 @@ public:
                                std::vector<std::string> &wallTexV);
 
   // Channel implementation
-  bool canMoveTo(const vec2f &dest) const override;
+  bool canMoveTo(const vec2f &dest, float radius) const override;
   void playerDiedNotify() override;
 
   bool isOutOfBounds(int test_x, int test_y) const;

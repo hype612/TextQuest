@@ -46,11 +46,17 @@ void SceneManager::uploadTextureVecForWall(const char &mapChar,
   _mapManager.uploadWallTextureVecFor(mapChar, wallTexV);
 }
 
-bool SceneManager::canMoveTo(const vec2f &dest) const {
-  return !_mapManager.isWall(static_cast<int>(dest.x),
-                             static_cast<int>(dest.y)) &&
-         !_mapManager.isOutOfBounds(static_cast<int>(dest.x),
-                                    static_cast<int>(dest.y));
+bool SceneManager::canMoveTo(const vec2f &dest, float radius) const {
+  // test the corners of the bounding box so the entity doesn't overlap walls
+  for (float dx : {-radius, radius}) {
+    for (float dy : {-radius, radius}) {
+      int x = static_cast<int>(std::floor(dest.x + dx));
+      int y = static_cast<int>(std::floor(dest.y + dy));
+      if (_mapManager.isOutOfBounds(x, y) || _mapManager.isWall(x, y))
+        return false;
+    }
+  }
+  return true;
 }
 
 void SceneManager::playerDiedNotify() { _sceneOver = true; }

@@ -10,19 +10,21 @@
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, std::string *tex, int initHP,
-               float collisionRadius, bool isPlayer, float fov_in_deg,
-               float viewDistance)
+               float collisionRadius, float hitRadius, bool isPlayer,
+               float fov_in_deg, float viewDistance)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
-      _collisionRadius(collisionRadius), _isPlayer(isPlayer),
+      _collisionRadius(collisionRadius), _hitRadius(hitRadius),
+      _isPlayer(isPlayer),
       _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
       _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                Transform pos, const std::vector<std::string> &texVec, int initHP,
-               float collisionRadius, bool isPlayer, float fov_in_deg,
-               float viewDistance)
+               float collisionRadius, float hitRadius, bool isPlayer,
+               float fov_in_deg, float viewDistance)
     : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),
-      _collisionRadius(collisionRadius), _isPlayer(isPlayer),
+      _collisionRadius(collisionRadius), _hitRadius(hitRadius),
+      _isPlayer(isPlayer),
       _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
       _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 // =============
@@ -93,6 +95,7 @@ float Entity::moveSpeedOnDir(MoveDirection direction) const {
 }
 
 float Entity::collisionRadius() const { return _collisionRadius; }
+float Entity::hitRadius() const { return _hitRadius; }
 
 // =============
 // Setters

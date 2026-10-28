@@ -7,12 +7,13 @@
 MapGenerator::MapGenerator(const Rect &parent_area, const part_params &params,
                            int min_wall_neighbor_count,
                            float noise_distribution, unsigned int seed)
-    : _bspRoot(parent_area, nullptr, params),
-      _ca_min_wall_neighbor_count(min_wall_neighbor_count),
+    : _ca_min_wall_neighbor_count(min_wall_neighbor_count),
       _ca_noise_distribution(noise_distribution), _parentArea(parent_area),
       _map(parent_area.height,
            std::vector<Tile>(parent_area.width, Tile::WALL)) {
+  // Seed before the BSP is built, it draws from rand() too.
   srand(seed);
+  _bspRoot.emplace(parent_area, nullptr, params);
   FillRooms();
   createLinks();
 }
@@ -20,12 +21,12 @@ MapGenerator::MapGenerator(const Rect &parent_area, const part_params &params,
 void MapGenerator::FillRooms() {
   // traverse bsp.
   // if leaf == let generator do its thang
-  createRoom(&_bspRoot);
+  createRoom(&*_bspRoot);
   enforceBorder();
 }
 
 void MapGenerator::createLinks() {
-  vec2i bfs_start = connectSubtree(&_bspRoot);
+  vec2i bfs_start = connectSubtree(&*_bspRoot);
   _accessibleMask = floodfill(bfs_start);
   for (size_t y = 0; y < _map.size(); y++) {
     for (size_t x = 0; x < _map[y].size(); x++) {
@@ -39,7 +40,7 @@ void MapGenerator::createLinks() {
 std::vector<vec2f>
 MapGenerator::generatePatrolPoints(vec2f spawn_point,
                                    unsigned int count) const {
-  const BspNode *room = findLeafContaining(&_bspRoot, spawn_point);
+  const BspNode *room = findLeafContaining(&*_bspRoot, spawn_point);
   auto cells = accessibleFloorCells(room->rect());
   std::vector<vec2f> patrol;
   if (cells.empty()) {

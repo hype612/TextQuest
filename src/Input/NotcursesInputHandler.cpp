@@ -66,6 +66,18 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
       _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = false;
     }
     break;
+  case 'j':
+    if (evtype == NCTYPE_PRESS)
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;
+    if (evtype == NCTYPE_RELEASE)
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = false;
+    break;
+  case 'l':
+    if (evtype == NCTYPE_PRESS)
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
+    if (evtype == NCTYPE_RELEASE)
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+    break;
   case 'q':
     if (evtype == NCTYPE_PRESS)
       _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;

@@ -5,6 +5,7 @@
 #include "../../Headers/Vec2i.h"
 #include "bsp_node.hpp"
 #include "cellularAutomata.hpp"
+#include <optional>
 #include <vector>
 
 constexpr int ideal_generation_num = 4;
@@ -60,7 +61,8 @@ private:
   void carveCorridor(vec2i a, vec2i b);
   void enforceBorder();
 
-  BspNode _bspRoot;
+  // Built in the ctor body, after srand(). Not movable (children point to it).
+  std::optional<BspNode> _bspRoot;
   int _ca_min_wall_neighbor_count;
   float _ca_noise_distribution;
   // x and y param are pretty much meaningless here

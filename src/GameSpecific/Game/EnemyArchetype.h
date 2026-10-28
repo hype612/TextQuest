@@ -9,7 +9,10 @@ struct EnemyArchetype {
   std::vector<std::string> textures;
   int health;
   float damage;
+  // movement footprint (walls, spacing)
   float collisionRadius;
+  // size as a hitscan target
+  float hitRadius;
   float fovDegrees;
   float viewDistance;
   float moveSpeed;

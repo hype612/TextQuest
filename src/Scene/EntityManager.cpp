@@ -54,7 +54,7 @@ void EntityManager::resolveProjectiles() {
 
       if (auto d = projectileHitDistSq(e.transform().position,
                                        other.transform().position,
-                                       other.collisionRadius(), dir, 20.f)) {
+                                       other.hitRadius(), dir, 20.f)) {
         if (*d < closest.second) {
           closest = {other.ID(), *d};
         }
@@ -80,22 +80,23 @@ void EntityManager::resolveMovement(float delta) {
   // validate intents
   for (auto &[id, dest] : intents) {
     Transform current_trans = _entityContainer[id].transform();
+    const float radius = _entityContainer[id].collisionRadius();
     if (dest != current_trans.position) {
-      if (!_sceneChannel.canMoveTo({dest.x, current_trans.position.y})) {
+      if (!_sceneChannel.canMoveTo({dest.x, current_trans.position.y}, radius)) {
         TerrainCollidable collided(
             {static_cast<int>(dest.x),
              static_cast<int>(current_trans.position.y)});
         dest.x = current_trans.position.x;
         _entityContainer[id].onCollision(collided);
       }
-      if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y})) {
+      if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y}, radius)) {
         TerrainCollidable collided({static_cast<int>(current_trans.position.x),
                                     static_cast<int>(dest.y)});
         dest.y = current_trans.position.y;
         _entityContainer[id].onCollision(collided);
       }
       // basically corner check
-      if (!_sceneChannel.canMoveTo(dest)) {
+      if (!_sceneChannel.canMoveTo(dest, radius)) {
         dest = current_trans.position;
       }
     }
@@ -217,7 +218,7 @@ bool EntityManager::rayBlockedByWall(vec2f origin, vec2f dir,
       rayLength = sideDist.y;
     }
 
-    if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y})) {
+    if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y}, 0.f)) {
       hitwall = true;
     }
   }

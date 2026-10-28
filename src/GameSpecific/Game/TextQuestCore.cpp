@@ -82,13 +82,13 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
   });
 
   registerEnemyArchetype(
-      "ghoul", EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"),
-                              100, 10.f, 0.2f, 180.f, 8.f, 3.f, 3.f, 1.f, 0.8f,
-                              0.3f});
+      "ghoul",
+      EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"), 100,
+                     10.f, 0.2f, 0.2f, 180.f, 8.f, 3.f, 3.f, 1.f, 0.8f, 0.3f});
   registerEnemyArchetype(
       "demon", EnemyArchetype{loadTextureVec("Resources/Textures/Cyberdemon/"),
-                              500, 25.f, 0.35f, 180.f, 12.f, 2.5f, 3.f, 0.7f,
-                              0.5f, 0.15f});
+                              500, 25.f, 0.35f, 0.35f, 180.f, 12.f, 2.5f, 3.f,
+                              0.7f, 0.5f, 0.15f});
 }
 
 void TextQuestCore::run() {
@@ -132,8 +132,7 @@ void TextQuestCore::registerEnemyArchetype(std::string name,
 }
 
 void TextQuestCore::spawnEnemy(const std::string &type_key, SceneManager &scene,
-                               vec2f pos,
-                               const ControllerFactory &make_ctrl) {
+                               vec2f pos, const ControllerFactory &make_ctrl) {
   auto it = _enemyArchetypes.find(type_key);
   if (it == _enemyArchetypes.end()) {
     Logger::GetInstance()->log(
@@ -155,8 +154,8 @@ void TextQuestCore::spawnEnemy(const std::string &type_key, SceneManager &scene,
   a.missChance =
       std::clamp(a.missChance * _chosenDifficulty.missChance, 0.f, 1.f);
 
-  Entity e(make_ctrl(a),Transform{pos, 1.f}, a.textures, a.health,
-           a.collisionRadius, false, a.fovDegrees, a.viewDistance);
+  Entity e(make_ctrl(a), Transform{pos, 1.f}, a.textures, a.health,
+           a.collisionRadius, a.hitRadius, false, a.fovDegrees, a.viewDistance);
   e.setMoveSpeedAllDirectons(a.moveSpeed);
   e.setTurnSpeedAlldirections(a.turnSpeed);
   scene.AddEntity(e);
@@ -291,8 +290,8 @@ TextQuestCore::BuiltScene TextQuestCore::buildScene() {
   l->log("before player construction", LogType::CORE, LogLevel::INFO);
   auto playerCtrl = std::make_unique<PlayerBehaviorController>(_input);
   PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
-  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, 0.3f, true, 0.f,
-           0.f);
+  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, 0.15f, 0.3f, true,
+           0.f, 0.f);
   p.setMoveSpeedAllDirectons(3.5f);
   p.setTurnSpeedAlldirections(2.5f);
   sceneMan.AddEntity(p);
