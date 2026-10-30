@@ -42,19 +42,19 @@ void UIManager::process(float dt) {
   for (auto &[id, element] : _elements) {
     element.tick(dt);
     if (auto design = element.takeDesign()) {
-      _renderer.setOverlayContent(id, design->get(), element.fgColor(),
-                                  element.bgColor());
+      _renderer.setOverlay(id, design->get(), element.fgColor(),
+                                  element.bgColor(), element.transparentSpaces());
       if (auto content = element.takeContent()) {
         _renderer.setOverlayRegion(id, element.writableArea(), content->get(),
-                                   element.fgColor(), element.bgColor());
+                                   element.fgColor(), element.bgColor(), element.transparentSpaces());
       } else {
         _renderer.setOverlayRegion(id, element.writableArea(),
                                    element.peekContent(), element.fgColor(),
-                                   element.bgColor());
+                                   element.bgColor(), element.transparentSpaces());
       }
     } else if (auto d = element.takeContent()) {
       _renderer.setOverlayRegion(id, element.writableArea(), d->get(),
-                                 element.fgColor(), element.bgColor());
+                                 element.fgColor(), element.bgColor(), element.transparentSpaces());
     }
   }
 }

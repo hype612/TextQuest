@@ -31,12 +31,12 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
   if (_inputHandler.keyDown(MoveDirection::TURN_RIGHT)) {
     moveDelta += moveIntent(MoveDirection::TURN_RIGHT, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::SHOOT)) {
-    moveDelta += moveIntent(MoveDirection::SHOOT, self, delta);
-  } else {
+  _cooldown -= delta;
+  if (_inputHandler.keyDown(MoveDirection::SHOOT) && _cooldown <= 0.f) {
+    self.setShooting(true);
+    _cooldown = _shootcd;
     if (_shootObserver)
       _shootObserver->onShoot();
-    self.setShooting(false);
   }
   return self.transform().position + moveDelta;
 }
@@ -76,11 +76,7 @@ vec2f PlayerBehaviorController::moveIntent(MoveDirection dir, Entity &self,
     return {0.f, 0.f};
     break;
   case MoveDirection::SHOOT:
-    _sinceLastShot += delta;
-    if (_sinceLastShot >= _shootcd) {
-      self.setShooting(true);
-      _sinceLastShot = 0.f;
-    }
+    // handled in Tick (cooldown + observer notification)
     return {0.f, 0.f};
     break;
   }

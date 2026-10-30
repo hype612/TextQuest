@@ -8,6 +8,7 @@
 #include "../Headers/IstvanStatePresenter.h"
 #include "../Headers/MinimapPresenter.h"
 #include "../Headers/PlayerBehaviorController.h"
+#include "../Headers/ViewmodelPresenter.h"
 #include "../MapGen/cellularAutomata.hpp"
 #include "Core.h"
 #include "Difficulty.h"
@@ -55,6 +56,7 @@ private:
     std::unique_ptr<IstvanStatePresenter> istvanState;
     std::unique_ptr<MinimapPresenter> minimap;
     std::unique_ptr<DamageFlashPresenter> damageFlash;
+    std::unique_ptr<ViewmodelPresenter> viewmodel;
     std::unique_ptr<HealthObserverFanOut> healthFanOut;
   };
 

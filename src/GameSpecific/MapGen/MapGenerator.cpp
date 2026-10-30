@@ -46,12 +46,60 @@ MapGenerator::generatePatrolPoints(vec2f spawn_point,
   if (cells.empty()) {
     return patrol;
   }
-  patrol.reserve(count);
-  while (patrol.size() != count) {
-    vec2i cell = cells[rand() % cells.size()];
-    patrol.push_back({cell.x + 0.5f, cell.y + 0.5f});
+  constexpr int MAX_ATTEMPTS = 20;
+  std::vector<vec2i> best;
+
+  // The enemy spawns here and walks to patrol[0] first, so the path has to
+  // start at the spawn cell or that first leg can cut through walls.
+  vec2i spawn_cell = {static_cast<int>(spawn_point.x),
+                      static_cast<int>(spawn_point.y)};
+  if (std::find(cells.begin(), cells.end(), spawn_cell) == cells.end()) {
+    spawn_cell = cells[rand() % cells.size()];
   }
 
+  // Greedy walks can dead-end, so restart from the spawn cell and keep the
+  // longest path found.
+  for (int attempt = 0; attempt < MAX_ATTEMPTS && best.size() < count;
+       attempt++) {
+    vec2i cur = spawn_cell;
+    std::vector<vec2i> i_patrol = {cur};
+
+    while (i_patrol.size() < count) {
+      std::vector<vec2i> candidates;
+      for (vec2i c : cells) {
+        if ((c.x == cur.x) == (c.y == cur.y)) { // same cell, or diagonal
+          continue;
+        }
+        if (std::find(i_patrol.begin(), i_patrol.end(), c) != i_patrol.end()) {
+          continue;
+        }
+        // Walk the straight run from cur to c; every cell must be floor.
+        int dx = (c.x > cur.x) - (c.x < cur.x);
+        int dy = (c.y > cur.y) - (c.y < cur.y);
+        bool clear = true;
+        for (vec2i p = cur; clear && !(p.x == c.x && p.y == c.y);
+             p = {p.x + dx, p.y + dy}) {
+          clear = _map[p.y][p.x] == Tile::FLOOR;
+        }
+        if (clear) {
+          candidates.push_back(c);
+        }
+      }
+      if (candidates.empty()) {
+        break;
+      }
+      cur = candidates[rand() % candidates.size()];
+      i_patrol.push_back(cur);
+    }
+    if (i_patrol.size() > best.size()) {
+      best = std::move(i_patrol);
+    }
+  }
+
+  patrol.reserve(best.size());
+  for (vec2i c : best) {
+    patrol.push_back({c.x + 0.5f, c.y + 0.5f});
+  }
   return patrol;
 }
 

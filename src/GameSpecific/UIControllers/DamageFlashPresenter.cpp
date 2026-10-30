@@ -2,8 +2,8 @@
 #include "../../Headers/UIElement.h"
 
 namespace {
-constexpr uint32_t kFlashRed = 0xFF3030;
-constexpr float kFlashSeconds = 0.25f;
+constexpr uint32_t flash_red = 0xFF3030;
+constexpr float flash_seconds = 0.25f;
 } // namespace
 
 DamageFlashPresenter::DamageFlashPresenter(UIManager &ui,
@@ -18,5 +18,5 @@ void DamageFlashPresenter::onHealthChanged(int current) {
     return;
   for (UIElementHandle h : _handles)
     if (UIElement *el = _ui.elementAt(h))
-      el->setColorForSec(kFlashRed, std::nullopt, kFlashSeconds);
+      el->setColorForSec(flash_red, std::nullopt, flash_seconds);
 }

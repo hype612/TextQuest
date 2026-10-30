@@ -25,14 +25,14 @@ public:
   virtual OverlayId createOverlay(Rect area) = 0;
   // `fg` / `bg` are 0xRRGGBB colors applied to the cells written by the call
   // only. nullopt means the default color, not "keep whatever was there".
-  virtual void setOverlayContent(OverlayId id,
+  virtual void setOverlay(OverlayId id,
                                  const std::vector<std::string> &content,
                                  std::optional<uint32_t> fg,
-                                 std::optional<uint32_t> bg) = 0;
+                                 std::optional<uint32_t> bg, bool transparentSpaces) = 0;
   virtual void setOverlayRegion(OverlayId id, Rect region,
                                 const std::vector<std::string> &content,
                                 std::optional<uint32_t> fg,
-                                std::optional<uint32_t> bg) = 0;
+                                std::optional<uint32_t> bg, bool transparentSpaces) = 0;
   virtual bool destroyOverlay(OverlayId id) = 0;
   IRenderer &operator=(const IRenderer &) = delete;
   IRenderer(IRenderer &&) = delete;

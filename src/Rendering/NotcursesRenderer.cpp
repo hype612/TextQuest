@@ -60,7 +60,7 @@ int NotcursesRenderer::screenWidth() const { return _screenWidth; }
 OverlayId NotcursesRenderer::createOverlay(Rect area) {
   if (area.x <= 0 || area.y <= 0) {
     Logger::GetInstance()->log(
-        "CreatePopupArea: x or y of the new rectangle was a negative value, "
+        "CreateOverlay: x or y of the new rectangle was a negative value, "
         "skipping the creation. x: " +
             std::to_string(area.x) + " y: " + std::to_string(area.y),
         LogType::RENDER, LogLevel::ERROR);
@@ -68,7 +68,7 @@ OverlayId NotcursesRenderer::createOverlay(Rect area) {
   }
 
   if (area.width <= 0 || area.height <= 0) {
-    Logger::GetInstance()->log("CreatePopupArea: width or height of the new "
+    Logger::GetInstance()->log("CreateOverlay: width or height of the new "
                                "rectangle was a negative value, "
                                "skipping the creation. width: " +
                                    std::to_string(area.width) +
@@ -81,7 +81,7 @@ OverlayId NotcursesRenderer::createOverlay(Rect area) {
            ncplane_dim_y(pln)};
     if (r.overlaps(area)) {
       Logger::GetInstance()->log(
-          "CreatePopupArea: The proposed plane overlaps with an existing one.",
+          "CreateOverlay: The proposed plane overlaps with an existing one.",
           LogType::RENDER, LogLevel::ERROR);
       return -1;
     }
@@ -120,10 +120,25 @@ static void applyColors(ncplane *plane, std::optional<uint32_t> fg,
     ncplane_set_bg_default(plane);
 }
 
-void NotcursesRenderer::setOverlayContent(
-    OverlayId id, const std::vector<std::string> &content,
-    std::optional<uint32_t> fg, std::optional<uint32_t> bg) {
+void NotcursesRenderer::putRow(ncplane *plane, int y, int x,
+                               const std::string &text, size_t width,
+                               bool transparentSpaces) {
+  const size_t len = std::min(text.size(), width);
+  if (!transparentSpaces) {
+    ncplane_cursor_move_yx(plane, y, x);
+    ncplane_putstr(plane, text.substr(0, len).c_str());
+    return;
+  }
+  for (size_t i = 0; i < len; i++) {
+    if (text[i] != ' ')
+      ncplane_putchar_yx(plane, y, x + static_cast<int>(i), text[i]);
+  }
+}
 
+void NotcursesRenderer::setOverlay(
+    OverlayId id, const std::vector<std::string> &content,
+    std::optional<uint32_t> fg, std::optional<uint32_t> bg,
+    bool transparentSpaces) {
   ncplane *current = _overlayPlanes.at(id);
   unsigned int p_width, p_height;
   int p_x, p_y;
@@ -144,17 +159,20 @@ void NotcursesRenderer::setOverlayContent(
   ncplane_erase(current);
   applyColors(current, fg, bg);
   int printheight = (content.size() < p_height) ? content.size() : p_height;
-  for (int y = 0; y < printheight; y++) {
-    ncplane_cursor_move_yx(current, y, 0);
-    ncplane_putstr(current, content[y].substr(0, p_width).c_str());
-  }
+  for (int y = 0; y < printheight; y++)
+    putRow(current, y, 0, content[y], p_width, transparentSpaces);
 }
 
+// region x,y should be relative to the parent ncplane == ui element
 void NotcursesRenderer::setOverlayRegion(
     OverlayId id, Rect region, const std::vector<std::string> &content,
-    std::optional<uint32_t> fg, std::optional<uint32_t> bg) {
+    std::optional<uint32_t> fg, std::optional<uint32_t> bg, bool transparentSpaces) {
+  if (region.width == 0 || region.height == 0 ) {
+    Logger::GetInstance()->log("setOverlayRegion: fn was called with 0 height or width region", LogType::RENDER, LogLevel::ERROR);
+    return;
+  } 
+  
   ncplane *current = _overlayPlanes.at(id);
-
   // check if rect is completely in plane
   Rect target{0, 0, 0, 0};
   ncplane_dim_yx(current, &target.height, &target.width);
@@ -178,13 +196,14 @@ void NotcursesRenderer::setOverlayRegion(
   }
 
   // override region
+  if (transparentSpaces) 
+    ncplane_erase_region(current, region.y, region.x, region.height, region.width); 
   applyColors(current, fg, bg);
   int printheight =
       (content.size() < region.height) ? content.size() : region.height;
-  for (int y = 0; y < printheight; y++) {
-    ncplane_cursor_move_yx(current, region.y + y, region.x);
-    ncplane_putstr(current, content[y].substr(0, region.width).c_str());
-  }
+  for (int y = 0; y < printheight; y++)
+    putRow(current, region.y + y, region.x, content[y], region.width,
+           transparentSpaces);
 }
 
 NotcursesRenderer::~NotcursesRenderer() {

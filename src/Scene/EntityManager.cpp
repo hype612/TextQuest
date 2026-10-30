@@ -82,14 +82,16 @@ void EntityManager::resolveMovement(float delta) {
     Transform current_trans = _entityContainer[id].transform();
     const float radius = _entityContainer[id].collisionRadius();
     if (dest != current_trans.position) {
-      if (!_sceneChannel.canMoveTo({dest.x, current_trans.position.y}, radius)) {
+      if (!_sceneChannel.canMoveTo({dest.x, current_trans.position.y},
+                                   radius)) {
         TerrainCollidable collided(
             {static_cast<int>(dest.x),
              static_cast<int>(current_trans.position.y)});
         dest.x = current_trans.position.x;
         _entityContainer[id].onCollision(collided);
       }
-      if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y}, radius)) {
+      if (!_sceneChannel.canMoveTo({current_trans.position.x, dest.y},
+                                   radius)) {
         TerrainCollidable collided({static_cast<int>(current_trans.position.x),
                                     static_cast<int>(dest.y)});
         dest.y = current_trans.position.y;
@@ -209,13 +211,13 @@ bool EntityManager::rayBlockedByWall(vec2f origin, vec2f dir,
   sideDist.y = sideDist.y * deltaDist.y;
   while (!hitwall && rayLength < maxDist) {
     if (sideDist.x < sideDist.y) {
+      rayLength = sideDist.x;
       sideDist.x += deltaDist.x;
       mapPos.x += stepDir.x;
-      rayLength = sideDist.x;
     } else {
+      rayLength = sideDist.y;
       sideDist.y += deltaDist.y;
       mapPos.y += stepDir.y;
-      rayLength = sideDist.y;
     }
 
     if (!_sceneChannel.canMoveTo({mapPos.x, mapPos.y}, 0.f)) {

@@ -21,8 +21,9 @@ public:
   void setShootObserver(IShootObserver *observer) { _shootObserver = observer; }
 
 private:
-  float _sinceLastShot = 0.f;
-  const float _shootcd = 0.1f;
+  float _cooldown =
+      0.f; // seconds until the next shot is allowed; may go negative while idle
+  const float _shootcd = 0.3f;
   vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
   IInputHandler &_inputHandler;
   IHealthObserver *_healthObserver = nullptr;

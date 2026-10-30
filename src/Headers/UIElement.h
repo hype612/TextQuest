@@ -10,7 +10,8 @@
 
 class UIElement {
 public:
-  UIElement(Rect area, Rect writableArea, std::vector<std::string> design);
+  UIElement(Rect area, Rect writableArea, std::vector<std::string> design,
+            bool transparentSpaces = false);
 
   UIElement(const UIElement &) = delete;
   UIElement &operator=(const UIElement &) = delete;
@@ -41,6 +42,7 @@ public:
   const std::optional<uint32_t> &bgColor() const {
     return _colorOverrideRemaining > 0.f ? _overrideBg : _bg;
   }
+  bool transparentSpaces() const { return _transparentSpaces;}
 
   std::optional<std::reference_wrapper<const std::vector<std::string>>>
   takeDesign();
@@ -63,6 +65,7 @@ private:
 
   std::vector<std::string> _design;
   std::vector<std::string> _content;
+  bool _transparentSpaces = false;
 };
 
 #endif // UIELEMENT_H

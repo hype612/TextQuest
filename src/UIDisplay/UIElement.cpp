@@ -3,8 +3,11 @@
 #include <optional>
 
 UIElement::UIElement(Rect area, Rect writableArea,
-                     std::vector<std::string> design)
-    : _area(area), _writableArea(writableArea), _design(std::move(design)) {
+                     std::vector<std::string> design,
+                     bool transparentSpaces)
+    : _area(area), _writableArea(writableArea),
+      _design(std::move(design)),
+      _transparentSpaces(transparentSpaces) {
 
   bool fitsInArea =
       writableArea.x >= 0 && writableArea.y >= 0 &&
@@ -60,22 +63,25 @@ void UIElement::setContentForSec(const std::vector<std::string> &override,
   if (seconds <= 0.f)
     return;
   if (peekContent() != override)
-    _designChanged = true;
+    _contentChanged = true;
   _overrideContent = override;
   _contentOverrideRemaining = seconds;
 }
 
 void UIElement::tick(float dt) {
-  if (_colorOverrideRemaining <= 0.f && _contentOverrideRemaining <= 0.f)
-    return;
+  if (_colorOverrideRemaining > 0.f) {
+    _colorOverrideRemaining -= dt;
+    if (_colorOverrideRemaining <= 0.f) {
+      _designChanged = true; // back to the base colors
+    }
+  }  
 
-  _colorOverrideRemaining -= dt;
-  if (_colorOverrideRemaining <= 0.f)
-    _designChanged = true; // back to the base colors
-
-  _contentOverrideRemaining -= dt;
-  if (_contentOverrideRemaining <= 0.f)
-    _contentChanged = true; // back to the base colors
+  if (_contentOverrideRemaining > 0.f) {
+    _contentOverrideRemaining -= dt;
+    if (_contentOverrideRemaining <= 0.f) {
+      _contentChanged = true; // back to the base content
+    }
+  }  
 }
 
 std::optional<std::reference_wrapper<const std::vector<std::string>>>

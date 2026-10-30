@@ -76,9 +76,11 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
 
   _ge.setOnSceneOver([this]() { onSceneOver(); });
   _ge.setPostSceneOver([this]() { onPostSceneOver(); });
-  _ge.setOnFrame([this](float) {
+  _ge.setOnFrame([this](float dt) {
     if (_hud.minimap)
       _hud.minimap->update();
+    if (_hud.viewmodel)
+      _hud.viewmodel->update(dt);
   });
 
   registerEnemyArchetype(
@@ -372,6 +374,12 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
   hud.healthFanOut->add(hud.healthBar.get());
   hud.healthFanOut->add(hud.damageFlash.get());
   built.playerCtrl->setHealthObserver(hud.healthFanOut.get());
+
+  // Weapon viewmodel, bottom-centre
+  UIElementHandle vmHandle = _ui.addElement(ViewmodelPresenter::makeElement(
+      ViewmodelPresenter::area(scr.x, scr.y)));
+  hud.viewmodel = std::make_unique<ViewmodelPresenter>(_ui, vmHandle);
+  built.playerCtrl->setShootObserver(hud.viewmodel.get());
   return hud;
 }
 
