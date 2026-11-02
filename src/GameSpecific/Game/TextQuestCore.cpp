@@ -15,59 +15,9 @@
 #include <unordered_map>
 #include <vector>
 
-std::string
-TextQuestCore::serializeThemedMap(const std::vector<std::vector<Tile>> &map,
-                                  const std::vector<Rect> &leafRooms,
-                                  const std::vector<char> &wallThemes) const {
-  if (wallThemes.empty()) {
-    Logger::GetInstance()->log("serializeThemedMap: no wall themes given",
-                               LogType::CORE, LogLevel::ERROR);
-    Logger::GetInstance()->forceFlush();
-    throw std::invalid_argument("serializeThemedMap: no wall themes given");
-  }
-  int mapHeight = static_cast<int>(map.size());
-  int mapWidth = mapHeight > 0 ? static_cast<int>(map[0].size()) : 0;
-
-  std::string out(static_cast<size_t>(mapWidth) * mapHeight, '.');
-  for (int y = 0; y < mapHeight; y++)
-    for (int x = 0; x < mapWidth; x++)
-      if (map[y][x] == Tile::WALL)
-        out[y * mapWidth + x] = wallThemes[0];
-
-  for (const Rect &room : leafRooms) {
-    char theme = wallThemes[rand() % wallThemes.size()];
-    for (int y = 0; y < static_cast<int>(room.height); y++) {
-      for (int x = 0; x < static_cast<int>(room.width); x++) {
-        int gx = room.x + x, gy = room.y + y;
-        if (map[gy][gx] == Tile::WALL)
-          out[gy * mapWidth + gx] = theme;
-      }
-    }
-  }
-  return out;
-}
-
-// Loads every shading variant in `dir`, ordered so lv0 (brightest) is first.
-std::vector<std::string> TextQuestCore::loadTextureVec(const std::string &dir) {
-  std::unordered_map<std::string, std::string> texs;
-  loadResources(dir, texs);
-  std::vector<std::string> keys;
-  keys.reserve(texs.size());
-  for (const auto &[key, value] : texs)
-    keys.push_back(key);
-  std::sort(keys.begin(), keys.end());
-  std::vector<std::string> out;
-  out.reserve(texs.size());
-  for (const auto &key : keys)
-    out.push_back(texs[key]);
-  Logger::GetInstance()->log(
-      dir + " texture count: " + std::to_string(out.size()), LogType::TEXPREP,
-      LogLevel::INFO);
-  return out;
-}
-
 TextQuestCore::TextQuestCore(GameEngine &ge)
-    : _ge(ge), _ui(ge.uiMan()), _input(ge.inputHandler()) {
+    : _ge(ge), _ui(ge.uiMan()), _input(ge.inputHandler()),
+      _builder(_input, "Resources/Textures/") {
   _ge.enableDistanceShading(true);
   std::vector<float> shadingThresholds;
   for (int i = 1; i < 8; i++)
@@ -83,14 +33,14 @@ TextQuestCore::TextQuestCore(GameEngine &ge)
       _hud.viewmodel->update(dt);
   });
 
-  registerEnemyArchetype(
+  _builder.registerEnemyArchetype(
       "ghoul",
-      EnemyArchetype{loadTextureVec("Resources/Textures/FeralGhoul/"), 100,
-                     10.f, 0.2f, 0.2f, 180.f, 8.f, 3.f, 3.f, 1.f, 0.8f, 0.3f});
-  registerEnemyArchetype(
-      "demon", EnemyArchetype{loadTextureVec("Resources/Textures/Cyberdemon/"),
-                              500, 25.f, 0.35f, 0.35f, 180.f, 12.f, 2.5f, 3.f,
-                              0.7f, 0.5f, 0.15f});
+      EnemyArchetype{_builder.loadTextureVec("FeralGhoul"), 100, 10.f, 0.2f,
+                     0.2f, 180.f, 8.f, 3.f, 3.f, 1.f, 0.8f, 0.3f});
+  _builder.registerEnemyArchetype(
+      "demon", EnemyArchetype{_builder.loadTextureVec("Cyberdemon"), 500, 25.f,
+                              0.35f, 0.35f, 180.f, 12.f, 2.5f, 3.f, 0.7f, 0.5f,
+                              0.15f});
 }
 
 void TextQuestCore::run() {
@@ -112,55 +62,6 @@ void TextQuestCore::run() {
   startScene();
   l->log("all prep is done, now running game..", LogType::CORE, LogLevel::INFO);
   _ge.run_game();
-}
-
-void TextQuestCore::registerEnemyArchetype(std::string name,
-                                           EnemyArchetype type) {
-  auto [it, succ] =
-      _enemyArchetypes.try_emplace(std::move(name), std::move(type));
-
-  // it is never intended to overwrite the value of an existing
-  // archetype for now. So it logs and throws.
-  if (!succ) {
-    Logger::GetInstance()->log(
-        "registerEnemyArchetype: insertion failed due to key duplication. The "
-        "duplicated key: " +
-            it->first + ".",
-        LogType::CORE, LogLevel::ERROR);
-    Logger::GetInstance()->forceFlush();
-    throw std::invalid_argument(
-        "registerEnemyArchetype: duplicate archetype key: " + it->first);
-  }
-}
-
-void TextQuestCore::spawnEnemy(const std::string &type_key, SceneManager &scene,
-                               vec2f pos, const ControllerFactory &make_ctrl) {
-  auto it = _enemyArchetypes.find(type_key);
-  if (it == _enemyArchetypes.end()) {
-    Logger::GetInstance()->log(
-        "spawnEnemy: function was called with non-existant key: " + type_key,
-        LogType::CORE, LogLevel::ERROR);
-    Logger::GetInstance()->forceFlush();
-    throw std::out_of_range("spawnEnemy: unknown archetype key: " + type_key);
-  }
-  // The registered archetype holds the base stats. Scale a copy with the
-  // difficulty chosen for this run.
-  EnemyArchetype a = it->second;
-  a.health *= _chosenDifficulty.enemyHealth;
-  a.damage *= _chosenDifficulty.enemyDamage;
-  a.fovDegrees *= _chosenDifficulty.fovDegrees;
-  a.viewDistance *= _chosenDifficulty.viewDistance;
-  a.moveSpeed *= _chosenDifficulty.enemySpeed;
-  a.shootCooldown *= _chosenDifficulty.attackCooldown;
-  a.reactionDelay *= _chosenDifficulty.reactionDelay;
-  a.missChance =
-      std::clamp(a.missChance * _chosenDifficulty.missChance, 0.f, 1.f);
-
-  Entity e(make_ctrl(a), Transform{pos, 1.f}, a.textures, a.health,
-           a.collisionRadius, a.hitRadius, false, a.fovDegrees, a.viewDistance);
-  e.setMoveSpeedAllDirectons(a.moveSpeed);
-  e.setTurnSpeedAlldirections(a.turnSpeed);
-  scene.AddEntity(e);
 }
 
 TextQuestCore::MenuChoice
@@ -262,80 +163,6 @@ void TextQuestCore::saveSeed(unsigned int seed) const {
                                LogType::CORE, LogLevel::WARNING);
 }
 
-TextQuestCore::BuiltScene TextQuestCore::buildScene() {
-  Logger *l = Logger::GetInstance();
-  auto scene = std::make_shared<SceneManager>();
-  SceneManager &sceneMan = *scene;
-
-  MapGenerator mg(Rect{0, 0, 50, 50}, part_params{.3f, .7f, 10, 10, 20, 20}, 5,
-                  .35f, _seed);
-
-  std::vector<std::string> walltexV =
-      loadTextureVec("Resources/Textures/wall/");
-  sceneMan.uploadTextureVecForWall('#', walltexV);
-  std::vector<std::string> tnttexV = loadTextureVec("Resources/Textures/tnt/");
-  sceneMan.uploadTextureVecForWall('T', tnttexV);
-
-  std::string map = serializeThemedMap(mg.map(), mg.leafRooms(), {'#', 'T'});
-  sceneMan.initializeNewMap(map, 50, 50);
-  l->log("map inited", LogType::CORE, LogLevel::INFO);
-
-  mg.generateSpawnPoints(_chosenDifficulty.enemyDensity,
-                         /*boss_room_count=*/1);
-  vec2f playerSpawn{-1.f, -1.f};
-  for (const SpawnPoint &sp : mg.spawnPoints())
-    if (sp.type == SpawnType::PLAYER)
-      playerSpawn = sp.pos;
-
-  std::string intex = " \n";
-  Transform init{playerSpawn, 0.f};
-  l->log("before player construction", LogType::CORE, LogLevel::INFO);
-  auto playerCtrl = std::make_unique<PlayerBehaviorController>(_input);
-  PlayerBehaviorController *playerCtrlPtr = playerCtrl.get();
-  Entity p(std::move(playerCtrl), init, &intex, playerMaxHp, 0.15f, 0.3f, true,
-           0.f, 0.f);
-  p.setMoveSpeedAllDirectons(3.5f);
-  p.setTurnSpeedAlldirections(2.5f);
-  sceneMan.AddEntity(p);
-  l->log("player added to entities", LogType::CORE, LogLevel::INFO);
-
-  // Enemies are spawned after the player so that the player keeps entity ID 0
-  // (the camera follows it).
-  IstvanBehaviorController *demonCtrlPtr = nullptr;
-  for (const SpawnPoint &sp : mg.spawnPoints()) {
-    if (sp.type == SpawnType::PLAYER)
-      continue;
-    vec2f spawnF = sp.pos;
-    IstvanBehaviorController *rawCtrl = nullptr;
-    auto makeCtrl = [&](const EnemyArchetype &a) {
-      auto ctrl = std::make_unique<IstvanBehaviorController>(
-          mg.generatePatrolPoints(spawnF, 3), a.shootCooldown, 3.f,
-          a.reactionDelay, a.missChance);
-      rawCtrl = ctrl.get();
-      return ctrl;
-    };
-    if (sp.type == SpawnType::BOSS) {
-      spawnEnemy("demon", sceneMan, spawnF, makeCtrl);
-      demonCtrlPtr = rawCtrl;
-    } else {
-      spawnEnemy("ghoul", sceneMan, spawnF, makeCtrl);
-    }
-  }
-
-  // ==================
-  // Win cond setup
-  // ==================
-  sceneMan.setWinCondition([](const SceneManager &sc_man) -> bool {
-    return std::ranges::all_of(sc_man.entities(), [](const Entity &e) {
-      return e.isPlayer() || e.health() <= 0;
-    });
-  });
-  sceneMan.setCameraFollow(sceneMan.entityAtId(0).transform());
-  sceneMan.setCameraFovDegrees(90);
-  l->log("camera follow set", LogType::CORE, LogLevel::INFO);
-  return {scene, playerCtrlPtr, demonCtrlPtr};
-}
-
 TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
   SceneHud hud;
   vec2i scr = _ge.screenSize();
@@ -346,7 +173,8 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
   UIElementHandle hbHandle = _ui.addElement(
       UIElement(hbArea, hbWritable, HealthBarPresenter::design(hbArea)));
   hud.healthBar =
-      std::make_unique<HealthBarPresenter>(_ui, hbHandle, playerMaxHp);
+      std::make_unique<HealthBarPresenter>(_ui, hbHandle,
+                                           _builder.playerMaxHp());
 
   // Demon state debug display
   Rect stateArea{2, scr.y - 7, 30, 3};
@@ -369,7 +197,7 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
   // the bar and the flash.
   hud.damageFlash = std::make_unique<DamageFlashPresenter>(
       _ui, std::vector<UIElementHandle>{hbHandle, stateHandle, mmHandle},
-      playerMaxHp);
+      _builder.playerMaxHp());
   hud.healthFanOut = std::make_unique<HealthObserverFanOut>();
   hud.healthFanOut->add(hud.healthBar.get());
   hud.healthFanOut->add(hud.damageFlash.get());
@@ -389,7 +217,7 @@ TextQuestCore::SceneHud TextQuestCore::buildHud(BuiltScene &built) {
 void TextQuestCore::startScene() {
   _hud = SceneHud{};
   _ui.clear();
-  BuiltScene built = buildScene();
+  BuiltScene built = _builder.build(_seed, _chosenDifficulty);
   _hud = buildHud(built);
   _ge.setScene(built.scene);
 }
@@ -423,37 +251,4 @@ void TextQuestCore::onSceneOver() {
 void TextQuestCore::onPostSceneOver() {
   if (_input.rawKeyPressed('r'))
     startScene();
-}
-
-void TextQuestCore::loadResources(
-    const std::string &filePath,
-    std::unordered_map<std::string, std::string> &outTextures) {
-  std::stringstream temp;
-  std::string value;
-  std::string key;
-  for (const auto &entry : std::filesystem::directory_iterator(filePath)) {
-    if (std::filesystem::is_regular_file(entry)) {
-      std::ifstream current_file(entry.path());
-      if (current_file.fail()) {
-        std::cerr << "ERROR: failed to open file: " << entry.path().string()
-                  << " reading next texture file..." << std::endl;
-        continue;
-      }
-
-      temp.str(std::string());
-      temp << current_file.rdbuf();
-      key = entry.path().stem().string();
-      if (outTextures.find(key) != outTextures.end()) {
-        std::cerr << "ERROR: texture for this type of tile is already present. "
-                     "Skipping this one...."
-                  << std::endl;
-        std::cerr << "texture: " << std::endl;
-        std::cout << temp.str() << std::endl;
-        continue;
-      }
-      value = temp.str();
-      outTextures[key] = value;
-      current_file.close();
-    }
-  }
 }

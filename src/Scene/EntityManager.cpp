@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -277,8 +278,9 @@ const std::deque<Entity> &EntityManager::entities() const {
 
 void EntityManager::addEntity(Entity &entity) {
   if (entity.ID() != -1) {
-    std::cerr << "id has been altered. Please do not touch id" << std::endl;
-    return;
+    Logger::GetInstance()->log("id has been altered. Please do not touch id",
+                               LogType::SCENE, LogLevel::ERROR);
+    throw(std::invalid_argument("id has been altered. Please do not touch id"));
   }
   entity.setID(_entityContainer.size());
   _entityContainer.push_back(std::move(entity));
@@ -333,7 +335,7 @@ std::string EntityManager::scaledTexOfEntity(int entityId, unsigned int width,
       static_cast<unsigned int>(entityId) >= _entityContainer.size()) {
     Logger::GetInstance()->log("Entity outside of container size.",
                                LogType::RENDER, LogLevel::ERROR);
-    return std::string();
+    throw(std::out_of_range("Entity outside of container size."));
   }
   return _entityContainer[entityId].scaledTex(width, height, shadingIdx);
 }
@@ -344,7 +346,7 @@ std::vector<int> EntityManager::scaledMaskOfEntity(int entityId,
       static_cast<unsigned int>(entityId) >= _entityContainer.size()) {
     Logger::GetInstance()->log("Entity outside of container size.",
                                LogType::RENDER, LogLevel::ERROR);
-    return std::vector<int>();
+    throw(std::out_of_range("Entity outside of container size."));
   }
   return _entityContainer[entityId].scaledMask(width, height);
 }

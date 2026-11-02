@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <notcurses/notcurses.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -28,9 +29,11 @@ NotcursesRenderer::NotcursesRenderer(std::shared_ptr<notcurses> nc) : _nc(nc) {
 void NotcursesRenderer::Init() {}
 void NotcursesRenderer::OverwriteBuffer(char *newBuffer) {
   if (newBuffer == nullptr) {
-    std::cerr << "OverWriteBuffer: function was called with nullptr"
-              << std::endl;
-    return;
+    Logger::GetInstance()->log(
+        "OverWriteBuffer: function was called with nullptr", LogType::RENDER,
+        LogLevel::ERROR);
+    throw(std::invalid_argument(
+        "OverWriteBuffer: function was called with nullptr"));
   }
 
   memcpy(_screenBuffer, newBuffer, _screenWidth * _screenHeight);
@@ -135,10 +138,11 @@ void NotcursesRenderer::putRow(ncplane *plane, int y, int x,
   }
 }
 
-void NotcursesRenderer::setOverlay(
-    OverlayId id, const std::vector<std::string> &content,
-    std::optional<uint32_t> fg, std::optional<uint32_t> bg,
-    bool transparentSpaces) {
+void NotcursesRenderer::setOverlay(OverlayId id,
+                                   const std::vector<std::string> &content,
+                                   std::optional<uint32_t> fg,
+                                   std::optional<uint32_t> bg,
+                                   bool transparentSpaces) {
   ncplane *current = _overlayPlanes.at(id);
   unsigned int p_width, p_height;
   int p_x, p_y;
@@ -154,6 +158,9 @@ void NotcursesRenderer::setOverlay(
                                "the area size. OverlayId: " +
                                    std::to_string(id),
                                LogType::RENDER, LogLevel::ERROR);
+    throw(std::invalid_argument("SetOverlaycontent: Content size did not match "
+                                "the area size. OverlayId: " +
+                                std::to_string(id)));
   }
 
   ncplane_erase(current);
@@ -166,12 +173,16 @@ void NotcursesRenderer::setOverlay(
 // region x,y should be relative to the parent ncplane == ui element
 void NotcursesRenderer::setOverlayRegion(
     OverlayId id, Rect region, const std::vector<std::string> &content,
-    std::optional<uint32_t> fg, std::optional<uint32_t> bg, bool transparentSpaces) {
-  if (region.width == 0 || region.height == 0 ) {
-    Logger::GetInstance()->log("setOverlayRegion: fn was called with 0 height or width region", LogType::RENDER, LogLevel::ERROR);
-    return;
-  } 
-  
+    std::optional<uint32_t> fg, std::optional<uint32_t> bg,
+    bool transparentSpaces) {
+  if (region.width == 0 || region.height == 0) {
+    Logger::GetInstance()->log(
+        "setOverlayRegion: fn was called with 0 height or width region",
+        LogType::RENDER, LogLevel::ERROR);
+    throw(std::invalid_argument(
+        "setOverlayRegion: fn was called with 0 height or width region"));
+  }
+
   ncplane *current = _overlayPlanes.at(id);
   // check if rect is completely in plane
   Rect target{0, 0, 0, 0};
@@ -180,7 +191,8 @@ void NotcursesRenderer::setOverlayRegion(
     Logger::GetInstance()->log(
         "setOverlayRegion: overwrite region is not fully in target region.",
         LogType::RENDER, LogLevel::ERROR);
-    return;
+    throw(std::invalid_argument(
+        "setOverlayRegion: overwrite region is not fully in target region."));
   }
 
   // roughly check if the new content fits the rect
@@ -193,11 +205,15 @@ void NotcursesRenderer::setOverlayRegion(
                                "the area size. OverlayId: " +
                                    std::to_string(id),
                                LogType::RENDER, LogLevel::ERROR);
+    throw(std::invalid_argument("setOverlayRegion: Content size did not match "
+                                "the area size. OverlayId: " +
+                                std::to_string(id)));
   }
 
   // override region
-  if (transparentSpaces) 
-    ncplane_erase_region(current, region.y, region.x, region.height, region.width); 
+  if (transparentSpaces)
+    ncplane_erase_region(current, region.y, region.x, region.height,
+                         region.width);
   applyColors(current, fg, bg);
   int printheight =
       (content.size() < region.height) ? content.size() : region.height;

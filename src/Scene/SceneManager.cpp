@@ -98,9 +98,11 @@ const std::deque<Entity> &SceneManager::entities() const {
 // Camera
 const Camera &SceneManager::camera() const {
   if (!_camera.has_value()) {
-    std::cerr << "Camera accessed before SetCameraFollow was ever called"
-              << std::endl;
-    std::exit(EXIT_FAILURE);
+    Logger::GetInstance()->log(
+        "Camera accessed before SetCameraFollow was ever called", LogType::CORE,
+        LogLevel::ERROR);
+    throw(std::logic_error(
+        "Camera accessed before SetCameraFollow was ever called"));
   }
   return *_camera;
 }
@@ -111,9 +113,11 @@ const Camera *SceneManager::cameraPtr() const {
 
 const Transform &SceneManager::cameraFollow() const {
   if (!_camera.has_value()) {
-    std::cerr << "Camera accessed before SetCameraFollow was ever called"
-              << std::endl;
-    std::exit(EXIT_FAILURE);
+    Logger::GetInstance()->log(
+        "Camera accessed before SetCameraFollow was ever called", LogType::CORE,
+        LogLevel::ERROR);
+    throw(std::logic_error(
+        "Camera accessed before SetCameraFollow was ever called"));
   }
   return _camera->follow();
 }

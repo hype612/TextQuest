@@ -19,6 +19,7 @@
 #include <ncurses.h>
 #include <notcurses/notcurses.h>
 #include <ranges>
+#include <stdexcept>
 #include <string>
 
 GameEngine::GameEngine() {
@@ -106,7 +107,8 @@ void GameEngine::run_game() {
     Logger::GetInstance()->log(
         "No scene set or map was never uploaded. Shutting down GameLoop",
         LogType::CORE, LogLevel::ERROR);
-    return;
+    throw(std::logic_error(
+        "No scene set or map was never uploaded. Shutting down GameLoop"));
   }
   screen = new char[_renderer->screenWidth() * _renderer->screenHeight()];
   _zBuffer.reserve(_renderer->screenWidth());

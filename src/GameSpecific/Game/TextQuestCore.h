@@ -4,19 +4,14 @@
 #include "../Headers/DamageFlashPresenter.h"
 #include "../Headers/HealthBarPresenter.h"
 #include "../Headers/HealthObserverFanOut.h"
-#include "../Headers/IstvanBehaviorController.h"
 #include "../Headers/IstvanStatePresenter.h"
 #include "../Headers/MinimapPresenter.h"
-#include "../Headers/PlayerBehaviorController.h"
 #include "../Headers/ViewmodelPresenter.h"
-#include "../MapGen/cellularAutomata.hpp"
 #include "Core.h"
 #include "Difficulty.h"
-#include "EnemyArchetype.h"
 #include "IInputHandler.h"
-#include "SceneManager.h"
+#include "SceneBuilder.h"
 #include "UIManager.h"
-#include <functional>
 #include <memory>
 #include <optional>
 
@@ -28,26 +23,13 @@ public:
   explicit TextQuestCore(GameEngine &ge);
   void run();
 
-  void registerEnemyArchetype(std::string name, EnemyArchetype type);
-  // Builds the controller of a new enemy from its difficulty-scaled archetype.
-  using ControllerFactory = std::function<std::unique_ptr<IBehaviorController>(
-      const EnemyArchetype &)>;
-  void spawnEnemy(const std::string &type_key, SceneManager &scene, vec2f pos,
-                  const ControllerFactory &make_ctrl);
-
   TextQuestCore(const TextQuestCore &) = delete;
   TextQuestCore &operator=(const TextQuestCore &) = delete;
   TextQuestCore(TextQuestCore &&) = delete;
   TextQuestCore &operator=(TextQuestCore &&) = delete;
 
 private:
-  // The controllers are owned by their entities inside the scene. The raw
-  // pointers are handed out so the HUD can attach presenters to them.
-  struct BuiltScene {
-    std::shared_ptr<SceneManager> scene;
-    PlayerBehaviorController *playerCtrl;
-    IstvanBehaviorController *istvanCtrl;
-  };
+  using BuiltScene = SceneBuilder::BuiltScene;
 
   // Per-scene HUD. The presenters observe the scene's controllers, so they
   // are created with the scene and replaced when it is reloaded.
@@ -69,29 +51,21 @@ private:
   std::optional<unsigned int> loadLastSeed() const;
   void saveSeed(unsigned int seed) const;
 
-  BuiltScene buildScene();
   SceneHud buildHud(BuiltScene &built);
   void startScene();
   void onSceneOver();
   void onPostSceneOver();
-  void loadResources(const std::string &filePath,
-                     std::unordered_map<std::string, std::string> &outTextures);
 
-  std::vector<std::string> loadTextureVec(const std::string &dir);
-  std::string serializeThemedMap(const std::vector<std::vector<Tile>> &map,
-                                 const std::vector<Rect> &leafRooms,
-                                 const std::vector<char> &wallThemes) const;
-  static constexpr int playerMaxHp = 100;
   static constexpr const char *seedFile = "last_seed.txt";
 
   // Seed of the current map. Kept so that retrying replays the same map.
   unsigned int _seed = 0;
 
-  std::unordered_map<std::string, EnemyArchetype> _enemyArchetypes;
   Difficulty _chosenDifficulty = NORMAL;
   GameEngine &_ge;
   UIManager &_ui;
   IInputHandler &_input;
+  SceneBuilder _builder;
   SceneHud _hud;
 };
 
