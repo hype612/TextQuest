@@ -6,13 +6,12 @@
 
 MapGenerator::MapGenerator(const Rect &parent_area, const part_params &params,
                            int min_wall_neighbor_count,
-                           float noise_distribution, unsigned int seed)
+                           float noise_distribution)
     : _ca_min_wall_neighbor_count(min_wall_neighbor_count),
       _ca_noise_distribution(noise_distribution), _parentArea(parent_area),
       _map(parent_area.height,
            std::vector<Tile>(parent_area.width, Tile::WALL)) {
-  // Seed before the BSP is built, it draws from rand() too.
-  srand(seed);
+  // Does not seed: the caller (SceneBuilder::build) calls srand() first.
   _bspRoot.emplace(parent_area, nullptr, params);
   FillRooms();
   createLinks();

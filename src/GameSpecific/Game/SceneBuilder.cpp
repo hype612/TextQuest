@@ -62,6 +62,9 @@ void SceneBuilder::spawnEnemy(const std::string &typeKey, SceneManager &scene,
   scene.AddEntity(e);
 }
 
+// Draws one rand() per leaf room for its wall theme. Depends on the stream
+// seeded in build(): the number of rand() calls before this must be the same
+// on every run for a given seed, or wall themes change between replays.
 std::string
 SceneBuilder::serializeThemedMap(const std::vector<std::vector<Tile>> &map,
                                  const std::vector<Rect> &leafRooms,
@@ -147,8 +150,14 @@ SceneBuilder::BuiltScene SceneBuilder::build(unsigned int seed,
   auto scene = std::make_shared<SceneManager>();
   SceneManager &sceneMan = *scene;
 
+  // The whole build is deterministic per seed because everything draws from
+  // the global rand() stream, seeded once here. Any rand() call during the
+  // build must happen the same number of times on every run (no dependence on
+  // timing, input, threads or running enemies), or the same seed will give a
+  // different scene (e.g. different wall textures on a replay).
+  srand(seed);
   MapGenerator mg(Rect{0, 0, 50, 50}, part_params{.3f, .7f, 10, 10, 20, 20}, 5,
-                  .35f, seed);
+                  .35f);
 
   std::vector<std::string> walltexV = loadTextureVec("wall");
   sceneMan.uploadTextureVecForWall('#', walltexV);

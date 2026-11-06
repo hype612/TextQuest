@@ -19,8 +19,7 @@ struct SpawnPoint {
 class MapGenerator {
 public:
   MapGenerator(const Rect &parent_area, const part_params &params,
-               int min_wall_neighbor_count, float noise_distribution,
-               unsigned int seed);
+               int min_wall_neighbor_count, float noise_distribution);
 
   void generateSpawnPoints(float max_enemy_density, int boss_room_count);
   std::vector<vec2f> generatePatrolPoints(vec2f spawn_point,
