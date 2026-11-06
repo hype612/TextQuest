@@ -34,6 +34,7 @@ public:
 
   OverlayId createOverlay(Rect area) override;
   bool destroyOverlay(OverlayId id) override;
+  bool setOverlayVisible(OverlayId id, bool visible) override;
   ~NotcursesRenderer();
 
 private:
@@ -46,7 +47,13 @@ private:
   std::shared_ptr<notcurses> _nc;
   // does NOT contain the default plane
   ncplane *_debugPlane;
-  std::unordered_map<OverlayId, ncplane *> _overlayPlanes;
+  struct Overlay {
+    ncplane *plane;
+    // The area the overlay was created with. The plane itself is moved
+    // off-screen while hidden, so its live position can not be trusted.
+    Rect rect;
+  };
+  std::unordered_map<OverlayId, Overlay> _overlays;
   OverlayId _topId = -1;
 };
 

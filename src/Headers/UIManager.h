@@ -23,6 +23,8 @@ public:
   // further elementAt() calls with it return nullptr.
   void removeElement(UIElementHandle handle);
   void clear();
+  // Hides or shows an element. Hidden elements still accept updates.
+  void setVisible(UIElementHandle handle, bool visible);
   // Resolves a handle to its element, or nullptr if the handle is
   // invalid / already removed.
   UIElement *elementAt(UIElementHandle handle);

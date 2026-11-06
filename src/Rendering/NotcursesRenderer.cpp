@@ -79,10 +79,8 @@ OverlayId NotcursesRenderer::createOverlay(Rect area) {
                                LogType::RENDER, LogLevel::ERROR);
     return -1;
   }
-  for (auto &[id, pln] : _overlayPlanes) {
-    Rect r{ncplane_x(pln), ncplane_y(pln), ncplane_dim_x(pln),
-           ncplane_dim_y(pln)};
-    if (r.overlaps(area)) {
+  for (auto &[id, ov] : _overlays) {
+    if (ov.rect.overlaps(area)) {
       Logger::GetInstance()->log(
           "CreateOverlay: The proposed plane overlaps with an existing one.",
           LogType::RENDER, LogLevel::ERROR);
@@ -90,23 +88,46 @@ OverlayId NotcursesRenderer::createOverlay(Rect area) {
     }
   }
 
-  _topId++;
   ncplane_options opts{area.y, area.x, area.height, area.width, NULL,
                        NULL,   NULL,   0,           0,          0};
-  _overlayPlanes[_topId] = ncplane_create(notcurses_stdplane(_nc.get()), &opts);
+  ncplane *plane = ncplane_create(notcurses_stdplane(_nc.get()), &opts);
+  if (!plane) {
+    // The arguments were valid, so this is notcurses failing, not the caller.
+    Logger::GetInstance()->log("CreateOverlay: ncplane_create failed.",
+                               LogType::RENDER, LogLevel::ERROR);
+    throw std::runtime_error("CreateOverlay: ncplane_create failed.");
+  }
+  _topId++;
+  _overlays[_topId] = Overlay{plane, area};
   return _topId;
 }
 
 bool NotcursesRenderer::destroyOverlay(OverlayId id) {
-  if (!_overlayPlanes.contains(id)) {
+  auto it = _overlays.find(id);
+  if (it == _overlays.end()) {
     Logger::GetInstance()->log(
         "destroyOverlay: function was called with invalid id.", LogType::RENDER,
         LogLevel::ERROR);
     return false;
   }
-  ncplane_destroy(_overlayPlanes.at(id));
-  _overlayPlanes.erase(id);
+  ncplane_destroy(it->second.plane);
+  _overlays.erase(it);
   return true;
+}
+
+// notcurses has no plane hide, but planes entirely outside the screen are not
+// rendered, so hiding parks the plane just below the bottom edge.
+bool NotcursesRenderer::setOverlayVisible(OverlayId id, bool visible) {
+  auto it = _overlays.find(id);
+  if (it == _overlays.end()) {
+    Logger::GetInstance()->log(
+        "setOverlayVisible: function was called with invalid id.",
+        LogType::RENDER, LogLevel::ERROR);
+    return false;
+  }
+  const Rect &r = it->second.rect;
+  return ncplane_move_yx(it->second.plane, visible ? r.y : _screenHeight,
+                         r.x) == 0;
 }
 
 // Sets the plane's active colors, which every later write on the plane picks
@@ -143,7 +164,7 @@ void NotcursesRenderer::setOverlay(OverlayId id,
                                    std::optional<uint32_t> fg,
                                    std::optional<uint32_t> bg,
                                    bool transparentSpaces) {
-  ncplane *current = _overlayPlanes.at(id);
+  ncplane *current = _overlays.at(id).plane;
   unsigned int p_width, p_height;
   int p_x, p_y;
   ncplane_dim_yx(current, &p_height, &p_width);
@@ -183,7 +204,7 @@ void NotcursesRenderer::setOverlayRegion(
         "setOverlayRegion: fn was called with 0 height or width region"));
   }
 
-  ncplane *current = _overlayPlanes.at(id);
+  ncplane *current = _overlays.at(id).plane;
   // check if rect is completely in plane
   Rect target{0, 0, 0, 0};
   ncplane_dim_yx(current, &target.height, &target.width);
@@ -224,7 +245,7 @@ void NotcursesRenderer::setOverlayRegion(
 
 NotcursesRenderer::~NotcursesRenderer() {
   delete[] _screenBuffer;
-  for (auto &[id, plane] : _overlayPlanes) {
-    ncplane_destroy(plane);
+  for (auto &[id, ov] : _overlays) {
+    ncplane_destroy(ov.plane);
   }
 }

@@ -30,6 +30,11 @@ void UIManager::clear() {
   _elements.clear();
 }
 
+void UIManager::setVisible(UIElementHandle handle, bool visible) {
+  if (_elements.contains(handle))
+    _renderer.setOverlayVisible(handle, visible);
+}
+
 UIElement *UIManager::elementAt(UIElementHandle handle) {
   auto it = _elements.find(handle);
   return it == _elements.end() ? nullptr : &it->second;

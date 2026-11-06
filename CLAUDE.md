@@ -19,7 +19,7 @@ make clean
 - The Makefile tracks header dependencies via `-MMD -MP` (`.d` files next to the objects), so editing a header rebuilds only the files that include it. If the Makefile itself or the flags change, run `make clean`.
 - New `.cpp` files anywhere under `src/` are picked up automatically (`find src -name '*.cpp'`). `-Isrc/Headers` is on the include path, but `src/GameSpecific/Headers/` is not, so those files use relative includes.
 - There is no test suite and no linter config.
-- Run from the repo root: `Logger` writes to `./logs/{common,core,input,render,texprep,scene}.log` (truncated each run), and `src/TextQuest.cpp` loads textures from paths relative to the working directory (`Resources/Textures/...`), so it must be run from the repo root.
+- Run from the repo root: `Logger` writes to `./logs/{common,core,input,render,texprep,scene}.log` (truncated each run), and `TextQuestCore` gives `SceneBuilder` the texture root `Resources/Textures/`, a path relative to the working directory, so it must be run from the repo root.
 - Controls (see `NotcursesInputHandler.cpp`): `w/s` forward/back, `a/d` strafe, `q/e` turn, `i` shoot, `x` quit. Key release events are used, so the terminal needs the kitty keyboard protocol; `~GameEngine` pops that mode on exit.
 - Only the Linux/notcurses path is live. The `Windows*` and `NCurses*` renderer/input `.cpp` files are still matched by the build glob, but they are neutralized by `#if` platform guards or commented out. They are stale and not expected to compile if re-enabled.
 
@@ -28,13 +28,19 @@ make clean
 Textures are plain-text ASCII art generated offline from images:
 
 - `Resources/TexGen.py` (run via `Resources/run_texgen.fish` from inside `Resources/`, uses `Resources/venv` with Pillow) converts every image in `Resources/TextureSource/` into `Resources/Textures/<Name>/<Name>lv0.txt … lv7.txt`: 8 progressively darker variants for distance shading, with power-of-2 dimensions.
-- At runtime, `SceneManager::loadResources` reads a directory into a `stem -> contents` map. `TextQuest.cpp` sorts the keys so that `lv0` (brightest) comes first, then passes the vector to `uploadTextureVecForWall` (wall map char) or an `Entity` constructor.
+- At runtime, `SceneBuilder::loadTextureVec(name)` reads `<textureRoot>/<name>` into a `stem -> contents` map (`readTextureDir`), sorts the keys so that `lv0` (brightest) comes first, and returns the vector. It is passed to `uploadTextureVecForWall` (wall map char) or an `Entity` constructor.
 - Texture format: rows joined with `'\n'`, all the same width; width = index of the first `'\n'`. A space `' '` is transparent for entity sprites.
 - `TextureMapper` owns the shading variants ("mipmaps") and does nearest-neighbour sampling. `RenderAssetManager` maps distance to a shading index through thresholds set with `GameEngine::setDistanceShadingThresholds`.
 
 ## Architecture
 
-`src/TextQuest.cpp` (`main`) acts as the "game" for now: it builds the map string, loads textures, creates entities, and calls `GameEngine::run_game()`. `GameEngine::sceneMan()` / `inputHandler()` are temporary hooks, pending a proper game-programmer API.
+`src/TextQuest.cpp` (`main`) constructs a `GameEngine` and a `TextQuestCore` (declared after the engine so it is destroyed first) and calls `TextQuestCore::run()`. `GameEngine::sceneMan()` / `inputHandler()` / `uiMan()` are temporary hooks, pending a proper game-programmer API.
+
+**Game layer** (`src/GameSpecific/Game/`, no static functions by convention):
+- `TextQuestCore` is the flow only: start menu, difficulty pick, seed persistence (`last_seed.txt`), `startScene` (also used for retry: drops the HUD, clears the UI, builds a new scene and HUD, hands the scene to the engine), and the engine callbacks (`setOnSceneOver`, `setPostSceneOver`, `setOnFrame`). It registers the enemy archetypes (game data) on the builder. Its `GameHud` is declared last so it is destroyed first.
+- `SceneBuilder` builds a playable scene: `build(seed, difficulty)` returns a `BuiltScene` (the scene plus raw pointers to the player and boss controllers, which are owned by their entities; the boss pointer is null if no boss spawned). It owns the archetype table and difficulty scaling (`spawnEnemy`), map serialization, and texture loading. It keeps no state between builds.
+- `GameHud` is per scene: it creates the HUD elements and presenters and attaches them as observers to the controllers in `BuiltScene`. `update(dt)` refreshes the minimap and viewmodel.
+- `Menus` holds the modal screens: `showStart`, `showDifficulty` (both block in `GameEngine::runMenu` and remove their box), and `showEnd(won)`, whose box stays until `hideEnd()` (called by `TextQuestCore::startScene`). `makeBox` draws the shared `=`/`|` frame centered on the screen.
 
 **Frame loop** (`src/Core/Core.cpp`, `GameEngine::run_game`):
 1. `IInputHandler::ReceiveInput()` updates key state.

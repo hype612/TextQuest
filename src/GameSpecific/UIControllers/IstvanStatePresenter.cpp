@@ -3,14 +3,16 @@
 
 IstvanStatePresenter::IstvanStatePresenter(UIManager &ui,
                                            UIElementHandle handle)
-    : _ui(ui), _handle(handle) {
-  onStateChanged("IDLE");
-}
+    : _ui(ui), _handle(handle) {}
 
 void IstvanStatePresenter::onStateChanged(const std::string &state) {
   UIElement *el = _ui.elementAt(_handle);
   if (!el)
     return; // element was removed or never created
+  // Istvan never returns to IDLE once he has seen the player, so the first
+  // non-IDLE state is the first sighting: reveal the (hidden) element.
+  if (state != "IDLE")
+    _ui.setVisible(_handle, true);
   std::string line = "Istvan: " + state;
   size_t width = el->writableArea().width;
   if (line.size() < width)

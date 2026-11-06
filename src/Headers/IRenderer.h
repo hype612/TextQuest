@@ -34,6 +34,9 @@ public:
                                 std::optional<uint32_t> fg,
                                 std::optional<uint32_t> bg, bool transparentSpaces) = 0;
   virtual bool destroyOverlay(OverlayId id) = 0;
+  // Hidden overlays keep their content and still accept writes, but are not
+  // drawn. A hidden overlay still occupies its area for overlap checks.
+  virtual bool setOverlayVisible(OverlayId, bool) { return false; }
   IRenderer &operator=(const IRenderer &) = delete;
   IRenderer(IRenderer &&) = delete;
 
