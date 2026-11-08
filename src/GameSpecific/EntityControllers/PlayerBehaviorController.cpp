@@ -14,22 +14,28 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
 
   vec2f moveDelta{0.f, 0.f};
   if (_inputHandler.keyDown(MoveDirection::FORWARD)) {
-    moveDelta += moveIntent(MoveDirection::FORWARD, self, delta);
+    moveDelta += moveIntent(MoveDirection::FORWARD, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::FORWARD);
   }
   if (_inputHandler.keyDown(MoveDirection::BACKWARD)) {
-    moveDelta += moveIntent(MoveDirection::BACKWARD, self, delta);
+    moveDelta += moveIntent(MoveDirection::BACKWARD, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::BACKWARD);
   }
   if (_inputHandler.keyDown(MoveDirection::STRAFE_LEFT)) {
-    moveDelta += moveIntent(MoveDirection::STRAFE_LEFT, self, delta);
+    moveDelta += moveIntent(MoveDirection::STRAFE_LEFT, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::STRAFE_LEFT);
   }
   if (_inputHandler.keyDown(MoveDirection::STRAFE_RIGHT)) {
-    moveDelta += moveIntent(MoveDirection::STRAFE_RIGHT, self, delta);
+    moveDelta += moveIntent(MoveDirection::STRAFE_RIGHT, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::STRAFE_RIGHT);
   }
   if (_inputHandler.keyDown(MoveDirection::TURN_LEFT)) {
-    moveDelta += moveIntent(MoveDirection::TURN_LEFT, self, delta);
+    moveDelta += moveIntent(MoveDirection::TURN_LEFT, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::TURN_LEFT);
   }
   if (_inputHandler.keyDown(MoveDirection::TURN_RIGHT)) {
-    moveDelta += moveIntent(MoveDirection::TURN_RIGHT, self, delta);
+    moveDelta += moveIntent(MoveDirection::TURN_RIGHT, self, delta) *
+                 _inputHandler.keyDown(MoveDirection::TURN_RIGHT);
   }
   _cooldown -= delta;
   if (_inputHandler.keyDown(MoveDirection::SHOOT) && _cooldown <= 0.f) {

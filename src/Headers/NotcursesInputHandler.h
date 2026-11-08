@@ -15,7 +15,7 @@ public:
   NotcursesInputHandler(std::shared_ptr<notcurses> nc);
   void Init() override;
   void ReceiveInput() override;
-  bool keyDown(MoveDirection dir) const override;
+  float keyDown(MoveDirection dir) const override;
   bool rawKeyPressed(uint32_t key) const override;
   ~NotcursesInputHandler() = default;
 
@@ -23,7 +23,7 @@ private:
   void KeyEvent(char in[], ncintype_e evtype);
 
   std::shared_ptr<notcurses> _nc;
-  std::array<bool, moveDirectionCount + 1> _mvmtKeyStates;
+  std::array<float, moveDirectionCount + 1> _mvmtKeyStates;
   std::unordered_set<char32_t> _pressedThisFrame;
 };
 

@@ -8,7 +8,7 @@ class IInputHandler {
 public:
   virtual void Init() = 0;
   virtual void ReceiveInput() = 0;
-  virtual bool keyDown(MoveDirection dir) const = 0;
+  virtual float keyDown(MoveDirection dir) const = 0;
   // fallback way to query raw key states w/o
   // routing through enums
   virtual bool rawKeyPressed(uint32_t key) const = 0;

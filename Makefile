@@ -1,14 +1,16 @@
 CXX := g++
 NOTCURSES_CFLAGS := $(shell pkg-config --cflags notcurses-core)
 NOTCURSES_LIBS := $(shell pkg-config --libs notcurses-core)
+INPUT_CFLAGS := $(shell pkg-config --cflags libevdev libudev)
+INPUT_LIBS := $(shell pkg-config --libs libevdev libudev)
 # Shared flags (no sanitizers here)
-BASE_CXXFLAGS := -Wall -Wextra -std=c++23 -g -Isrc/Headers $(NOTCURSES_CFLAGS)
+BASE_CXXFLAGS := -Wall -Wextra -std=c++23 -g -Isrc/Headers $(NOTCURSES_CFLAGS) $(INPUT_CFLAGS)
 # emit .d files so header edits trigger rebuilds of dependent objects
 DEPFLAGS := -MMD -MP
 SAN_FLAGS := -fsanitize=address -fsanitize=undefined
 CXXFLAGS := $(BASE_CXXFLAGS) -O1 $(SAN_FLAGS)
 LDFLAGS := $(SAN_FLAGS)
-LDLIBS := $(NOTCURSES_LIBS) -lncursesw
+LDLIBS := $(NOTCURSES_LIBS) $(INPUT_LIBS) -lncursesw
 SRC_DIR := src
 BUILD_DIR := build
 BUILD_DIR_DEBUG := build-debug
@@ -23,7 +25,7 @@ all: $(TARGET)
 
 # plain build (default, no sanitizers)
 $(TARGET): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(NOTCURSES_LIBS) -lncursesw
+	$(CXX) $(OBJS) -o $@ $(NOTCURSES_LIBS) $(INPUT_LIBS) -lncursesw
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(BASE_CXXFLAGS) $(DEPFLAGS) -O2 -c $< -o $@

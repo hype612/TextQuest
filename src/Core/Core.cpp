@@ -3,6 +3,7 @@
 #include "../Headers/EntityDistance.h"
 #include "../Headers/Logger.h"
 #include "../Headers/Transform.h"
+#include "DualsenseInputHandler.h"
 #include "NotcursesInputHandler.h"
 #include "NotcursesRenderer.h"
 #include "SceneManager.h"
@@ -36,7 +37,23 @@ GameEngine::GameEngine() {
   std::shared_ptr<notcurses> nc(notcurses_core_init(&ncopts, stdout),
                                 notcurses_stop);
   _renderer = new NotcursesRenderer(nc);
-  _inputHandler = new NotcursesInputHandler(nc);
+  // dualsense is the input device; fall back to the keyboard if no
+  // controller can be opened
+  try {
+    auto *pad = new DualsenseInputHandler();
+    try {
+      pad->Init();
+    } catch (...) {
+      delete pad;
+      throw;
+    }
+    _inputHandler = pad;
+  } catch (const std::exception &e) {
+    Logger::log(std::string("dualsense unavailable, using keyboard: ") +
+                    e.what(),
+                LogType::INPUT, LogLevel::WARNING);
+    _inputHandler = new NotcursesInputHandler(nc);
+  }
 #endif
 #if (defined(_WIN32) || defined(_WIN64))
   _renderer = new WindowsRenderer();

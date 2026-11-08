@@ -26,7 +26,7 @@ void NotcursesInputHandler::ReceiveInput() {
   }
 }
 
-bool NotcursesInputHandler::keyDown(MoveDirection dir) const {
+float NotcursesInputHandler::keyDown(MoveDirection dir) const {
   return _mvmtKeyStates[static_cast<int>(dir)];
 }
 
@@ -38,64 +38,64 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   switch (*in) {
   case 'w':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = 1.f;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = 0.f;
     }
     break;
   case 'a':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = 1.f;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = 0.f;
     }
     break;
   case 's':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = 1.f;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = 0.f;
     break;
   case 'd':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = 1.f;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = 0.f;
     }
     break;
   case 'j':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = 1.f;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = 0.f;
     break;
   case 'l':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = 1.f;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = 0.f;
     break;
   case 'q':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = 1.f;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = 0.f;
     break;
   case 'e':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = 1.f;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = 0.f;
     break;
   case 'i':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = true;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = 1.f;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = false;
+      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = 0.f;
     }
     break;
   default:
