@@ -1,7 +1,7 @@
 #ifndef SCENEBUILDER_H
 #define SCENEBUILDER_H
 
-#include "../Headers/IstvanBehaviorController.h"
+#include "../Headers/EnemyBehaviorController.h"
 #include "../Headers/PlayerBehaviorController.h"
 #include "../MapGen/cellularAutomata.hpp"
 #include "Difficulty.h"
@@ -24,7 +24,7 @@ public:
   struct BuiltScene {
     std::shared_ptr<SceneManager> scene;
     PlayerBehaviorController *playerCtrl;
-    IstvanBehaviorController *istvanCtrl;
+    EnemyBehaviorController *enemyCtrl;
   };
 
   // `textureRoot` is the directory that holds one subdirectory per texture.

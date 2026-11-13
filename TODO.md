@@ -49,11 +49,11 @@ Remaining:
   small fan-out observer that forwards to both the health bar and the flash presenter.
   Create it in `buildHud` and keep the destruction order (presenters before `UIManager`).
 - [ ] Optional uses: persistent low-health tint on the health bar (needs "no expiry"),
-  tint on `IstvanStatePresenter` state change.
+  tint on `EnemyStatePresenter` state change.
 - [ ] Update the UI section of `CLAUDE.md` with the color model, tick the "damage
   feedback" item in step 5 below.
 - Prep refactors worth doing alongside: a shared `boxDesign(Rect)` helper (the frame
-  design is copy-pasted in `HealthBarPresenter`, `IstvanStatePresenter`,
+  design is copy-pasted in `HealthBarPresenter`, `EnemyStatePresenter`,
   `MinimapPresenter` and both menus in `TextQuestCore`), and simplifying the nested
   design/content branch in `UIManager::process`.
 - Out of scope: per-cell colors (e.g. different colors for `#` and `e` on the minimap) and
@@ -75,8 +75,8 @@ Remaining:
 ## Critical path (do in this order)
 
 ### 1. Enemy attacks and states (~4-6 h)
-- [x] Give `IstvanBehaviorController` states: idle, chase, attack
-  (`src/GameSpecific/EntityControllers/IstvanBehaviorController.cpp`).
+- [x] Give `EnemyBehaviorController` states: idle, chase, attack
+  (`src/GameSpecific/EntityControllers/EnemyBehaviorController.cpp`).
 - [x] In attack, call `self.setShooting(true)` on a cooldown, like the player's `_shootcd`.
   This reaches `PlayerBehaviorController::onHit`, which drives the health bar.
 - [x] Wall line-of-sight for enemies: `EntityManager::resolveVisibility` already does a
@@ -84,7 +84,7 @@ Remaining:
   `onVisible` never shoots through a wall.
 - [x] (Separate gameplay bug, optional) `resolveProjectiles` has no wall check, so the
   player's shots can hit enemies behind walls.
-- [x] Remove the per-frame `Logger` call in `IstvanBehaviorController::Tick` (log spam),
+- [x] Remove the per-frame `Logger` call in `EnemyBehaviorController::Tick` (log spam),
   initialise `_target`, `_targetAngle` and `_a_idx`, and stop `onCollision` from
   damaging the enemy itself when it touches an entity.
 - Done when: an enemy in view walks up, stops, and drains the player's health bar.
@@ -165,7 +165,7 @@ decision point. It must be finished before the Oct 25 feature freeze, otherwise 
   between the entity's facing and the direction to the camera, so the player can tell
   whether an enemy faces them (~2-3 h).
 - [ ] State-based animation component: per-state frame lists (idle, chase, attack, dead),
-  a frame timer, driven by the state `IstvanBehaviorController` already exposes (~4-5 h).
+  a frame timer, driven by the state `EnemyBehaviorController` already exposes (~4-5 h).
 - [ ] Texture storage per entity becomes `state -> facing -> frame -> shading`; extend
   `TexGen.py` accordingly. Build the small version first, generalise later.
 - Art: AI-generated or sourced from elsewhere. Record the source and licence of every
@@ -256,7 +256,7 @@ can be carried from one scene to the next. Nothing here is implemented yet.
 - [ ] Reset input state (`_quitPressed`, held keys) on scene swap.
 - [x] `IRenderer::destroyOverlay` (+ notcurses implementation) and
   `UIManager::removeElement`, plus `UIManager::clear()`. On restart `startScene` clears
-  every overlay and rebuilds the whole HUD (health bar and Istvan state display) together
+  every overlay and rebuilds the whole HUD (health bar and Enemy state display) together
   with the scene, so the presenters are re-attached to the new controllers.
 - [ ] Game side (`src/GameSpecific/Game/TextQuestCore.cpp`): split `main` into per-level builders returning a
   `shared_ptr<SceneManager>`. Each sets its own win condition, on-over and restart

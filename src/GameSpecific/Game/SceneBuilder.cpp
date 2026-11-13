@@ -189,14 +189,14 @@ SceneBuilder::BuiltScene SceneBuilder::build(unsigned int seed,
 
   // Enemies are spawned after the player so that the player keeps entity ID 0
   // (the camera follows it).
-  IstvanBehaviorController *demonCtrlPtr = nullptr;
+  EnemyBehaviorController *demonCtrlPtr = nullptr;
   for (const SpawnPoint &sp : mg.spawnPoints()) {
     if (sp.type == SpawnType::PLAYER)
       continue;
     vec2f spawnF = sp.pos;
-    IstvanBehaviorController *rawCtrl = nullptr;
+    EnemyBehaviorController *rawCtrl = nullptr;
     auto makeCtrl = [&](const EnemyArchetype &a) {
-      auto ctrl = std::make_unique<IstvanBehaviorController>(
+      auto ctrl = std::make_unique<EnemyBehaviorController>(
           mg.generatePatrolPoints(spawnF, 3), a.shootCooldown, 3.f,
           a.reactionDelay, a.missChance);
       rawCtrl = ctrl.get();

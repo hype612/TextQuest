@@ -2,8 +2,8 @@
 #define NOTCURSESCURSESINPUTHANDLER_H_
 
 #if (defined(LINUX) || defined(__linux__))
+#include "./EntityAction.h"
 #include "./IInputHandler.h"
-#include "./MoveDirection.h"
 #include <array>
 #include <cstdint>
 #include <memory>
@@ -15,15 +15,16 @@ public:
   NotcursesInputHandler(std::shared_ptr<notcurses> nc);
   void Init() override;
   void ReceiveInput() override;
-  bool keyDown(MoveDirection dir) const override;
+  bool keyDown(EntityAction dir) const override;
   bool rawKeyPressed(uint32_t key) const override;
+  void resetInputState() override;
   ~NotcursesInputHandler() = default;
 
 private:
   void KeyEvent(char in[], ncintype_e evtype);
 
   std::shared_ptr<notcurses> _nc;
-  std::array<bool, moveDirectionCount + 1> _mvmtKeyStates;
+  std::array<bool, entityActionCount> _mvmtKeyStates;
   std::unordered_set<char32_t> _pressedThisFrame;
 };
 

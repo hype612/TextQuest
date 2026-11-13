@@ -42,12 +42,6 @@ void NCursesRenderer::OverwriteBuffer(char *newBuffer) {
 
 void NCursesRenderer::PrintBuffer() const { refresh(); }
 
-void NCursesRenderer::PrintDebugInfo(const std::vector<std::string> &nfo) {
-  for (size_t i = 0; i < nfo.size(); i++) {
-    mvprintw(i, 0, "%s", nfo[i].c_str());
-  }
-}
-
 vec2i NCursesRenderer::screenSize() const {
   return {_screenWidth, _screenHeight};
 }

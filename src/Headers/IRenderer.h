@@ -19,7 +19,6 @@ public:
   virtual int screenHeight() const = 0;
   virtual int screenWidth() const = 0;
   virtual vec2i screenSize() const = 0;
-  virtual void PrintDebugInfo(const std::vector<std::string> &nfo) = 0;
   virtual ~IRenderer() = default;
 
   virtual OverlayId createOverlay(Rect area) = 0;

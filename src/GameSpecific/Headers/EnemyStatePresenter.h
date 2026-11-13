@@ -1,15 +1,15 @@
-#ifndef ISTVANSTATEPRESENTER_H
-#define ISTVANSTATEPRESENTER_H
+#ifndef ENEMYSTATEPRESENTER_H
+#define ENEMYSTATEPRESENTER_H
 
-#include "IIstvanStateObserver.h"
+#include "IEnemyStateObserver.h"
 #include "Rect.h"
 #include "UIManager.h"
 #include <string>
 #include <vector>
 
-class IstvanStatePresenter : public IIstvanStateObserver {
+class EnemyStatePresenter : public IEnemyStateObserver {
 public:
-  IstvanStatePresenter(UIManager &ui, UIElementHandle handle);
+  EnemyStatePresenter(UIManager &ui, UIElementHandle handle);
 
   void onStateChanged(const std::string &state) override;
 
@@ -20,4 +20,4 @@ private:
   UIElementHandle _handle;
 };
 
-#endif // ISTVANSTATEPRESENTER_H
+#endif // ENEMYSTATEPRESENTER_H

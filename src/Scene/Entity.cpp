@@ -2,6 +2,8 @@
 #include "../Headers/IBehaviorController.h"
 #include "../Headers/ICollidable.h"
 #include "../Headers/Vec2f.h"
+#include "Logger.h"
+#include "EntityAction.h"
 #include <cmath>
 
 // =============
@@ -14,18 +16,16 @@ Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
                float fov_in_deg, float viewDistance)
     : _id(-1), _transform(pos), _texMapper(*tex), _health(initHP),
       _collisionRadius(collisionRadius), _hitRadius(hitRadius),
-      _isPlayer(isPlayer),
-      _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
+      _isPlayer(isPlayer), _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
       _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 
 Entity::Entity(std::unique_ptr<IBehaviorController> behaviourCtrl,
-               Transform pos, const std::vector<std::string> &texVec, int initHP,
-               float collisionRadius, float hitRadius, bool isPlayer,
-               float fov_in_deg, float viewDistance)
+               Transform pos, const std::vector<std::string> &texVec,
+               int initHP, float collisionRadius, float hitRadius,
+               bool isPlayer, float fov_in_deg, float viewDistance)
     : _id(-1), _transform(pos), _texMapper(texVec), _health(initHP),
       _collisionRadius(collisionRadius), _hitRadius(hitRadius),
-      _isPlayer(isPlayer),
-      _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
+      _isPlayer(isPlayer), _fov(fov_in_deg * std::numbers::pi_v<float> / 180),
       _viewDistance(viewDistance), _behaviourCtrl(std::move(behaviourCtrl)) {}
 // =============
 // Process
@@ -90,7 +90,7 @@ std::vector<int> Entity::scaledMask(unsigned int width,
 int Entity::health() const { return _health; }
 bool Entity::shooting() const { return _isShooting; }
 int Entity::dmg() const { return _dmg; }
-float Entity::moveSpeedOnDir(MoveDirection direction) const {
+float Entity::moveSpeedOnDir(EntityAction direction) const {
   return _directionalSpeeds[static_cast<int>(direction)];
 }
 
@@ -108,80 +108,95 @@ void Entity::addToY(float rval_y) { _transform.position.y += rval_y; }
 void Entity::addToAngle(float rval_a) { _transform.angle += rval_a; }
 
 void Entity::addToMoveSpeedOnDirection(float new_speed,
-                                       MoveDirection direction) {
+                                       EntityAction direction) {
+  if (direction == EntityAction::SHOOT) {
+    Logger::GetInstance()->log(
+        "addToMoveSpeedOnDirection: called with SHOOT. Ignoring.",
+        LogType::SCENE, LogLevel::WARNING);
+    return;
+  }
   _directionalSpeeds[static_cast<int>(direction)] += new_speed;
 }
 
 void Entity::addToMoveSpeedAllDirections(float new_speed) {
-  _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] += new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] += new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] += new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] +=
+  _directionalSpeeds[static_cast<int>(EntityAction::FORWARD)] += new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::BACKWARD)] += new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_LEFT)] += new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_RIGHT)] +=
       new_speed;
 }
 void Entity::addToTurnSpeedAlldirections(float new_speed) {
-  _directionalSpeeds[static_cast<int>(MoveDirection::TURN_LEFT)] += new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::TURN_RIGHT)] += new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::TURN_LEFT)] += new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::TURN_RIGHT)] += new_speed;
 }
 
-void Entity::setMoveSpeedOnDirection(float new_speed, MoveDirection direction) {
+void Entity::setMoveSpeedOnDirection(float new_speed, EntityAction direction) {
+  if (direction == EntityAction::SHOOT) {
+    Logger::GetInstance()->log(
+        "setMoveSpeedOnDirection: called with SHOOT. Ignoring.", LogType::SCENE,
+        LogLevel::WARNING);
+    return;
+  }
   _directionalSpeeds[static_cast<int>(direction)] = new_speed;
 }
 
 void Entity::setMoveSpeedAllDirectons(float new_speed) {
-  _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] = new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] = new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] = new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::FORWARD)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::BACKWARD)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_LEFT)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_RIGHT)] = new_speed;
 }
 void Entity::setTurnSpeedAlldirections(float new_speed) {
-  _directionalSpeeds[static_cast<int>(MoveDirection::TURN_LEFT)] = new_speed;
-  _directionalSpeeds[static_cast<int>(MoveDirection::TURN_RIGHT)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::TURN_LEFT)] = new_speed;
+  _directionalSpeeds[static_cast<int>(EntityAction::TURN_RIGHT)] = new_speed;
 }
 
-void Entity::move(float delta, MoveDirection dir) {
+void Entity::move(float delta, EntityAction dir) {
   switch (dir) {
-  case MoveDirection::FORWARD:
+  case EntityAction::FORWARD:
     addToX(sin(_transform.angle) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::FORWARD)] *
            delta);
     addToY(cos(_transform.angle) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::FORWARD)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::FORWARD)] *
            delta);
     break;
-  case MoveDirection::BACKWARD:
+  case EntityAction::BACKWARD:
     addToX(-1 * sin(_transform.angle) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::BACKWARD)] *
            delta);
     addToY(-1 * cos(_transform.angle) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::BACKWARD)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::BACKWARD)] *
            delta);
     break;
-  case MoveDirection::STRAFE_LEFT:
+  case EntityAction::STRAFE_LEFT:
     addToX(sin(_transform.angle - (3.14159f / 2.0f)) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_LEFT)] *
            delta);
     addToY(cos(_transform.angle - (3.14159f / 2.0f)) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_LEFT)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_LEFT)] *
            delta);
     break;
-  case MoveDirection::STRAFE_RIGHT:
+  case EntityAction::STRAFE_RIGHT:
     addToX(sin(_transform.angle + (3.14159f / 2.0f)) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_RIGHT)] *
            delta);
     addToY(cos(_transform.angle + (3.14159f / 2.0f)) *
-           _directionalSpeeds[static_cast<int>(MoveDirection::STRAFE_RIGHT)] *
+           _directionalSpeeds[static_cast<int>(EntityAction::STRAFE_RIGHT)] *
            delta);
     break;
-  case MoveDirection::TURN_LEFT:
+  case EntityAction::TURN_LEFT:
     addToAngle(-1 *
-               _directionalSpeeds[static_cast<int>(MoveDirection::TURN_LEFT)] *
+               _directionalSpeeds[static_cast<int>(EntityAction::TURN_LEFT)] *
                delta);
     break;
-  case MoveDirection::TURN_RIGHT:
-    addToAngle(_directionalSpeeds[static_cast<int>(MoveDirection::TURN_RIGHT)] *
+  case EntityAction::TURN_RIGHT:
+    addToAngle(_directionalSpeeds[static_cast<int>(EntityAction::TURN_RIGHT)] *
                delta);
     break;
+  case EntityAction::SHOOT:
+  case EntityAction::COUNT:
+    break; // not a movement, handled by the controller
   }
 }
 

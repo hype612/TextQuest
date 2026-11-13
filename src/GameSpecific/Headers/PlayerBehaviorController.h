@@ -5,7 +5,7 @@
 #include "IHealthObserver.h"
 #include "IInputHandler.h"
 #include "IShootObserver.h"
-#include "MoveDirection.h"
+#include "EntityAction.h"
 
 class PlayerBehaviorController : public IBehaviorController {
 public:
@@ -24,7 +24,7 @@ private:
   float _cooldown =
       0.f; // seconds until the next shot is allowed; may go negative while idle
   const float _shootcd = 0.3f;
-  vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
+  vec2f moveIntent(EntityAction dir, Entity &self, float delta);
   IInputHandler &_inputHandler;
   IHealthObserver *_healthObserver = nullptr;
   IShootObserver *_shootObserver = nullptr;

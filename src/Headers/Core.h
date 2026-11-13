@@ -28,9 +28,6 @@ public:
   void setDistanceShadingThresholds(const std::vector<float> &thresholds);
   vec2i screenSize();
 
-  // TODO: Get rid of these ASAP
-  //       only for testing purposes mid-refactor
-  //       implement a real API for game programmers
   SceneManager &sceneMan();
   IInputHandler &inputHandler();
   UIManager &uiMan();
@@ -54,6 +51,9 @@ private:
                  int screenHeight, const std::string &toRender);
   // scene
   void applyPendingScene();
+  void createDebugOverlay();
+  void updateDebugOverlay(const Camera *cam, float dt);
+  UIElementHandle _debugHandle = -1;
   std::shared_ptr<SceneManager> _sceneManager; // active
   std::shared_ptr<SceneManager> _pendingScene; // applied at loop top
   std::function<void()> _sceneOverCb;

@@ -4,7 +4,7 @@
 #include "../Headers/DamageFlashPresenter.h"
 #include "../Headers/HealthBarPresenter.h"
 #include "../Headers/HealthObserverFanOut.h"
-#include "../Headers/IstvanStatePresenter.h"
+#include "../Headers/EnemyStatePresenter.h"
 #include "../Headers/MinimapPresenter.h"
 #include "../Headers/ViewmodelPresenter.h"
 #include "SceneBuilder.h"
@@ -26,7 +26,7 @@ public:
 
 private:
   std::unique_ptr<HealthBarPresenter> _healthBar;
-  std::unique_ptr<IstvanStatePresenter> _istvanState;
+  std::unique_ptr<EnemyStatePresenter> _enemyState;
   std::unique_ptr<MinimapPresenter> _minimap;
   std::unique_ptr<DamageFlashPresenter> _damageFlash;
   std::unique_ptr<ViewmodelPresenter> _viewmodel;

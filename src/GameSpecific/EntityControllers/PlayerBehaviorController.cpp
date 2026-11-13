@@ -1,6 +1,6 @@
 #include "../Headers/PlayerBehaviorController.h"
 #include "../../Headers/Entity.h"
-#include "MoveDirection.h"
+#include "EntityAction.h"
 
 #include <cmath>
 #include <ncurses.h>
@@ -13,26 +13,26 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
   self.setShooting(false);
 
   vec2f moveDelta{0.f, 0.f};
-  if (_inputHandler.keyDown(MoveDirection::FORWARD)) {
-    moveDelta += moveIntent(MoveDirection::FORWARD, self, delta);
+  if (_inputHandler.keyDown(EntityAction::FORWARD)) {
+    moveDelta += moveIntent(EntityAction::FORWARD, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::BACKWARD)) {
-    moveDelta += moveIntent(MoveDirection::BACKWARD, self, delta);
+  if (_inputHandler.keyDown(EntityAction::BACKWARD)) {
+    moveDelta += moveIntent(EntityAction::BACKWARD, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::STRAFE_LEFT)) {
-    moveDelta += moveIntent(MoveDirection::STRAFE_LEFT, self, delta);
+  if (_inputHandler.keyDown(EntityAction::STRAFE_LEFT)) {
+    moveDelta += moveIntent(EntityAction::STRAFE_LEFT, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::STRAFE_RIGHT)) {
-    moveDelta += moveIntent(MoveDirection::STRAFE_RIGHT, self, delta);
+  if (_inputHandler.keyDown(EntityAction::STRAFE_RIGHT)) {
+    moveDelta += moveIntent(EntityAction::STRAFE_RIGHT, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::TURN_LEFT)) {
-    moveDelta += moveIntent(MoveDirection::TURN_LEFT, self, delta);
+  if (_inputHandler.keyDown(EntityAction::TURN_LEFT)) {
+    moveDelta += moveIntent(EntityAction::TURN_LEFT, self, delta);
   }
-  if (_inputHandler.keyDown(MoveDirection::TURN_RIGHT)) {
-    moveDelta += moveIntent(MoveDirection::TURN_RIGHT, self, delta);
+  if (_inputHandler.keyDown(EntityAction::TURN_RIGHT)) {
+    moveDelta += moveIntent(EntityAction::TURN_RIGHT, self, delta);
   }
   _cooldown -= delta;
-  if (_inputHandler.keyDown(MoveDirection::SHOOT) && _cooldown <= 0.f) {
+  if (_inputHandler.keyDown(EntityAction::SHOOT) && _cooldown <= 0.f) {
     self.setShooting(true);
     _cooldown = _shootcd;
     if (_shootObserver)
@@ -41,41 +41,42 @@ vec2f PlayerBehaviorController::Tick(Entity &self, float delta) {
   return self.transform().position + moveDelta;
 }
 
-vec2f PlayerBehaviorController::moveIntent(MoveDirection dir, Entity &self,
+vec2f PlayerBehaviorController::moveIntent(EntityAction dir, Entity &self,
                                            float delta) {
   switch (dir) {
-  case MoveDirection::FORWARD:
+  case EntityAction::FORWARD:
     return {sinf(self.transform().angle) * self.moveSpeedOnDir(dir) * delta,
             cosf(self.transform().angle) * self.moveSpeedOnDir(dir) * delta};
     break;
-  case MoveDirection::BACKWARD:
+  case EntityAction::BACKWARD:
     return {
         -1 * sinf(self.transform().angle) * self.moveSpeedOnDir(dir) * delta,
         -1 * cosf(self.transform().angle) * self.moveSpeedOnDir(dir) * delta};
     break;
-  case MoveDirection::STRAFE_LEFT:
+  case EntityAction::STRAFE_LEFT:
     return {sinf(self.transform().angle - (std::numbers::pi_v<float> / 2.f)) *
                 self.moveSpeedOnDir(dir) * delta,
             cosf(self.transform().angle - (std::numbers::pi_v<float> / 2.f)) *
                 self.moveSpeedOnDir(dir) * delta};
 
     break;
-  case MoveDirection::STRAFE_RIGHT:
+  case EntityAction::STRAFE_RIGHT:
     return {sinf(self.transform().angle + (std::numbers::pi_v<float> / 2.f)) *
                 self.moveSpeedOnDir(dir) * delta,
             cosf(self.transform().angle + (std::numbers::pi_v<float> / 2.f)) *
                 self.moveSpeedOnDir(dir) * delta};
 
     break;
-  case MoveDirection::TURN_LEFT:
+  case EntityAction::TURN_LEFT:
     self.addToAngle(-1 * self.moveSpeedOnDir(dir) * delta);
     return {0.f, 0.f};
     break;
-  case MoveDirection::TURN_RIGHT:
+  case EntityAction::TURN_RIGHT:
     self.addToAngle(self.moveSpeedOnDir(dir) * delta);
     return {0.f, 0.f};
     break;
-  case MoveDirection::SHOOT:
+  case EntityAction::SHOOT:
+  case EntityAction::COUNT:
     // handled in Tick (cooldown + observer notification)
     return {0.f, 0.f};
     break;

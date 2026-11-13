@@ -22,22 +22,22 @@ void NCursesInputHandler::ReceiveMovementInput(float delta) {
     key = getch();
   }
   if (keysPressed.count('a') || keysPressed.count('A')) {
-    _player.move(delta, MoveDirection::STRAFE_LEFT);
+    _player.move(delta, EntityAction::STRAFE_LEFT);
   }
   if (keysPressed.count('d') || keysPressed.count('D')) {
-    _player.move(delta, MoveDirection::STRAFE_RIGHT);
+    _player.move(delta, EntityAction::STRAFE_RIGHT);
   }
   if (keysPressed.count('w') || keysPressed.count('W')) {
-    _player.move(delta, MoveDirection::FORWARD);
+    _player.move(delta, EntityAction::FORWARD);
   }
   if (keysPressed.count('s') || keysPressed.count('S')) {
-    _player.move(delta, MoveDirection::BACKWARD);
+    _player.move(delta, EntityAction::BACKWARD);
   }
   if (keysPressed.count('q') || keysPressed.count('Q')) {
-    _player.move(delta, MoveDirection::TURN_LEFT);
+    _player.move(delta, EntityAction::TURN_LEFT);
   }
   if (keysPressed.count('e') || keysPressed.count('E')) {
-    _player.move(delta, MoveDirection::TURN_RIGHT);
+    _player.move(delta, EntityAction::TURN_RIGHT);
   }
 }
 

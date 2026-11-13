@@ -10,8 +10,6 @@
 #include "Vec2f.h"
 #include "Vec2i.h"
 #include "WallSide.h"
-#include "WindowsInputHandler.h"
-#include "WindowsRenderer.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -78,16 +76,38 @@ void GameEngine::setOnFrame(std::function<void(float)> callback) {
 void GameEngine::setScene(const std::shared_ptr<SceneManager> &sc_man) {
   _pendingScene = sc_man;
 }
-
 void GameEngine::applyPendingScene() {
   if (!_pendingScene)
     return;
+  if (!_pendingScene.get()->cameraPtr()) {
+    Logger::GetInstance()->log("No camera was set for the pending scene",
+                               LogType::CORE, LogLevel::ERROR);
+    throw(std::runtime_error("No camera was set for the pending scene"));
+  }
   _sceneManager = std::move(_pendingScene);
   _renderAssetManager.emplace(*_sceneManager);
   _renderAssetManager->setDistanceShading(_shadingEnabled);
   _renderAssetManager->setDistanceShadingThresholds(_shadingThresholds);
   _sceneOverFired = false;
-  // TODO: reset input state, check camera is set
+  _inputHandler->resetInputState();
+  createDebugOverlay();
+}
+
+void GameEngine::createDebugOverlay() {
+  _uimanager->removeElement(_debugHandle);
+  const Rect area{1, 1, 54, 2};
+  _debugHandle = _uimanager->addElement(
+      UIElement(area, Rect{0, 0, area.width, area.height}, {}, true));
+}
+
+void GameEngine::updateDebugOverlay(const Camera *cam, float dt) {
+  UIElement *dbg = _uimanager->elementAt(_debugHandle);
+  if (!dbg)
+    return;
+  dbg->updateContent({"C.x: " + std::to_string(cam->follow().position.x) +
+                          " C.y: " + std::to_string(cam->follow().position.y) +
+                          " angle: " + std::to_string(cam->follow().angle),
+                      "fps: " + std::to_string(1.f / dt)});
 }
 
 void GameEngine::runMenu(const std::function<bool()> &onFrame) {
@@ -99,7 +119,6 @@ void GameEngine::runMenu(const std::function<bool()> &onFrame) {
     _renderer->PrintBuffer();
   }
 }
-
 void GameEngine::run_game() {
   _engineRunning = true;
   applyPendingScene();
@@ -121,7 +140,6 @@ void GameEngine::run_game() {
     std::chrono::duration<float> elapsed_time = tp2 - tp1;
     tp1 = tp2;
     float f_elapsed_time = elapsed_time.count();
-
     _inputHandler->ReceiveInput();
     if (_inputHandler->rawKeyPressed('x'))
       _engineRunning = false;
@@ -141,20 +159,11 @@ void GameEngine::run_game() {
       if (_postSceneOverCb)
         _postSceneOverCb();
     }
-    // TODO: Either introduce a legit built-in debug plane
-    //       or just delete this entirely and just expose
-    //       query functions for these.
-    std::vector<std::string> dbgNfo = {
-        "C.x: " + std::to_string(cam->follow().position.x) +
-            " C.y: " + std::to_string(cam->follow().position.y) +
-            " angle: " + std::to_string(cam->follow().angle),
-        "fps: " + std::to_string(1.f / f_elapsed_time)};
-    _renderer->PrintDebugInfo(dbgNfo);
+    updateDebugOverlay(cam, f_elapsed_time);
     _renderer->PrintBuffer();
     _uimanager->process(f_elapsed_time);
   }
 }
-
 void GameEngine::RayCastingProcess(const Camera *cam) {
   const float max_raylength = 50.f;
   int screenHeight = _renderer->screenHeight();
@@ -163,17 +172,13 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
   vec2f planeV{std::cos(cam->follow().angle) * std::tan(cam->fov() / 2.f),
                -std::sin(cam->follow().angle) * std::tan(cam->fov() / 2.f)};
   for (int x = 0; x < screenWidth; x++) {
-    bool hitwall = false;
-
-    // init for DDA
+    bool hitwall = false; // init for DDA
     WallSide side = WallSide::NOHIT;
     float rayLength = 0;
-
     float cameraX = 2.f * x / (float)screenWidth - 1.f;
     vec2f rayDir{playerDir + planeV * cameraX};
     vec2f deltaDist{(rayDir.x == 0.f) ? 1e30f : std::abs(1.f / rayDir.x),
                     (rayDir.y == 0.f) ? 1e30f : std::abs(1.f / rayDir.y)};
-
     vec2i stepDir{(rayDir.x >= 0.f) ? 1 : -1, (rayDir.y >= 0.f) ? 1 : -1};
     vec2i mapPos{static_cast<int>(cam->follow().position.x),
                  static_cast<int>(cam->follow().position.y)};
@@ -199,13 +204,11 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
         rayLength = sideDist.y;
         side = WallSide::VERTICAL;
       }
-
       if (_sceneManager->isOutOfBounds(mapPos.x, mapPos.y)) {
         sideDist.x = max_raylength;
         sideDist.y = max_raylength;
         break;
       }
-
       if (_sceneManager->isWall(mapPos.x, mapPos.y)) {
         hitwall = true;
       }
@@ -229,13 +232,10 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
         (side == WallSide::HORIZONTAL)
             ? cam->follow().position.y + distance_to_wall * rayDir.y
             : cam->follow().position.x + distance_to_wall * rayDir.x;
-
     hitpoint -= std::floorf(hitpoint);
     if (distance_to_wall < 0.0001f)
       distance_to_wall = 0.0001f;
-
     int wallHeight = static_cast<int>(screenHeight / distance_to_wall);
-
     int ceiling = (screenHeight / 2) - (wallHeight / 2);
     int floor = ceiling + wallHeight;
     ceiling = std::max(0, ceiling);
@@ -259,13 +259,11 @@ void GameEngine::RayCastingProcess(const Camera *cam) {
     RenderCol(ceiling, floor, x, screenWidth, screenHeight, toRender);
   }
 }
-
 void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
                            int screenHeight, const std::string &toRender) {
   wchar_t floorShade;
   int x = col;
   int toRenderIt = 0;
-
   int colHeight =
       std::min(toRender.size(), static_cast<size_t>(floor - ceiling + 1));
   for (int y = 0; y < screenHeight; y++) {
@@ -295,7 +293,6 @@ void GameEngine::RenderCol(int ceiling, int floor, int col, int screenWidth,
     }
   }
 }
-
 void GameEngine::EntityProjectionProcess(const Camera *cam) {
   std::vector<EntityDistance> entities =
       _sceneManager->entitiesSortedByDistanceTo(cam->follow().position);
@@ -326,13 +323,11 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
     int width = height;
     int screenX = static_cast<int>((scWidth / 2.f) *
                                    (1 + entityRelPos.x / entityRelPos.y));
-
     std::string eTex = _renderAssetManager->scaledEntityTex(e.id, width, height,
                                                             entityRelPos.y);
     int colwidth = eTex.find('\n');
     int texStart = static_cast<int>(screenX - colwidth / 2.f);
     int texEnd = texStart + colwidth;
-
     int texX = 0;
     for (int x = texStart; x <= texEnd; x++, texX++) {
       if (x < 0 || x >= scWidth)
@@ -354,7 +349,6 @@ void GameEngine::EntityProjectionProcess(const Camera *cam) {
     }
   }
 }
-
 GameEngine::~GameEngine() {
   // so it doesnt hijack the terminal input
   fputs("\033[<u", stdout);

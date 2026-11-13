@@ -8,7 +8,7 @@
 
 #include "IBehaviorController.h"
 #include "ICollidable.h"
-#include "MoveDirection.h"
+#include "EntityAction.h"
 #include "TextureMapper.h"
 #include "Transform.h"
 #include "Vec2f.h"
@@ -59,7 +59,7 @@ public:
   int health() const;
   bool shooting() const;
   int dmg() const;
-  float moveSpeedOnDir(MoveDirection direction) const;
+  float moveSpeedOnDir(EntityAction direction) const;
   // movement: walls and entity-vs-entity spacing
   float collisionRadius() const;
   // hitscan: how big the entity is as a projectile target
@@ -69,7 +69,7 @@ public:
   // Setters
   // =============
 
-  void move(float delta, MoveDirection dir);
+  void move(float delta, EntityAction dir);
   void setID(int id);
   // makes the entity adoptable by another EntityManager
   void clearID();
@@ -81,11 +81,11 @@ public:
   void addToX(float rval_x);
   void addToY(float rval_y);
   void addToAngle(float rval_a);
-  void addToMoveSpeedOnDirection(float new_speed, MoveDirection direction);
+  void addToMoveSpeedOnDirection(float new_speed, EntityAction direction);
   void addToMoveSpeedAllDirections(float new_speed);
   void addToTurnSpeedAlldirections(float new_speed);
 
-  void setMoveSpeedOnDirection(float new_speed, MoveDirection direction);
+  void setMoveSpeedOnDirection(float new_speed, EntityAction direction);
   void setMoveSpeedAllDirectons(float new_speed);
   void setTurnSpeedAlldirections(float new_speed);
 
@@ -104,7 +104,7 @@ private:
   bool _isShooting = false;
   int _dmg = 20;
   std::unique_ptr<IBehaviorController> _behaviourCtrl;
-  std::array<float, moveDirectionCount> _directionalSpeeds;
+  std::array<float, entityActionCount> _directionalSpeeds;
 };
 
 #endif // ENTITY_H

@@ -13,7 +13,6 @@ public:
   void Init() override;
   void OverwriteBuffer(char *newBuffer) override;
   void PrintBuffer() const override;
-  void PrintDebugInfo(const std::vector<std::string> &nfo) override;
   vec2i screenSize() const override;
   int screenHeight() const override;
   int screenWidth() const override;

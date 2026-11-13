@@ -22,9 +22,6 @@ public:
   int getEntityCount() const;
   const std::deque<Entity> &entities() const;
 
-  // TODO: rework these so the ids are persistant.
-  // possibly implement swap-pop to save on time
-
   void addEntity(Entity &entity);
   void removeEntity(int id);
   void removeAllEntities();

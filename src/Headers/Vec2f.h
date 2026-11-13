@@ -6,6 +6,7 @@
 
 struct vec2f {
   float x, y;
+  static constexpr float epsilon = 1e-5f;
 
   vec2f operator+(const vec2f &rval) const { return {x + rval.x, y + rval.y}; }
   vec2f operator-(const vec2f &rval) const { return {x - rval.x, y - rval.y}; }
@@ -13,7 +14,6 @@ struct vec2f {
   float dot(const vec2f &rval) const { return x * rval.x + y * rval.y; }
   float cross(const vec2f &rval) const { return x * rval.y - y * rval.x; }
   bool operator==(const vec2f &rval) const {
-    constexpr float epsilon = 1e-5f;
     return std::abs(x - rval.x) < epsilon && std::abs(y - rval.y) < epsilon;
   }
   bool operator!=(const vec2f &rval) const { return !(*this == rval); }
@@ -42,14 +42,14 @@ struct vec2f {
     x /= len;
     y /= len;
   }
-  vec2f normalized() {
+  vec2f normalized() const {
     float len = std::sqrt(x * x + y * y);
     if (len == 0) {
-      Logger::GetInstance()->log("normalize was called on a null-vec.",
+      Logger::GetInstance()->log("normalized was called on a null-vec.",
                                  LogType::CORE, LogLevel::ERROR);
       return {-1.f, -1.f};
     }
-    return {x /= len, y /= len};
+    return {x / len, y / len};
   }
 };
 

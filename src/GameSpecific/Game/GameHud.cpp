@@ -14,12 +14,12 @@ GameHud::GameHud(UIManager &ui, vec2i scr, SceneBuilder::BuiltScene &built,
   Rect stateArea{2, scr.y - 7, 30, 3};
   Rect stateWritable{1, 1, 28, 1};
   UIElementHandle stateHandle = ui.addElement(UIElement(
-      stateArea, stateWritable, IstvanStatePresenter::design(stateArea)));
-  // Hidden until Istvan first notices the player (see IstvanStatePresenter).
+      stateArea, stateWritable, EnemyStatePresenter::design(stateArea)));
+  // Hidden until Enemy first notices the player (see EnemyStatePresenter).
   ui.setVisible(stateHandle, false);
-  _istvanState = std::make_unique<IstvanStatePresenter>(ui, stateHandle);
-  if (built.istvanCtrl)
-    built.istvanCtrl->setStateObserver(_istvanState.get());
+  _enemyState = std::make_unique<EnemyStatePresenter>(ui, stateHandle);
+  if (built.enemyCtrl)
+    built.enemyCtrl->setStateObserver(_enemyState.get());
 
   // Minimap, top-right corner
   const int mmW = 25, mmH = 13;

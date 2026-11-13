@@ -15,7 +15,6 @@ public:
   void Init() override;
   void OverwriteBuffer(char *newBuffer) override;
   void PrintBuffer() const override;
-  void PrintDebugInfo(const std::vector<std::string> &nfo) override;
   vec2i screenSize() const override;
   int screenHeight() const override;
   int screenWidth() const override;
@@ -45,8 +44,6 @@ private:
 
   char *_screenBuffer;
   std::shared_ptr<notcurses> _nc;
-  // does NOT contain the default plane
-  ncplane *_debugPlane;
   struct Overlay {
     ncplane *plane;
     // The area the overlay was created with. The plane itself is moved

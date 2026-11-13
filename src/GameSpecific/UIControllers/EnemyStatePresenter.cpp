@@ -1,19 +1,19 @@
-#include "../Headers/IstvanStatePresenter.h"
+#include "../Headers/EnemyStatePresenter.h"
 #include "../../Headers/UIElement.h"
 
-IstvanStatePresenter::IstvanStatePresenter(UIManager &ui,
+EnemyStatePresenter::EnemyStatePresenter(UIManager &ui,
                                            UIElementHandle handle)
     : _ui(ui), _handle(handle) {}
 
-void IstvanStatePresenter::onStateChanged(const std::string &state) {
+void EnemyStatePresenter::onStateChanged(const std::string &state) {
   UIElement *el = _ui.elementAt(_handle);
   if (!el)
     return; // element was removed or never created
-  // Istvan never returns to IDLE once he has seen the player, so the first
+  // Enemy never returns to IDLE once he has seen the player, so the first
   // non-IDLE state is the first sighting: reveal the (hidden) element.
   if (state != "IDLE")
     _ui.setVisible(_handle, true);
-  std::string line = "Istvan: " + state;
+  std::string line = "Enemy: " + state;
   size_t width = el->writableArea().width;
   if (line.size() < width)
     line += std::string(width - line.size(), ' ');
@@ -22,7 +22,7 @@ void IstvanStatePresenter::onStateChanged(const std::string &state) {
   el->updateContent({line});
 }
 
-std::vector<std::string> IstvanStatePresenter::design(const Rect &area) {
+std::vector<std::string> EnemyStatePresenter::design(const Rect &area) {
   const size_t w = area.width;
   if (w < 2)
     return {};

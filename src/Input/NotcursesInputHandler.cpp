@@ -1,5 +1,6 @@
 #include "../Headers/NotcursesInputHandler.h"
 #include "./Logger.h"
+#include "EntityAction.h"
 #include <notcurses/notcurses.h>
 #include <string>
 
@@ -26,7 +27,7 @@ void NotcursesInputHandler::ReceiveInput() {
   }
 }
 
-bool NotcursesInputHandler::keyDown(MoveDirection dir) const {
+bool NotcursesInputHandler::keyDown(EntityAction dir) const {
   return _mvmtKeyStates[static_cast<int>(dir)];
 }
 
@@ -38,67 +39,74 @@ void NotcursesInputHandler::KeyEvent(char in[], ncintype_e evtype) {
   switch (*in) {
   case 'w':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::FORWARD)] = true;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::FORWARD)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::FORWARD)] = false;
     }
     break;
   case 'a':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::STRAFE_LEFT)] = true;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::STRAFE_LEFT)] = false;
     }
     break;
   case 's':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::BACKWARD)] = true;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::BACKWARD)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::BACKWARD)] = false;
     break;
   case 'd':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::STRAFE_RIGHT)] = true;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::STRAFE_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::STRAFE_RIGHT)] = false;
     }
     break;
   case 'j':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_LEFT)] = true;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_LEFT)] = false;
     break;
   case 'l':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_RIGHT)] = true;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_RIGHT)] = false;
     break;
   case 'q':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_LEFT)] = true;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_LEFT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_LEFT)] = false;
     break;
   case 'e':
     if (evtype == NCTYPE_PRESS)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_RIGHT)] = true;
     if (evtype == NCTYPE_RELEASE)
-      _mvmtKeyStates[static_cast<int>(MoveDirection::TURN_RIGHT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::TURN_RIGHT)] = false;
     break;
   case 'i':
     if (evtype == NCTYPE_PRESS) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = true;
+      _mvmtKeyStates[static_cast<int>(EntityAction::SHOOT)] = true;
     }
     if (evtype == NCTYPE_RELEASE) {
-      _mvmtKeyStates[static_cast<int>(MoveDirection::SHOOT)] = false;
+      _mvmtKeyStates[static_cast<int>(EntityAction::SHOOT)] = false;
     }
     break;
   default:
     break;
   }
+}
+
+void NotcursesInputHandler::resetInputState() {
+  for (size_t i = 0; i < entityActionCount; i++) {
+    _mvmtKeyStates[i] = false;
+  }
+  _pressedThisFrame.clear();
 }

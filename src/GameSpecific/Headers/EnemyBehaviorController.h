@@ -1,16 +1,16 @@
-#ifndef ISTVANBEHAVIORCONTROLLER_H
-#define ISTVANBEHAVIORCONTROLLER_H
+#ifndef ENEMYBEHAVIORCONTROLLER_H
+#define ENEMYBEHAVIORCONTROLLER_H
 
-#include "../Headers/MoveDirection.h"
+#include "../Headers/EntityAction.h"
 #include "IBehaviorController.h"
 #include "ICollidable.h"
-#include "IIstvanStateObserver.h"
+#include "IEnemyStateObserver.h"
 #include <string>
 #include <vector>
 
-class IstvanBehaviorController : public IBehaviorController {
+class EnemyBehaviorController : public IBehaviorController {
 public:
-  IstvanBehaviorController(std::vector<vec2f> patrol_points,
+  EnemyBehaviorController(std::vector<vec2f> patrol_points,
                            float shootCooldown, float shootDistance,
                            float reactionDelay = 0.f, float missChance = 0.f);
   vec2f Tick(Entity &self, float delta) override;
@@ -20,7 +20,7 @@ public:
 
   // Non-owning; the observer must outlive this controller (or be reset to
   // nullptr first).
-  void setStateObserver(IIstvanStateObserver *observer) {
+  void setStateObserver(IEnemyStateObserver *observer) {
     _stateObserver = observer;
   }
 
@@ -32,16 +32,16 @@ private:
 
   enum class State { IDLE, CHASE, ATTACK };
   /*
-   * For Istvan, the valid state-changes are:
+   * For Enemy, the valid state-changes are:
    * IDLE -> CHASE
    * IDLE -> ATTACK
    * CHASE -> ATTACK
    * ATTACK -> CHASE
-   * NOTE: Istvan cannot go back to idle once he
+   * NOTE: Enemy cannot go back to idle once he
    * sees the player
    */
   void updateState(Entity &self);
-  vec2f moveIntent(MoveDirection dir, Entity &self, float delta);
+  vec2f moveIntent(EntityAction dir, Entity &self, float delta);
   std::string stateName(State s) const;
 
   State _state;
@@ -57,7 +57,7 @@ private:
   // Time between first noticing the player and the first shot.
   const float _reactionDelay;
   const float _missChance; // 0..1
-  IIstvanStateObserver *_stateObserver = nullptr;
+  IEnemyStateObserver *_stateObserver = nullptr;
 };
 
-#endif // ISTVANBEHAVIORCONTROLLER_H
+#endif // ENEMYBEHAVIORCONTROLLER_H
